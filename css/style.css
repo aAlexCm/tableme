@@ -1,0 +1,230 @@
+:root {
+  --gold: #b08d57;
+  --gold-light: #d9c2a3;
+  --cream: #fdf8f3;
+  --ink: #3a3530;
+  --error: #b5453a;
+  --radius: 10px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Georgia', 'Times New Roman', serif;
+  background: var(--cream);
+  color: var(--ink);
+  min-height: 100vh;
+}
+
+.page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 48px 24px 80px;
+}
+
+header.hero {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+header.hero h1 {
+  font-size: 2.2rem;
+  letter-spacing: 1px;
+  color: var(--gold);
+  margin: 0 0 8px;
+}
+
+header.hero p {
+  color: #756c61;
+  margin: 0;
+}
+
+.card {
+  background: #fff;
+  border: 1px solid var(--gold-light);
+  border-radius: var(--radius);
+  padding: 28px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 16px rgba(176, 141, 87, 0.08);
+}
+
+.search-box {
+  display: flex;
+  gap: 10px;
+}
+
+input, select {
+  font-family: inherit;
+  font-size: 1rem;
+  padding: 12px 14px;
+  border: 1px solid var(--gold-light);
+  border-radius: var(--radius);
+  background: #fff;
+  color: var(--ink);
+  width: 100%;
+}
+
+input:focus, select:focus {
+  outline: none;
+  border-color: var(--gold);
+}
+
+button {
+  font-family: inherit;
+  font-size: 1rem;
+  padding: 12px 20px;
+  border: none;
+  border-radius: var(--radius);
+  background: var(--gold);
+  color: #fff;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s ease;
+}
+
+button:hover {
+  background: #98774a;
+}
+
+button.secondary {
+  background: transparent;
+  color: var(--gold);
+  border: 1px solid var(--gold-light);
+}
+
+button.secondary:hover {
+  background: var(--gold-light);
+  color: var(--ink);
+}
+
+button.danger {
+  background: var(--error);
+}
+
+button.danger:hover {
+  background: #8f372e;
+}
+
+.result {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.result .table-number {
+  font-size: 2.4rem;
+  color: var(--gold);
+  font-weight: bold;
+  margin: 6px 0;
+}
+
+.result .guest-name {
+  font-size: 1.1rem;
+  color: var(--ink);
+}
+
+.guest-match {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 0;
+  border-bottom: 1px solid #f0e7da;
+  cursor: pointer;
+}
+
+.guest-match:last-child {
+  border-bottom: none;
+}
+
+.guest-match:hover {
+  background: #fbf4ea;
+}
+
+.muted {
+  color: #918577;
+  font-size: 0.92rem;
+}
+
+.error-msg {
+  color: var(--error);
+  margin-top: 12px;
+}
+
+nav.admin-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+}
+
+nav.admin-nav a {
+  color: var(--gold);
+  text-decoration: none;
+}
+
+form.inline-form {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+form.inline-form input {
+  flex: 1;
+  min-width: 140px;
+}
+
+.wedding-list, .guest-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.wedding-item, .guest-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 0;
+  border-bottom: 1px solid #f0e7da;
+  gap: 12px;
+}
+
+.wedding-item:last-child, .guest-item:last-child {
+  border-bottom: none;
+}
+
+.wedding-item .info, .guest-item .info {
+  flex: 1;
+}
+
+.wedding-item .info strong, .guest-item .info strong {
+  display: block;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+.link-box {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.link-box input {
+  background: #f7f1e8;
+}
+
+h2 {
+  margin-top: 0;
+  font-size: 1.3rem;
+  color: var(--gold);
+}
+
+.empty-state {
+  text-align: center;
+  color: #918577;
+  padding: 20px 0;
+}
