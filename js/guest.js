@@ -21,6 +21,8 @@ const LANG_KEY = 'tableme_lang';
   let currentLang = localStorage.getItem(LANG_KEY) || 'fr';
   let currentWedding = null;
 
+  applyTranslations(currentLang);
+
   function setLang(lang) {
     currentLang = lang;
     localStorage.setItem(LANG_KEY, lang);
