@@ -151,6 +151,41 @@ async function hashPassword(text) {
     await renderWeddings();
   }
 
+  async function moveGuest(guestId, direction) {
+    const wedding = await Storage.getWedding(selectedWeddingId);
+    if (!wedding) return;
+    const groups = groupGuestsByTable(wedding.guests);
+    let moved = false;
+    for (const group of groups) {
+      const idx = group.guests.findIndex((g) => g.id === guestId);
+      if (idx === -1) continue;
+      const swapIdx = direction === 'up' ? idx - 1 : idx + 1;
+      if (swapIdx >= 0 && swapIdx < group.guests.length) {
+        [group.guests[idx], group.guests[swapIdx]] = [group.guests[swapIdx], group.guests[idx]];
+        moved = true;
+      }
+      break;
+    }
+    if (!moved) return;
+    const newGuests = groups.flatMap((g) => g.guests);
+    await Storage.setGuests(selectedWeddingId, newGuests);
+    await renderGuests();
+  }
+
+  async function updateGuestTable(guestId, newTable) {
+    const table = newTable.trim();
+    if (!table) {
+      await renderGuests();
+      return;
+    }
+    const wedding = await Storage.getWedding(selectedWeddingId);
+    if (!wedding) return;
+    const guests = wedding.guests.map((g) => (g.id === guestId ? { ...g, table } : g));
+    await Storage.setGuests(selectedWeddingId, guests);
+    await renderGuests();
+    await renderWeddings();
+  }
+
   function attachRowDragEvents(row) {
     row.addEventListener('dragstart', () => {
       draggedRow = row;
@@ -216,6 +251,11 @@ async function hashPassword(text) {
         li.innerHTML = `
           <span class="drag-handle">&#10303;</span>
           <span class="guest-row-name">${escapeHtml(g.name)}</span>
+          <input type="text" class="guest-table-edit" data-id="${g.id}" value="${escapeHtml(g.table)}" aria-label="${escapeHtml(t(currentLang, 'tableLabel'))}" />
+          <span class="row-arrows">
+            <button type="button" class="arrow-btn" data-action="move-up" data-id="${g.id}" aria-label="up">&#9650;</button>
+            <button type="button" class="arrow-btn" data-action="move-down" data-id="${g.id}" aria-label="down">&#9660;</button>
+          </span>
           <button type="button" class="danger" data-action="delete-guest" data-id="${g.id}">${escapeHtml(t(currentLang, 'deleteBtn'))}</button>
         `;
         attachRowDragEvents(li);
@@ -275,13 +315,21 @@ async function hashPassword(text) {
 
   guestListEl.addEventListener('click', async (e) => {
     const btn = e.target.closest('button');
-    if (!btn) return;
+    if (!btn || !selectedWeddingId) return;
     const { action, id } = btn.dataset;
-    if (action === 'delete-guest' && selectedWeddingId) {
+    if (action === 'delete-guest') {
       await Storage.deleteGuest(selectedWeddingId, id);
       await renderGuests();
       await renderWeddings();
+    } else if (action === 'move-up' || action === 'move-down') {
+      await moveGuest(id, action === 'move-up' ? 'up' : 'down');
     }
+  });
+
+  guestListEl.addEventListener('change', async (e) => {
+    const input = e.target.closest('.guest-table-edit');
+    if (!input || !selectedWeddingId) return;
+    await updateGuestTable(input.dataset.id, input.value);
   });
 
   copyLinkBtn.addEventListener('click', () => {

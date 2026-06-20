@@ -425,6 +425,7 @@ form.inline-form select {
 
 .wedding-item {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
   padding: 16px 18px;
@@ -483,6 +484,7 @@ form.inline-form select {
 .guest-row {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 10px;
   padding: 12px 14px;
   margin-bottom: 8px;
@@ -513,14 +515,48 @@ form.inline-form select {
 
 .guest-row-name {
   flex: 1;
+  min-width: 120px;
   font-family: 'Playfair Display', serif;
   font-size: 1.05rem;
   font-weight: 700;
   color: var(--charcoal);
 }
 
+.guest-table-edit {
+  width: 64px;
+  flex: 0 0 auto;
+  padding: 8px 10px;
+  font-size: 0.85rem;
+  text-align: center;
+  border-radius: var(--radius-sm);
+}
+
+.row-arrows {
+  display: flex;
+  gap: 4px;
+  flex: 0 0 auto;
+}
+
+.arrow-btn {
+  background: var(--paper);
+  color: var(--sage-deep);
+  border: 1px solid rgba(138, 150, 120, 0.3);
+  box-shadow: none;
+  padding: 8px 10px;
+  font-size: 0.65rem;
+  border-radius: var(--radius-sm);
+}
+
+.arrow-btn:hover {
+  background: var(--sage-light);
+  filter: none;
+  transform: none;
+  box-shadow: none;
+}
+
 .actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
 }
 
@@ -661,4 +697,66 @@ select.mini-lang-select {
   background: var(--sage-light);
   color: var(--sage-deep);
   border: 1px solid rgba(138, 150, 120, 0.3);
+}
+
+@media (max-width: 600px) {
+  .page {
+    padding: 64px 14px 56px;
+  }
+
+  .card {
+    padding: 20px;
+  }
+
+  header.hero {
+    padding: 12px 8px;
+  }
+
+  header.hero.invite-hero {
+    padding: 90px 16px 16px;
+  }
+
+  header.hero h1 {
+    font-size: 1.7rem;
+  }
+
+  .script-word {
+    font-size: 2.4rem;
+  }
+
+  .lang-switcher-mount {
+    top: 12px;
+    right: 12px;
+  }
+
+  .lang-switcher-trigger {
+    padding: 5px 10px;
+    font-size: 0.66rem;
+  }
+
+  .wedding-item .actions,
+  .table-group .actions {
+    width: 100%;
+  }
+
+  .wedding-item .info strong {
+    font-size: 1rem;
+  }
+
+  .guest-row {
+    padding: 10px 12px;
+  }
+
+  .row-arrows {
+    order: 3;
+  }
+
+  .guest-table-edit {
+    order: 2;
+  }
+
+  .guest-row .danger {
+    order: 4;
+    width: 100%;
+  }
 }
