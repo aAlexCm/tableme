@@ -32,6 +32,7 @@ const LANG_KEY = 'tableme_lang';
       handleSearch(inputEl.value, currentWedding.guests);
     } else {
       titleEl.textContent = t(lang, 'guestHeroTitle');
+      document.title = `TableMe · ${t(lang, 'guestHeroTitle')}`;
     }
   }
 
@@ -98,8 +99,10 @@ const LANG_KEY = 'tableme_lang';
     const parts = name.split(/\s+(?:&|et)\s+/i);
     if (parts.length === 2) {
       titleEl.innerHTML = `<span class="script-word">${escapeHtml(parts[0])}</span><span class="title-heart">&#9825;</span><span class="script-word">${escapeHtml(parts[1])}</span>`;
+      document.title = `${parts[0]} ♥ ${parts[1]} · TableMe`;
     } else {
       titleEl.innerHTML = `<span class="script-word">${escapeHtml(name)}</span>`;
+      document.title = `${name} · TableMe`;
     }
   }
 
@@ -137,6 +140,7 @@ const LANG_KEY = 'tableme_lang';
     langMount.appendChild(buildLangSwitcher(currentLang, setLang));
     applyTranslations(currentLang);
     titleEl.textContent = t(currentLang, 'guestHeroTitle');
+    document.title = `TableMe · ${t(currentLang, 'guestHeroTitle')}`;
     await showWeddingPicker();
     return;
   }
@@ -146,6 +150,7 @@ const LANG_KEY = 'tableme_lang';
     langMount.appendChild(buildLangSwitcher(currentLang, setLang));
     applyTranslations(currentLang);
     titleEl.textContent = t(currentLang, 'guestHeroTitle');
+    document.title = `TableMe · ${t(currentLang, 'guestHeroTitle')}`;
     await showWeddingPicker();
     return;
   }
