@@ -601,20 +601,6 @@ h2 {
   padding: 24px 0;
 }
 
-#auth-gate {
-  max-width: 420px;
-  margin: 80px auto 0;
-  text-align: center;
-}
-
-#auth-gate h2 {
-  margin-bottom: 18px;
-}
-
-#auth-gate form {
-  flex-direction: column;
-}
-
 .lang-switcher-mount {
   position: fixed;
   top: 18px;

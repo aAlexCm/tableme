@@ -1,17 +1,7 @@
 import { Storage } from './storage.js';
 import { LANGS, LANG_LABELS, applyTranslations, buildLangSwitcher, t } from './i18n.js';
 
-const ADMIN_PASSWORD_HASH = 'fd2eb3f297cddf665a7518d12b3e5781ef56522f16878241949efbfffcfaf439';
-const AUTH_SESSION_KEY = 'tableme_admin_auth';
 const ADMIN_LANG_KEY = 'tableme_admin_lang';
-
-async function hashPassword(text) {
-  const data = new TextEncoder().encode(text);
-  const digest = await crypto.subtle.digest('SHA-256', data);
-  return Array.from(new Uint8Array(digest))
-    .map((b) => b.toString(16).padStart(2, '0'))
-    .join('');
-}
 
 (function () {
   let selectedWeddingId = null;
@@ -19,12 +9,6 @@ async function hashPassword(text) {
   let draggedRow = null;
 
   const langMount = document.getElementById('lang-switcher-mount');
-
-  const authGate = document.getElementById('auth-gate');
-  const authForm = document.getElementById('auth-form');
-  const authPasswordInput = document.getElementById('auth-password');
-  const authErrorEl = document.getElementById('auth-error');
-  const adminContent = document.getElementById('admin-content');
 
   const weddingForm = document.getElementById('wedding-form');
   const weddingNameInput = document.getElementById('wedding-name');
@@ -377,30 +361,8 @@ async function hashPassword(text) {
     setTimeout(() => (copyLinkBtn.textContent = t(currentLang, 'copyBtn')), 1500);
   });
 
-  function unlockAdmin() {
-    authGate.hidden = true;
-    adminContent.hidden = false;
-    renderWeddings();
-  }
-
-  authForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const hash = await hashPassword(authPasswordInput.value);
-    if (hash === ADMIN_PASSWORD_HASH) {
-      sessionStorage.setItem(AUTH_SESSION_KEY, 'true');
-      authErrorEl.hidden = true;
-      authForm.reset();
-      unlockAdmin();
-    } else {
-      authErrorEl.hidden = false;
-    }
-  });
-
   langMount.appendChild(buildLangSwitcher(currentLang, setLang));
   applyTranslations(currentLang);
   populateWeddingLangSelect();
-
-  if (sessionStorage.getItem(AUTH_SESSION_KEY) === 'true') {
-    unlockAdmin();
-  }
+  renderWeddings();
 })();
