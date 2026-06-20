@@ -423,7 +423,7 @@ form.inline-form select {
   padding: 0;
 }
 
-.wedding-item, .guest-item {
+.wedding-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -435,22 +435,86 @@ form.inline-form select {
   transition: background 0.15s ease;
 }
 
-.wedding-item:hover, .guest-item:hover {
+.wedding-item:hover {
   background: #dde5d3;
 }
 
-.wedding-item:last-child, .guest-item:last-child {
+.wedding-item:last-child {
   margin-bottom: 0;
 }
 
-.wedding-item .info, .guest-item .info {
+.wedding-item .info {
   flex: 1;
 }
 
-.wedding-item .info strong, .guest-item .info strong {
+.wedding-item .info strong {
   display: block;
   font-family: 'Playfair Display', serif;
   font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--charcoal);
+}
+
+.table-group {
+  margin-bottom: 22px;
+}
+
+.table-group:last-child {
+  margin-bottom: 0;
+}
+
+.table-group-title {
+  margin: 0 0 10px;
+  font-family: 'Playfair Display', serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--gold-deep);
+}
+
+.table-guest-list {
+  list-style: none;
+  margin: 0;
+  padding: 8px;
+  min-height: 12px;
+  border-radius: var(--radius-sm);
+  background: rgba(138, 150, 120, 0.08);
+}
+
+.guest-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  border-radius: var(--radius-sm);
+  background: var(--sage-light);
+  cursor: grab;
+  transition: background 0.15s ease, opacity 0.15s ease;
+}
+
+.guest-row:last-child {
+  margin-bottom: 0;
+}
+
+.guest-row:hover {
+  background: #dde5d3;
+}
+
+.guest-row.dragging {
+  opacity: 0.4;
+}
+
+.drag-handle {
+  color: var(--gold);
+  font-size: 1rem;
+  line-height: 1;
+  user-select: none;
+}
+
+.guest-row-name {
+  flex: 1;
+  font-family: 'Playfair Display', serif;
+  font-size: 1.05rem;
   font-weight: 700;
   color: var(--charcoal);
 }

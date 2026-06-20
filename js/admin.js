@@ -16,6 +16,7 @@ async function hashPassword(text) {
 (function () {
   let selectedWeddingId = null;
   let currentLang = localStorage.getItem(ADMIN_LANG_KEY) || 'fr';
+  let draggedRow = null;
 
   const langMount = document.getElementById('lang-switcher-mount');
 
@@ -103,6 +104,83 @@ async function hashPassword(text) {
     }
   }
 
+  function groupGuestsByTable(guests) {
+    const groups = new Map();
+    guests.forEach((g) => {
+      const key = g.table || '';
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push(g);
+    });
+    const sortedKeys = Array.from(groups.keys()).sort((a, b) => {
+      const na = parseFloat(a);
+      const nb = parseFloat(b);
+      if (!Number.isNaN(na) && !Number.isNaN(nb)) return na - nb;
+      return String(a).localeCompare(String(b));
+    });
+    return sortedKeys.map((key) => ({ key, guests: groups.get(key) }));
+  }
+
+  function getDragAfterElement(container, y) {
+    const rows = [...container.querySelectorAll('.guest-row:not(.dragging)')];
+    return rows.reduce(
+      (closest, row) => {
+        const box = row.getBoundingClientRect();
+        const offset = y - box.top - box.height / 2;
+        if (offset < 0 && offset > closest.offset) {
+          return { offset, element: row };
+        }
+        return closest;
+      },
+      { offset: Number.NEGATIVE_INFINITY, element: null }
+    ).element;
+  }
+
+  async function commitGuestOrder() {
+    const wedding = await Storage.getWedding(selectedWeddingId);
+    if (!wedding) return;
+    const guestMap = new Map(wedding.guests.map((g) => [g.id, g]));
+    const newGuests = [];
+    guestListEl.querySelectorAll('.guest-row').forEach((row) => {
+      const guest = guestMap.get(row.dataset.id);
+      if (!guest) return;
+      const table = row.closest('.table-guest-list').dataset.table;
+      newGuests.push({ ...guest, table });
+    });
+    await Storage.setGuests(selectedWeddingId, newGuests);
+    await renderGuests();
+    await renderWeddings();
+  }
+
+  function attachRowDragEvents(row) {
+    row.addEventListener('dragstart', () => {
+      draggedRow = row;
+      row.classList.add('dragging');
+    });
+    row.addEventListener('dragend', () => {
+      row.classList.remove('dragging');
+      draggedRow = null;
+    });
+  }
+
+  function attachListDropEvents(list) {
+    list.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      if (!draggedRow) return;
+      const afterEl = getDragAfterElement(list, e.clientY);
+      if (afterEl == null) {
+        list.appendChild(draggedRow);
+      } else {
+        list.insertBefore(draggedRow, afterEl);
+      }
+    });
+
+    list.addEventListener('drop', async (e) => {
+      e.preventDefault();
+      if (!draggedRow) return;
+      await commitGuestOrder();
+    });
+  }
+
   async function renderGuests() {
     const wedding = await Storage.getWedding(selectedWeddingId);
     if (!wedding) {
@@ -117,19 +195,36 @@ async function hashPassword(text) {
     guestListEl.innerHTML = '';
     guestEmptyEl.hidden = wedding.guests.length > 0;
 
-    wedding.guests.forEach((g) => {
-      const li = document.createElement('li');
-      li.className = 'guest-item';
-      li.innerHTML = `
-        <div class="info">
-          <strong>${escapeHtml(g.name)}</strong>
-          <span class="muted">${escapeHtml(t(currentLang, 'tableLabel'))} ${escapeHtml(g.table)}</span>
-        </div>
-        <div class="actions">
+    groupGuestsByTable(wedding.guests).forEach(({ key, guests }) => {
+      const groupEl = document.createElement('div');
+      groupEl.className = 'table-group';
+
+      const title = document.createElement('h3');
+      title.className = 'table-group-title';
+      title.textContent = `${t(currentLang, 'tableLabel')} ${key || '—'}`;
+      groupEl.appendChild(title);
+
+      const list = document.createElement('ul');
+      list.className = 'table-guest-list';
+      list.dataset.table = key;
+
+      guests.forEach((g) => {
+        const li = document.createElement('li');
+        li.className = 'guest-row';
+        li.draggable = true;
+        li.dataset.id = g.id;
+        li.innerHTML = `
+          <span class="drag-handle">&#10303;</span>
+          <span class="guest-row-name">${escapeHtml(g.name)}</span>
           <button type="button" class="danger" data-action="delete-guest" data-id="${g.id}">${escapeHtml(t(currentLang, 'deleteBtn'))}</button>
-        </div>
-      `;
-      guestListEl.appendChild(li);
+        `;
+        attachRowDragEvents(li);
+        list.appendChild(li);
+      });
+
+      attachListDropEvents(list);
+      groupEl.appendChild(list);
+      guestListEl.appendChild(groupEl);
     });
   }
 

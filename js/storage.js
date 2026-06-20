@@ -65,4 +65,8 @@ export const Storage = {
     const guests = wedding.guests.filter((g) => g.id !== guestId);
     await updateDoc(doc(db, 'weddings', weddingId), { guests });
   },
+
+  async setGuests(weddingId, guests) {
+    await updateDoc(doc(db, 'weddings', weddingId), { guests });
+  },
 };
