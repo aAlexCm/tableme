@@ -212,15 +212,15 @@ input, select {
   padding: 14px 18px;
   border: 1px solid rgba(176, 141, 79, 0.3);
   border-radius: var(--radius-sm);
-  background: #ced3c0;
+  background: var(--sage-light);
   color: var(--ink);
   width: 100%;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 input::placeholder {
-  color: #ffffff;
-  opacity: 0.85;
+  color: var(--sage-deep);
+  opacity: 0.75;
 }
 
 input:focus, select:focus {
