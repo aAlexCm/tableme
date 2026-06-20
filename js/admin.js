@@ -1,7 +1,24 @@
 import { Storage } from './storage.js';
 
+const ADMIN_PASSWORD_HASH = 'fd2eb3f297cddf665a7518d12b3e5781ef56522f16878241949efbfffcfaf439';
+const AUTH_SESSION_KEY = 'tableme_admin_auth';
+
+async function hashPassword(text) {
+  const data = new TextEncoder().encode(text);
+  const digest = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(digest))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
+}
+
 (function () {
   let selectedWeddingId = null;
+
+  const authGate = document.getElementById('auth-gate');
+  const authForm = document.getElementById('auth-form');
+  const authPasswordInput = document.getElementById('auth-password');
+  const authErrorEl = document.getElementById('auth-error');
+  const adminContent = document.getElementById('admin-content');
 
   const weddingForm = document.getElementById('wedding-form');
   const weddingNameInput = document.getElementById('wedding-name');
@@ -143,5 +160,26 @@ import { Storage } from './storage.js';
     setTimeout(() => (copyLinkBtn.textContent = 'Copier'), 1500);
   });
 
-  renderWeddings();
+  function unlockAdmin() {
+    authGate.hidden = true;
+    adminContent.hidden = false;
+    renderWeddings();
+  }
+
+  authForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const hash = await hashPassword(authPasswordInput.value);
+    if (hash === ADMIN_PASSWORD_HASH) {
+      sessionStorage.setItem(AUTH_SESSION_KEY, 'true');
+      authErrorEl.hidden = true;
+      authForm.reset();
+      unlockAdmin();
+    } else {
+      authErrorEl.hidden = false;
+    }
+  });
+
+  if (sessionStorage.getItem(AUTH_SESSION_KEY) === 'true') {
+    unlockAdmin();
+  }
 })();

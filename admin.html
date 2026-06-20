@@ -8,47 +8,58 @@
 </head>
 <body>
   <div class="page">
-    <nav class="admin-nav">
-      <strong>Administration</strong>
-      <a href="index.html">Voir la page invité &rarr;</a>
-    </nav>
-
-    <header class="hero">
-      <h1>Gérer les mariages</h1>
-      <p>Créez un mariage, ajoutez vos invités et leur numéro de table</p>
-    </header>
-
-    <div class="card">
-      <h2>Nouveau mariage</h2>
-      <form id="wedding-form" class="inline-form">
-        <input type="text" id="wedding-name" placeholder="Nom du mariage (ex: Mariage de Léa & Tom)" required />
-        <input type="date" id="wedding-date" />
-        <button type="submit">Créer</button>
+    <div id="auth-gate" class="card">
+      <h2>Accès administration</h2>
+      <form id="auth-form" class="inline-form">
+        <input type="password" id="auth-password" placeholder="Mot de passe" required autocomplete="off" />
+        <button type="submit">Entrer</button>
       </form>
+      <p class="error-msg" id="auth-error" hidden>Mot de passe incorrect.</p>
     </div>
 
-    <div class="card">
-      <h2>Mariages</h2>
-      <ul class="wedding-list" id="wedding-list"></ul>
-      <p class="empty-state" id="wedding-empty" hidden>Aucun mariage créé pour le moment.</p>
-    </div>
+    <div id="admin-content" hidden>
+      <nav class="admin-nav">
+        <strong>Administration</strong>
+        <a href="index.html">Voir la page invité &rarr;</a>
+      </nav>
 
-    <div class="card" id="guests-card" hidden>
-      <h2 id="guests-title">Invités</h2>
+      <header class="hero">
+        <h1>Gérer les mariages</h1>
+        <p>Créez un mariage, ajoutez vos invités et leur numéro de table</p>
+      </header>
 
-      <div class="link-box">
-        <input type="text" id="guest-link" readonly />
-        <button type="button" class="secondary" id="copy-link">Copier</button>
+      <div class="card">
+        <h2>Nouveau mariage</h2>
+        <form id="wedding-form" class="inline-form">
+          <input type="text" id="wedding-name" placeholder="Nom du mariage (ex: Mariage de Léa & Tom)" required />
+          <input type="date" id="wedding-date" />
+          <button type="submit">Créer</button>
+        </form>
       </div>
 
-      <form id="guest-form" class="inline-form" style="margin-top: 20px">
-        <input type="text" id="guest-name" placeholder="Nom et prénom de l'invité" required />
-        <input type="text" id="guest-table" placeholder="N° de table" required />
-        <button type="submit">Ajouter</button>
-      </form>
+      <div class="card">
+        <h2>Mariages</h2>
+        <ul class="wedding-list" id="wedding-list"></ul>
+        <p class="empty-state" id="wedding-empty" hidden>Aucun mariage créé pour le moment.</p>
+      </div>
 
-      <ul class="guest-list" id="guest-list" style="margin-top: 16px"></ul>
-      <p class="empty-state" id="guest-empty" hidden>Aucun invité ajouté pour le moment.</p>
+      <div class="card" id="guests-card" hidden>
+        <h2 id="guests-title">Invités</h2>
+
+        <div class="link-box">
+          <input type="text" id="guest-link" readonly />
+          <button type="button" class="secondary" id="copy-link">Copier</button>
+        </div>
+
+        <form id="guest-form" class="inline-form" style="margin-top: 20px">
+          <input type="text" id="guest-name" placeholder="Nom et prénom de l'invité" required />
+          <input type="text" id="guest-table" placeholder="N° de table" required />
+          <button type="submit">Ajouter</button>
+        </form>
+
+        <ul class="guest-list" id="guest-list" style="margin-top: 16px"></ul>
+        <p class="empty-state" id="guest-empty" hidden>Aucun invité ajouté pour le moment.</p>
+      </div>
     </div>
   </div>
 
