@@ -26,7 +26,10 @@ const LANG_KEY = 'tableme_lang';
     localStorage.setItem(LANG_KEY, lang);
     applyTranslations(lang);
     if (currentWedding) {
+      renderWeddingTitle(currentWedding.name);
       handleSearch(inputEl.value, currentWedding.guests);
+    } else {
+      titleEl.textContent = t(lang, 'guestHeroTitle');
     }
   }
 
@@ -131,6 +134,7 @@ const LANG_KEY = 'tableme_lang';
   if (!weddingId) {
     langMount.appendChild(buildLangSwitcher(currentLang, setLang));
     applyTranslations(currentLang);
+    titleEl.textContent = t(currentLang, 'guestHeroTitle');
     await showWeddingPicker();
     return;
   }
@@ -139,6 +143,7 @@ const LANG_KEY = 'tableme_lang';
   if (!wedding) {
     langMount.appendChild(buildLangSwitcher(currentLang, setLang));
     applyTranslations(currentLang);
+    titleEl.textContent = t(currentLang, 'guestHeroTitle');
     await showWeddingPicker();
     return;
   }
