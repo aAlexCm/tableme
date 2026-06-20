@@ -98,7 +98,11 @@ import { Storage, normalize } from './storage.js';
       clearResult();
       return;
     }
-    const matches = guests.filter((g) => normalize(g.name).includes(q));
+    const queryWords = q.split(/\s+/).filter(Boolean);
+    const matches = guests.filter((g) => {
+      const normalizedName = normalize(g.name);
+      return queryWords.every((word) => normalizedName.includes(word));
+    });
     if (matches.length === 0) {
       showNoMatch();
     } else if (matches.length === 1) {
