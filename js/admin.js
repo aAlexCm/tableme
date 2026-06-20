@@ -195,6 +195,44 @@ async function hashPassword(text) {
       row.classList.remove('dragging');
       draggedRow = null;
     });
+
+    const handle = row.querySelector('.drag-handle');
+
+    handle.addEventListener(
+      'touchstart',
+      (e) => {
+        e.preventDefault();
+        draggedRow = row;
+        row.classList.add('dragging');
+      },
+      { passive: false }
+    );
+
+    handle.addEventListener(
+      'touchmove',
+      (e) => {
+        if (!draggedRow) return;
+        e.preventDefault();
+        const touch = e.touches[0];
+        const elAtPoint = document.elementFromPoint(touch.clientX, touch.clientY);
+        const list = elAtPoint && elAtPoint.closest('.table-guest-list');
+        if (!list) return;
+        const afterEl = getDragAfterElement(list, touch.clientY);
+        if (afterEl == null) {
+          list.appendChild(draggedRow);
+        } else {
+          list.insertBefore(draggedRow, afterEl);
+        }
+      },
+      { passive: false }
+    );
+
+    handle.addEventListener('touchend', async () => {
+      if (!draggedRow) return;
+      row.classList.remove('dragging');
+      draggedRow = null;
+      await commitGuestOrder();
+    });
   }
 
   function attachListDropEvents(list) {

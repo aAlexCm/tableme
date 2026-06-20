@@ -507,10 +507,17 @@ form.inline-form select {
 }
 
 .drag-handle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  min-height: 32px;
   color: var(--gold);
-  font-size: 1rem;
+  font-size: 1.1rem;
   line-height: 1;
   user-select: none;
+  touch-action: none;
+  cursor: grab;
 }
 
 .guest-row-name {
