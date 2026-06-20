@@ -67,6 +67,65 @@ header.hero::after {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M14 92 C 34 70, 22 42, 54 10' stroke='%238a9678' stroke-width='2.5' fill='none' stroke-linecap='round'/%3E%3Cellipse cx='32' cy='62' rx='11' ry='5.5' fill='%238a9678' transform='rotate(-45 32 62)'/%3E%3Cellipse cx='42' cy='42' rx='10' ry='5' fill='%238a9678' transform='rotate(-35 42 42)'/%3E%3Cellipse cx='53' cy='22' rx='8.5' ry='4.5' fill='%23b08d4f' transform='rotate(-22 53 22)'/%3E%3C/svg%3E");
 }
 
+header.hero.invite-hero {
+  padding: 96px 20px 16px;
+  margin-bottom: 36px;
+}
+
+header.hero.invite-hero::before,
+header.hero.invite-hero::after {
+  width: 150px;
+  height: 150px;
+  opacity: 0.9;
+}
+
+header.hero.invite-hero::before {
+  top: -42px;
+  left: -16px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 160'%3E%3Cpath d='M10 150 C 35 125, 15 95, 55 65 C 85 45, 65 25, 115 12' stroke='%235f6b53' stroke-width='2.5' fill='none' stroke-linecap='round'/%3E%3Cellipse cx='28' cy='118' rx='13' ry='6.5' fill='%238a9678' transform='rotate(-50 28 118)'/%3E%3Cellipse cx='22' cy='90' rx='12' ry='6' fill='%235f6b53' transform='rotate(-30 22 90)'/%3E%3Cellipse cx='50' cy='62' rx='12' ry='6' fill='%238a9678' transform='rotate(-55 50 62)'/%3E%3Cellipse cx='78' cy='40' rx='11' ry='5.5' fill='%235f6b53' transform='rotate(-35 78 40)'/%3E%3Cellipse cx='100' cy='20' rx='10' ry='5' fill='%238a9678' transform='rotate(-25 100 20)'/%3E%3Cpath d='M30 130 Q 50 110 40 90 T 70 60' stroke='%23b08d4f' stroke-width='1.1' fill='none' stroke-linecap='round' opacity='0.8'/%3E%3Ccircle cx='20' cy='135' r='3' fill='%23b08d4f'/%3E%3Ccircle cx='35' cy='115' r='2' fill='%23b08d4f'/%3E%3Ccircle cx='55' cy='100' r='2.5' fill='%23b08d4f'/%3E%3Ccircle cx='45' cy='80' r='1.6' fill='%23b08d4f'/%3E%3Ccircle cx='68' cy='72' r='2.2' fill='%23b08d4f'/%3E%3Ccircle cx='85' cy='55' r='1.8' fill='%23b08d4f'/%3E%3C/svg%3E");
+}
+
+header.hero.invite-hero::after {
+  bottom: -42px;
+  right: -16px;
+  transform: rotate(180deg);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 160'%3E%3Cpath d='M10 150 C 35 125, 15 95, 55 65 C 85 45, 65 25, 115 12' stroke='%235f6b53' stroke-width='2.5' fill='none' stroke-linecap='round'/%3E%3Cellipse cx='28' cy='118' rx='13' ry='6.5' fill='%238a9678' transform='rotate(-50 28 118)'/%3E%3Cellipse cx='22' cy='90' rx='12' ry='6' fill='%235f6b53' transform='rotate(-30 22 90)'/%3E%3Cellipse cx='50' cy='62' rx='12' ry='6' fill='%238a9678' transform='rotate(-55 50 62)'/%3E%3Cellipse cx='78' cy='40' rx='11' ry='5.5' fill='%235f6b53' transform='rotate(-35 78 40)'/%3E%3Cellipse cx='100' cy='20' rx='10' ry='5' fill='%238a9678' transform='rotate(-25 100 20)'/%3E%3Cpath d='M30 130 Q 50 110 40 90 T 70 60' stroke='%23b08d4f' stroke-width='1.1' fill='none' stroke-linecap='round' opacity='0.8'/%3E%3Ccircle cx='20' cy='135' r='3' fill='%23b08d4f'/%3E%3Ccircle cx='35' cy='115' r='2' fill='%23b08d4f'/%3E%3Ccircle cx='55' cy='100' r='2.5' fill='%23b08d4f'/%3E%3Ccircle cx='45' cy='80' r='1.6' fill='%23b08d4f'/%3E%3Ccircle cx='68' cy='72' r='2.2' fill='%23b08d4f'/%3E%3Ccircle cx='85' cy='55' r='1.8' fill='%23b08d4f'/%3E%3C/svg%3E");
+}
+
+.script-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin: 0;
+}
+
+.script-word {
+  font-family: 'Parisienne', cursive;
+  font-size: 3.4rem;
+  font-weight: 400;
+  color: var(--sage-deep);
+  line-height: 1;
+}
+
+.title-heart {
+  font-size: 1.8rem;
+  color: var(--gold-light);
+  transform: translateY(2px);
+}
+
+.tracked-subtitle {
+  text-transform: uppercase;
+  letter-spacing: 2.2px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  font-style: normal !important;
+  font-family: 'Lato', sans-serif !important;
+  color: #8a7e6e;
+  margin: 16px 0 0 !important;
+}
+
 header.hero .eyebrow {
   display: inline-block;
   margin: 0 0 14px;
@@ -196,14 +255,17 @@ button:active {
 }
 
 button.secondary {
-  background: var(--sage-light);
+  background: transparent;
   color: var(--sage-deep);
-  border: 1px solid rgba(138, 150, 120, 0.3);
+  border: 1.5px solid var(--sage-deep);
+  text-decoration: underline;
+  text-decoration-color: rgba(95, 107, 83, 0.5);
+  text-underline-offset: 3px;
   box-shadow: none;
 }
 
 button.secondary:hover {
-  background: #dde5d3;
+  background: var(--sage-light);
   color: var(--charcoal);
   filter: none;
   box-shadow: none;

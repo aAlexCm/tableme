@@ -73,6 +73,15 @@ import { Storage, normalize } from './storage.js';
     resultEl.innerHTML = `<p class="error-msg">Aucun invité trouvé avec ce nom. Vérifiez l'orthographe.</p>`;
   }
 
+  function renderWeddingTitle(name) {
+    const parts = name.split(/\s+(?:&|et)\s+/i);
+    if (parts.length === 2) {
+      titleEl.innerHTML = `<span class="script-word">${escapeHtml(parts[0])}</span><span class="title-heart">&#9825;</span><span class="script-word">${escapeHtml(parts[1])}</span>`;
+    } else {
+      titleEl.innerHTML = `<span class="script-word">${escapeHtml(name)}</span>`;
+    }
+  }
+
   function escapeHtml(value) {
     return String(value).replace(/[&<>"']/g, (c) => ({
       '&': '&amp;',
@@ -110,7 +119,7 @@ import { Storage, normalize } from './storage.js';
     return;
   }
 
-  titleEl.textContent = wedding.name;
+  renderWeddingTitle(wedding.name);
   subtitleEl.textContent = 'Tapez votre nom pour découvrir votre table';
   searchSectionEl.hidden = false;
 
