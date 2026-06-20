@@ -1,4 +1,4 @@
-import { Storage } from './storage.js';
+import { Storage, normalize } from './storage.js';
 
 (async function () {
   const params = new URLSearchParams(window.location.search);
@@ -10,7 +10,6 @@ import { Storage } from './storage.js';
   const weddingPickerEl = document.getElementById('wedding-picker');
   const noWeddingEmptyEl = document.getElementById('no-wedding-empty');
   const searchSectionEl = document.getElementById('search-section');
-  const formEl = document.getElementById('search-form');
   const inputEl = document.getElementById('guest-input');
   const resultEl = document.getElementById('result');
   const matchListEl = document.getElementById('match-list');
@@ -45,10 +44,7 @@ import { Storage } from './storage.js';
   function showSingleGuest(guest) {
     clearResult();
     resultEl.hidden = false;
-    resultEl.innerHTML = `
-      <p class="guest-name">${escapeHtml(guest.name)}</p>
-      <p class="table-number">Table ${escapeHtml(guest.table)}</p>
-    `;
+    resultEl.innerHTML = `<p class="table-number">${escapeHtml(guest.name)} - ${escapeHtml(guest.table)}</p>`;
   }
 
   function showMatchList(guests) {
@@ -56,7 +52,7 @@ import { Storage } from './storage.js';
     guests.forEach((g) => {
       const li = document.createElement('li');
       li.className = 'guest-match';
-      li.innerHTML = `<span>${escapeHtml(g.name)}</span><span class="muted">Choisir</span>`;
+      li.innerHTML = `<span>${escapeHtml(g.name)} - ${escapeHtml(g.table)}</span>`;
       li.addEventListener('click', () => showSingleGuest(g));
       matchListEl.appendChild(li);
     });
@@ -78,8 +74,13 @@ import { Storage } from './storage.js';
     })[c]);
   }
 
-  async function handleSearch(query) {
-    const matches = await Storage.findGuests(weddingId, query);
+  function handleSearch(query, guests) {
+    const q = normalize(query);
+    if (!q) {
+      clearResult();
+      return;
+    }
+    const matches = guests.filter((g) => normalize(g.name).includes(q));
     if (matches.length === 0) {
       showNoMatch();
     } else if (matches.length === 1) {
@@ -104,8 +105,7 @@ import { Storage } from './storage.js';
   subtitleEl.textContent = 'Tapez votre nom pour découvrir votre table';
   searchSectionEl.hidden = false;
 
-  formEl.addEventListener('submit', (e) => {
-    e.preventDefault();
-    handleSearch(inputEl.value);
+  inputEl.addEventListener('input', () => {
+    handleSearch(inputEl.value, wedding.guests);
   });
 })();

@@ -14,7 +14,7 @@ function generateId() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 }
 
-function normalize(str) {
+export function normalize(str) {
   return (str || '')
     .toString()
     .trim()
@@ -60,13 +60,5 @@ export const Storage = {
     if (!wedding) return;
     const guests = wedding.guests.filter((g) => g.id !== guestId);
     await updateDoc(doc(db, 'weddings', weddingId), { guests });
-  },
-
-  async findGuests(weddingId, query) {
-    const wedding = await this.getWedding(weddingId);
-    if (!wedding) return [];
-    const q = normalize(query);
-    if (!q) return [];
-    return wedding.guests.filter((g) => normalize(g.name).includes(q));
   },
 };
