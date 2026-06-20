@@ -7,7 +7,7 @@
   --sage-light: #e6ebe0;
   --ink: #38362f;
   --charcoal: #211f1a;
-  --cream: #faf6ee;
+  --cream: #f9f9f7;
   --paper: #fffdf9;
   --error: #9b4438;
   --radius: 20px;
@@ -24,7 +24,7 @@ body {
   font-family: 'Lato', sans-serif;
   font-weight: 400;
   background: var(--cream);
-  background-image: radial-gradient(circle at 50% 0%, #fffdf8 0%, var(--cream) 60%);
+  background-image: radial-gradient(circle at 50% 0%, #ffffff 0%, var(--cream) 60%);
   color: var(--ink);
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
@@ -212,7 +212,7 @@ input, select {
   padding: 14px 18px;
   border: 1px solid rgba(176, 141, 79, 0.3);
   border-radius: var(--radius-sm);
-  background: #fffaf0;
+  background: #ced3c0;
   color: var(--ink);
   width: 100%;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
