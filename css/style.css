@@ -219,7 +219,8 @@ input, select {
 }
 
 input::placeholder {
-  color: #b3a48a;
+  color: #ffffff;
+  opacity: 0.85;
 }
 
 input:focus, select:focus {
