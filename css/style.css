@@ -1,10 +1,13 @@
 :root {
-  --gold: #b08d57;
-  --gold-light: #d9c2a3;
-  --cream: #fdf8f3;
-  --ink: #3a3530;
-  --error: #b5453a;
-  --radius: 10px;
+  --gold: #a98a51;
+  --gold-deep: #8a6d3c;
+  --gold-light: #e2d3b3;
+  --ink: #2b2926;
+  --charcoal: #1c1a17;
+  --cream: #faf6ef;
+  --paper: #fffdfa;
+  --error: #9b4438;
+  --radius: 5px;
 }
 
 * {
@@ -13,105 +16,171 @@
 
 body {
   margin: 0;
-  font-family: 'Georgia', 'Times New Roman', serif;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 400;
   background: var(--cream);
+  background-image: radial-gradient(circle at 50% 0%, #fffdf8 0%, var(--cream) 55%);
   color: var(--ink);
   min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
 }
 
 .page {
-  max-width: 720px;
+  max-width: 680px;
   margin: 0 auto;
-  padding: 48px 24px 80px;
+  padding: 64px 24px 96px;
 }
 
 header.hero {
   text-align: center;
-  margin-bottom: 40px;
+  margin-bottom: 48px;
+}
+
+header.hero .eyebrow {
+  margin: 0 0 6px;
+  font-size: 0.72rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--gold-deep);
+  font-weight: 500;
 }
 
 header.hero h1 {
-  font-size: 2.2rem;
-  letter-spacing: 1px;
-  color: var(--gold);
-  margin: 0 0 8px;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2.8rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  color: var(--charcoal);
+  margin: 0;
+  line-height: 1.15;
 }
 
-header.hero p {
-  color: #756c61;
-  margin: 0;
+header.hero p:not(.eyebrow) {
+  color: #7a7165;
+  margin: 14px 0 0;
+  font-size: 0.95rem;
+  font-style: italic;
+  font-family: 'Cormorant Garamond', serif;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin: 18px 0;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  height: 1px;
+  width: 64px;
+  background: linear-gradient(90deg, transparent, var(--gold-light));
+}
+
+.divider::after {
+  background: linear-gradient(90deg, var(--gold-light), transparent);
+}
+
+.divider span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--gold);
+  display: inline-block;
 }
 
 .card {
-  background: #fff;
+  background: var(--paper);
   border: 1px solid var(--gold-light);
   border-radius: var(--radius);
-  padding: 28px;
+  padding: 32px;
   margin-bottom: 24px;
-  box-shadow: 0 4px 16px rgba(176, 141, 87, 0.08);
+  box-shadow: 0 14px 36px rgba(43, 35, 16, 0.06);
 }
 
 input, select {
-  font-family: inherit;
-  font-size: 1rem;
-  padding: 12px 14px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.95rem;
+  padding: 13px 16px;
   border: 1px solid var(--gold-light);
   border-radius: var(--radius);
-  background: #fff;
+  background: var(--paper);
   color: var(--ink);
   width: 100%;
+}
+
+input::placeholder {
+  color: #b3a48a;
 }
 
 input:focus, select:focus {
   outline: none;
   border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(169, 138, 81, 0.12);
 }
 
 button {
-  font-family: inherit;
-  font-size: 1rem;
-  padding: 12px 20px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.82rem;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  font-weight: 500;
+  padding: 13px 22px;
   border: none;
   border-radius: var(--radius);
   background: var(--gold);
   color: #fff;
   cursor: pointer;
   white-space: nowrap;
-  transition: background 0.15s ease;
+  transition: background 0.2s ease, transform 0.05s ease;
 }
 
 button:hover {
-  background: #98774a;
+  background: var(--gold-deep);
+}
+
+button:active {
+  transform: translateY(1px);
 }
 
 button.secondary {
   background: transparent;
-  color: var(--gold);
+  color: var(--gold-deep);
   border: 1px solid var(--gold-light);
 }
 
 button.secondary:hover {
-  background: var(--gold-light);
-  color: var(--ink);
+  background: #f6efe2;
+  color: var(--charcoal);
 }
 
 button.danger {
-  background: var(--error);
+  background: transparent;
+  color: var(--error);
+  border: 1px solid #e3c9c4;
 }
 
 button.danger:hover {
-  background: #8f372e;
+  background: #f8eeec;
 }
 
 .result {
-  margin-top: 20px;
+  margin-top: 24px;
   text-align: center;
 }
 
 .result .table-number {
-  font-size: 1.8rem;
-  color: var(--gold);
-  font-weight: bold;
+  display: inline-block;
+  padding: 18px 36px;
+  border: 1px solid var(--gold-light);
+  border-radius: var(--radius);
+  background: #fbf7ef;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--charcoal);
   margin: 6px 0;
 }
 
@@ -119,9 +188,12 @@ button.danger:hover {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 14px 0;
-  border-bottom: 1px solid #f0e7da;
+  padding: 16px 4px;
+  border-bottom: 1px solid #f1e8d8;
   cursor: pointer;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.15rem;
+  transition: background 0.15s ease;
 }
 
 .guest-match:last-child {
@@ -129,29 +201,46 @@ button.danger:hover {
 }
 
 .guest-match:hover {
-  background: #fbf4ea;
+  background: #fbf7ef;
 }
 
 .muted {
-  color: #918577;
-  font-size: 0.92rem;
+  color: #998c77;
+  font-size: 0.88rem;
 }
 
 .error-msg {
   color: var(--error);
-  margin-top: 12px;
+  margin-top: 14px;
+  font-size: 0.88rem;
 }
 
 nav.admin-nav {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 32px;
+  margin-bottom: 40px;
+  font-size: 0.85rem;
+}
+
+nav.admin-nav strong {
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  color: var(--gold-deep);
+  font-weight: 600;
 }
 
 nav.admin-nav a {
-  color: var(--gold);
+  color: var(--gold-deep);
   text-decoration: none;
+  border-bottom: 1px solid var(--gold-light);
+  padding-bottom: 2px;
+}
+
+nav.admin-nav a:hover {
+  color: var(--charcoal);
+  border-color: var(--gold);
 }
 
 form.inline-form {
@@ -175,8 +264,8 @@ form.inline-form input {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 14px 0;
-  border-bottom: 1px solid #f0e7da;
+  padding: 16px 0;
+  border-bottom: 1px solid #f1e8d8;
   gap: 12px;
 }
 
@@ -190,6 +279,10 @@ form.inline-form input {
 
 .wedding-item .info strong, .guest-item .info strong {
   display: block;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--charcoal);
 }
 
 .actions {
@@ -204,17 +297,36 @@ form.inline-form input {
 }
 
 .link-box input {
-  background: #f7f1e8;
+  background: #f6efe2;
+  font-size: 0.85rem;
 }
 
 h2 {
   margin-top: 0;
-  font-size: 1.3rem;
-  color: var(--gold);
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--charcoal);
 }
 
 .empty-state {
   text-align: center;
-  color: #918577;
-  padding: 20px 0;
+  color: #998c77;
+  font-style: italic;
+  font-family: 'Cormorant Garamond', serif;
+  padding: 24px 0;
+}
+
+#auth-gate {
+  max-width: 420px;
+  margin: 80px auto 0;
+  text-align: center;
+}
+
+#auth-gate h2 {
+  margin-bottom: 18px;
+}
+
+#auth-gate form {
+  flex-direction: column;
 }
