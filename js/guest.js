@@ -44,7 +44,16 @@ import { Storage, normalize } from './storage.js';
   function showSingleGuest(guest) {
     clearResult();
     resultEl.hidden = false;
-    resultEl.innerHTML = `<p class="table-number">${escapeHtml(guest.name)} - ${escapeHtml(guest.table)}</p>`;
+    resultEl.innerHTML = `
+      <div class="table-number">
+        <span class="guest-name">${escapeHtml(guest.name)}</span>
+        <span class="table-sep"></span>
+        <span class="table-tag">
+          <span class="table-label">Table</span>
+          <span class="table-value">${escapeHtml(guest.table)}</span>
+        </span>
+      </div>
+    `;
   }
 
   function showMatchList(guests) {
@@ -52,7 +61,7 @@ import { Storage, normalize } from './storage.js';
     guests.forEach((g) => {
       const li = document.createElement('li');
       li.className = 'guest-match';
-      li.innerHTML = `<span>${escapeHtml(g.name)} - ${escapeHtml(g.table)}</span>`;
+      li.innerHTML = `<span>${escapeHtml(g.name)}</span><span class="match-table">Table ${escapeHtml(g.table)}</span>`;
       li.addEventListener('click', () => showSingleGuest(g));
       matchListEl.appendChild(li);
     });
