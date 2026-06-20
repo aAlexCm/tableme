@@ -1,3 +1,5 @@
+import { Storage } from './storage.js';
+
 (function () {
   let selectedWeddingId = null;
 
@@ -27,8 +29,8 @@
     })[c]);
   }
 
-  function renderWeddings() {
-    const weddings = Storage.getWeddings();
+  async function renderWeddings() {
+    const weddings = await Storage.getWeddings();
     weddingListEl.innerHTML = '';
     weddingEmptyEl.hidden = weddings.length > 0;
 
@@ -55,8 +57,8 @@
     }
   }
 
-  function renderGuests() {
-    const wedding = Storage.getWedding(selectedWeddingId);
+  async function renderGuests() {
+    const wedding = await Storage.getWedding(selectedWeddingId);
     if (!wedding) {
       guestsCard.hidden = true;
       return;
@@ -85,52 +87,52 @@
     });
   }
 
-  weddingForm.addEventListener('submit', (e) => {
+  weddingForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const name = weddingNameInput.value.trim();
     if (!name) return;
-    Storage.addWedding(name, weddingDateInput.value);
+    await Storage.addWedding(name, weddingDateInput.value);
     weddingForm.reset();
-    renderWeddings();
+    await renderWeddings();
   });
 
-  weddingListEl.addEventListener('click', (e) => {
+  weddingListEl.addEventListener('click', async (e) => {
     const btn = e.target.closest('button');
     if (!btn) return;
     const { action, id } = btn.dataset;
 
     if (action === 'manage') {
       selectedWeddingId = id;
-      renderGuests();
+      await renderGuests();
     } else if (action === 'delete') {
-      const wedding = Storage.getWedding(id);
+      const wedding = await Storage.getWedding(id);
       if (wedding && confirm(`Supprimer le mariage "${wedding.name}" et tous ses invités ?`)) {
-        Storage.deleteWedding(id);
-        renderWeddings();
+        await Storage.deleteWedding(id);
+        await renderWeddings();
       }
     }
   });
 
-  guestForm.addEventListener('submit', (e) => {
+  guestForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     if (!selectedWeddingId) return;
     const name = guestNameInput.value.trim();
     const table = guestTableInput.value.trim();
     if (!name || !table) return;
-    Storage.addGuest(selectedWeddingId, name, table);
+    await Storage.addGuest(selectedWeddingId, name, table);
     guestForm.reset();
-    renderGuests();
-    renderWeddings();
+    await renderGuests();
+    await renderWeddings();
   });
 
-  guestListEl.addEventListener('click', (e) => {
+  guestListEl.addEventListener('click', async (e) => {
     const btn = e.target.closest('button');
     if (!btn) return;
     const { action, id } = btn.dataset;
     if (action === 'delete-guest' && selectedWeddingId) {
-      Storage.deleteGuest(selectedWeddingId, id);
-      renderGuests();
-      renderWeddings();
+      await Storage.deleteGuest(selectedWeddingId, id);
+      await renderGuests();
+      await renderWeddings();
     }
   });
 

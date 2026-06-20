@@ -1,4 +1,6 @@
-(function () {
+import { Storage } from './storage.js';
+
+(async function () {
   const params = new URLSearchParams(window.location.search);
   const weddingId = params.get('id');
 
@@ -13,8 +15,8 @@
   const resultEl = document.getElementById('result');
   const matchListEl = document.getElementById('match-list');
 
-  function showWeddingPicker() {
-    const weddings = Storage.getWeddings();
+  async function showWeddingPicker() {
+    const weddings = await Storage.getWeddings();
     noWeddingEl.hidden = false;
     searchSectionEl.hidden = true;
 
@@ -76,8 +78,8 @@
     })[c]);
   }
 
-  function handleSearch(query) {
-    const matches = Storage.findGuests(weddingId, query);
+  async function handleSearch(query) {
+    const matches = await Storage.findGuests(weddingId, query);
     if (matches.length === 0) {
       showNoMatch();
     } else if (matches.length === 1) {
@@ -88,13 +90,13 @@
   }
 
   if (!weddingId) {
-    showWeddingPicker();
+    await showWeddingPicker();
     return;
   }
 
-  const wedding = Storage.getWedding(weddingId);
+  const wedding = await Storage.getWedding(weddingId);
   if (!wedding) {
-    showWeddingPicker();
+    await showWeddingPicker();
     return;
   }
 

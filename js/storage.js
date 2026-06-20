@@ -1,5 +1,14 @@
-// Couche d'accès aux données, stockées dans localStorage.
-const STORAGE_KEY = 'tableme_weddings';
+// Couche d'accès aux données, stockées dans Firestore.
+import { db } from './firebase-config.js';
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+} from 'https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js';
 
 function generateId() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
@@ -14,58 +23,47 @@ function normalize(str) {
     .replace(/[̀-ͯ]/g, '');
 }
 
-const Storage = {
-  getWeddings() {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      return raw ? JSON.parse(raw) : [];
-    } catch (e) {
-      console.error('Erreur de lecture du localStorage', e);
-      return [];
-    }
+const weddingsCol = collection(db, 'weddings');
+
+export const Storage = {
+  async getWeddings() {
+    const snap = await getDocs(weddingsCol);
+    return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
   },
 
-  saveWeddings(weddings) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(weddings));
+  async getWedding(id) {
+    if (!id) return null;
+    const snap = await getDoc(doc(db, 'weddings', id));
+    return snap.exists() ? { id: snap.id, ...snap.data() } : null;
   },
 
-  getWedding(id) {
-    return this.getWeddings().find((w) => w.id === id) || null;
+  async addWedding(name, date) {
+    const ref = await addDoc(weddingsCol, { name, date, guests: [] });
+    return { id: ref.id, name, date, guests: [] };
   },
 
-  addWedding(name, date) {
-    const weddings = this.getWeddings();
-    const wedding = { id: generateId(), name, date, guests: [] };
-    weddings.push(wedding);
-    this.saveWeddings(weddings);
-    return wedding;
+  async deleteWedding(weddingId) {
+    await deleteDoc(doc(db, 'weddings', weddingId));
   },
 
-  deleteWedding(weddingId) {
-    const weddings = this.getWeddings().filter((w) => w.id !== weddingId);
-    this.saveWeddings(weddings);
-  },
-
-  addGuest(weddingId, name, table) {
-    const weddings = this.getWeddings();
-    const wedding = weddings.find((w) => w.id === weddingId);
+  async addGuest(weddingId, name, table) {
+    const wedding = await this.getWedding(weddingId);
     if (!wedding) return null;
     const guest = { id: generateId(), name, table };
-    wedding.guests.push(guest);
-    this.saveWeddings(weddings);
+    const guests = [...wedding.guests, guest];
+    await updateDoc(doc(db, 'weddings', weddingId), { guests });
     return guest;
   },
 
-  deleteGuest(weddingId, guestId) {
-    const weddings = this.getWeddings();
-    const wedding = weddings.find((w) => w.id === weddingId);
+  async deleteGuest(weddingId, guestId) {
+    const wedding = await this.getWedding(weddingId);
     if (!wedding) return;
-    wedding.guests = wedding.guests.filter((g) => g.id !== guestId);
-    this.saveWeddings(weddings);
+    const guests = wedding.guests.filter((g) => g.id !== guestId);
+    await updateDoc(doc(db, 'weddings', weddingId), { guests });
   },
 
-  findGuests(weddingId, query) {
-    const wedding = this.getWedding(weddingId);
+  async findGuests(weddingId, query) {
+    const wedding = await this.getWedding(weddingId);
     if (!wedding) return [];
     const q = normalize(query);
     if (!q) return [];
