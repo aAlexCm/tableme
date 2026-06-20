@@ -486,12 +486,14 @@ form.inline-form select {
   align-items: center;
   flex-wrap: wrap;
   gap: 10px;
-  padding: 12px 14px;
-  margin-bottom: 8px;
-  border-radius: var(--radius-sm);
-  background: var(--sage-light);
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  border-radius: var(--radius);
+  background: var(--paper);
+  border: 1px solid rgba(176, 141, 79, 0.18);
+  box-shadow: 0 6px 16px rgba(138, 109, 60, 0.06);
   cursor: grab;
-  transition: background 0.15s ease, opacity 0.15s ease;
+  transition: background 0.15s ease, transform 0.18s ease, box-shadow 0.18s ease;
 }
 
 .guest-row:last-child {
@@ -499,11 +501,16 @@ form.inline-form select {
 }
 
 .guest-row:hover {
-  background: #dde5d3;
+  background: var(--sage-light);
+  box-shadow: 0 10px 22px rgba(138, 109, 60, 0.1);
 }
 
 .guest-row.dragging {
-  opacity: 0.4;
+  transform: scale(1.04) rotate(-1deg);
+  box-shadow: 0 18px 32px rgba(138, 109, 60, 0.28);
+  background: var(--sage-light);
+  cursor: grabbing;
+  z-index: 5;
 }
 
 .drag-handle {
@@ -755,7 +762,7 @@ select.mini-lang-select {
   }
 
   .row-arrows {
-    order: 3;
+    display: none;
   }
 
   .guest-table-edit {
