@@ -139,16 +139,69 @@ export function applyTranslations(lang) {
 }
 
 export function buildLangSwitcher(currentLang, onChange) {
-  const select = document.createElement('select');
-  select.className = 'lang-switcher';
-  select.setAttribute('aria-label', 'Langue / Language / Limbă');
-  LANGS.forEach((code) => {
-    const option = document.createElement('option');
-    option.value = code;
-    option.textContent = LANG_LABELS[code];
-    if (code === currentLang) option.selected = true;
-    select.appendChild(option);
+  let selected = currentLang;
+
+  const wrapper = document.createElement('div');
+  wrapper.className = 'lang-switcher';
+
+  const trigger = document.createElement('button');
+  trigger.type = 'button';
+  trigger.className = 'lang-switcher-trigger';
+  trigger.setAttribute('aria-haspopup', 'listbox');
+  trigger.setAttribute('aria-expanded', 'false');
+  trigger.setAttribute('aria-label', 'Langue / Language / Limbă');
+  trigger.innerHTML = `<span class="lang-switcher-current">${LANG_LABELS[selected]}</span><span class="lang-switcher-chevron">&#9662;</span>`;
+
+  const menu = document.createElement('ul');
+  menu.className = 'lang-switcher-menu';
+  menu.setAttribute('role', 'listbox');
+  menu.hidden = true;
+
+  function handleOutsideClick(e) {
+    if (!wrapper.contains(e.target)) closeMenu();
+  }
+
+  function openMenu() {
+    menu.hidden = false;
+    trigger.setAttribute('aria-expanded', 'true');
+    document.addEventListener('click', handleOutsideClick);
+  }
+
+  function closeMenu() {
+    menu.hidden = true;
+    trigger.setAttribute('aria-expanded', 'false');
+    document.removeEventListener('click', handleOutsideClick);
+  }
+
+  function renderOptions() {
+    menu.innerHTML = '';
+    LANGS.forEach((code) => {
+      const li = document.createElement('li');
+      li.className = 'lang-switcher-option';
+      li.setAttribute('role', 'option');
+      li.dataset.lang = code;
+      if (code === selected) li.setAttribute('aria-selected', 'true');
+      li.innerHTML = `<span class="check">${code === selected ? '&#10003;' : ''}</span><span>${LANG_LABELS[code]}</span>`;
+      li.addEventListener('click', () => {
+        if (code !== selected) {
+          selected = code;
+          trigger.querySelector('.lang-switcher-current').textContent = LANG_LABELS[code];
+          renderOptions();
+          onChange(code);
+        }
+        closeMenu();
+      });
+      menu.appendChild(li);
+    });
+  }
+
+  trigger.addEventListener('click', () => {
+    if (menu.hidden) openMenu();
+    else closeMenu();
   });
-  select.addEventListener('change', () => onChange(select.value));
-  return select;
+
+  renderOptions();
+  wrapper.appendChild(trigger);
+  wrapper.appendChild(menu);
+  return wrapper;
 }
