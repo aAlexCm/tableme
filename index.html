@@ -11,16 +11,18 @@
 </head>
 <body>
   <div class="page">
+    <div id="lang-switcher-mount" class="lang-switcher-mount"></div>
+
     <header class="hero invite-hero">
-      <h1 id="wedding-title" class="script-title">Trouver ma table</h1>
-      <p id="wedding-subtitle" class="tracked-subtitle">Tapez votre nom pour découvrir votre table</p>
+      <h1 id="wedding-title" class="script-title" data-i18n="guestHeroTitle">Trouver ma table</h1>
+      <p id="wedding-subtitle" class="tracked-subtitle" data-i18n="guestSubtitle">Tapez votre nom pour découvrir votre table</p>
     </header>
 
     <div id="no-wedding" class="card" hidden>
-      <h2>Choisissez un mariage</h2>
-      <p class="muted">Aucun mariage n'est précisé dans le lien. Sélectionnez-en un ci-dessous.</p>
+      <h2 data-i18n="noWeddingTitle">Choisissez un mariage</h2>
+      <p class="muted" data-i18n="noWeddingDesc">Aucun mariage n'est précisé dans le lien. Sélectionnez-en un ci-dessous.</p>
       <ul class="wedding-list" id="wedding-picker"></ul>
-      <p class="empty-state" id="no-wedding-empty" hidden>Aucun mariage n'a encore été créé.</p>
+      <p class="empty-state" id="no-wedding-empty" data-i18n="noWeddingEmpty" hidden>Aucun mariage n'a encore été créé.</p>
     </div>
 
     <div id="search-section" class="card" hidden>
@@ -28,6 +30,7 @@
         type="text"
         id="guest-input"
         placeholder="Votre nom et prénom..."
+        data-i18n-placeholder="searchPlaceholder"
         autocomplete="off"
       />
 

@@ -1,7 +1,9 @@
 import { Storage } from './storage.js';
+import { LANGS, LANG_LABELS, applyTranslations, buildLangSwitcher, t } from './i18n.js';
 
 const ADMIN_PASSWORD_HASH = 'fd2eb3f297cddf665a7518d12b3e5781ef56522f16878241949efbfffcfaf439';
 const AUTH_SESSION_KEY = 'tableme_admin_auth';
+const ADMIN_LANG_KEY = 'tableme_admin_lang';
 
 async function hashPassword(text) {
   const data = new TextEncoder().encode(text);
@@ -13,6 +15,9 @@ async function hashPassword(text) {
 
 (function () {
   let selectedWeddingId = null;
+  let currentLang = localStorage.getItem(ADMIN_LANG_KEY) || 'fr';
+
+  const langMount = document.getElementById('lang-switcher-mount');
 
   const authGate = document.getElementById('auth-gate');
   const authForm = document.getElementById('auth-form');
@@ -23,6 +28,7 @@ async function hashPassword(text) {
   const weddingForm = document.getElementById('wedding-form');
   const weddingNameInput = document.getElementById('wedding-name');
   const weddingDateInput = document.getElementById('wedding-date');
+  const weddingLangSelect = document.getElementById('wedding-lang');
   const weddingListEl = document.getElementById('wedding-list');
   const weddingEmptyEl = document.getElementById('wedding-empty');
 
@@ -46,6 +52,25 @@ async function hashPassword(text) {
     })[c]);
   }
 
+  function populateWeddingLangSelect() {
+    weddingLangSelect.innerHTML = '';
+    LANGS.forEach((code) => {
+      const option = document.createElement('option');
+      option.value = code;
+      option.textContent = LANG_LABELS[code];
+      if (code === 'fr') option.selected = true;
+      weddingLangSelect.appendChild(option);
+    });
+  }
+
+  function setLang(lang) {
+    currentLang = lang;
+    localStorage.setItem(ADMIN_LANG_KEY, lang);
+    applyTranslations(lang);
+    renderWeddings();
+    if (selectedWeddingId) renderGuests();
+  }
+
   async function renderWeddings() {
     const weddings = await Storage.getWeddings();
     weddingListEl.innerHTML = '';
@@ -54,15 +79,19 @@ async function hashPassword(text) {
     weddings.forEach((w) => {
       const li = document.createElement('li');
       li.className = 'wedding-item';
-      const dateLabel = w.date ? new Date(w.date).toLocaleDateString('fr-FR') : 'Date non définie';
+      const dateLabel = w.date ? new Date(w.date).toLocaleDateString('fr-FR') : t(currentLang, 'dateUnset');
+      const langOptions = LANGS.map(
+        (code) => `<option value="${code}" ${(w.lang || 'fr') === code ? 'selected' : ''}>${LANG_LABELS[code]}</option>`
+      ).join('');
       li.innerHTML = `
         <div class="info">
           <strong>${escapeHtml(w.name)}</strong>
-          <span class="muted">${escapeHtml(dateLabel)} &middot; ${w.guests.length} invité(s)</span>
+          <span class="muted">${escapeHtml(dateLabel)} &middot; ${w.guests.length} ${escapeHtml(t(currentLang, 'guestCountSuffix'))}</span>
         </div>
         <div class="actions">
-          <button type="button" class="secondary" data-action="manage" data-id="${w.id}">Gérer</button>
-          <button type="button" class="danger" data-action="delete" data-id="${w.id}">Supprimer</button>
+          <select class="mini-lang-select" data-id="${w.id}">${langOptions}</select>
+          <button type="button" class="secondary" data-action="manage" data-id="${w.id}">${escapeHtml(t(currentLang, 'manageBtn'))}</button>
+          <button type="button" class="danger" data-action="delete" data-id="${w.id}">${escapeHtml(t(currentLang, 'deleteBtn'))}</button>
         </div>
       `;
       weddingListEl.appendChild(li);
@@ -82,7 +111,7 @@ async function hashPassword(text) {
     }
 
     guestsCard.hidden = false;
-    guestsTitle.textContent = `Invités — ${wedding.name}`;
+    guestsTitle.textContent = `${t(currentLang, 'guestsTitlePrefix')}${wedding.name}`;
     guestLinkInput.value = `${window.location.origin}${window.location.pathname.replace('admin.html', '')}index.html?id=${wedding.id}`;
 
     guestListEl.innerHTML = '';
@@ -94,10 +123,10 @@ async function hashPassword(text) {
       li.innerHTML = `
         <div class="info">
           <strong>${escapeHtml(g.name)}</strong>
-          <span class="muted">Table ${escapeHtml(g.table)}</span>
+          <span class="muted">${escapeHtml(t(currentLang, 'tableLabel'))} ${escapeHtml(g.table)}</span>
         </div>
         <div class="actions">
-          <button type="button" class="danger" data-action="delete-guest" data-id="${g.id}">Supprimer</button>
+          <button type="button" class="danger" data-action="delete-guest" data-id="${g.id}">${escapeHtml(t(currentLang, 'deleteBtn'))}</button>
         </div>
       `;
       guestListEl.appendChild(li);
@@ -108,8 +137,9 @@ async function hashPassword(text) {
     e.preventDefault();
     const name = weddingNameInput.value.trim();
     if (!name) return;
-    await Storage.addWedding(name, weddingDateInput.value);
+    await Storage.addWedding(name, weddingDateInput.value, weddingLangSelect.value);
     weddingForm.reset();
+    populateWeddingLangSelect();
     await renderWeddings();
   });
 
@@ -123,11 +153,17 @@ async function hashPassword(text) {
       await renderGuests();
     } else if (action === 'delete') {
       const wedding = await Storage.getWedding(id);
-      if (wedding && confirm(`Supprimer le mariage "${wedding.name}" et tous ses invités ?`)) {
+      if (wedding && confirm(t(currentLang, 'confirmDeleteWedding', wedding.name))) {
         await Storage.deleteWedding(id);
         await renderWeddings();
       }
     }
+  });
+
+  weddingListEl.addEventListener('change', async (e) => {
+    const select = e.target.closest('.mini-lang-select');
+    if (!select) return;
+    await Storage.updateWeddingLang(select.dataset.id, select.value);
   });
 
   guestForm.addEventListener('submit', async (e) => {
@@ -156,8 +192,8 @@ async function hashPassword(text) {
   copyLinkBtn.addEventListener('click', () => {
     guestLinkInput.select();
     navigator.clipboard?.writeText(guestLinkInput.value).catch(() => {});
-    copyLinkBtn.textContent = 'Copié !';
-    setTimeout(() => (copyLinkBtn.textContent = 'Copier'), 1500);
+    copyLinkBtn.textContent = t(currentLang, 'copiedBtn');
+    setTimeout(() => (copyLinkBtn.textContent = t(currentLang, 'copyBtn')), 1500);
   });
 
   function unlockAdmin() {
@@ -178,6 +214,10 @@ async function hashPassword(text) {
       authErrorEl.hidden = false;
     }
   });
+
+  langMount.appendChild(buildLangSwitcher(currentLang, setLang));
+  applyTranslations(currentLang);
+  populateWeddingLangSelect();
 
   if (sessionStorage.getItem(AUTH_SESSION_KEY) === 'true') {
     unlockAdmin();

@@ -37,13 +37,17 @@ export const Storage = {
     return snap.exists() ? { id: snap.id, ...snap.data() } : null;
   },
 
-  async addWedding(name, date) {
-    const ref = await addDoc(weddingsCol, { name, date, guests: [] });
-    return { id: ref.id, name, date, guests: [] };
+  async addWedding(name, date, lang = 'fr') {
+    const ref = await addDoc(weddingsCol, { name, date, lang, guests: [] });
+    return { id: ref.id, name, date, lang, guests: [] };
   },
 
   async deleteWedding(weddingId) {
     await deleteDoc(doc(db, 'weddings', weddingId));
+  },
+
+  async updateWeddingLang(weddingId, lang) {
+    await updateDoc(doc(db, 'weddings', weddingId), { lang });
   },
 
   async addGuest(weddingId, name, table) {

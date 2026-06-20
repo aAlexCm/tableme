@@ -1,4 +1,7 @@
 import { Storage, normalize } from './storage.js';
+import { applyTranslations, buildLangSwitcher, t } from './i18n.js';
+
+const LANG_KEY = 'tableme_lang';
 
 (async function () {
   const params = new URLSearchParams(window.location.search);
@@ -13,6 +16,19 @@ import { Storage, normalize } from './storage.js';
   const inputEl = document.getElementById('guest-input');
   const resultEl = document.getElementById('result');
   const matchListEl = document.getElementById('match-list');
+  const langMount = document.getElementById('lang-switcher-mount');
+
+  let currentLang = localStorage.getItem(LANG_KEY) || 'fr';
+  let currentWedding = null;
+
+  function setLang(lang) {
+    currentLang = lang;
+    localStorage.setItem(LANG_KEY, lang);
+    applyTranslations(lang);
+    if (currentWedding) {
+      handleSearch(inputEl.value, currentWedding.guests);
+    }
+  }
 
   async function showWeddingPicker() {
     const weddings = await Storage.getWeddings();
@@ -49,7 +65,7 @@ import { Storage, normalize } from './storage.js';
         <span class="guest-name">${escapeHtml(guest.name)}</span>
         <span class="table-sep"></span>
         <span class="table-tag">
-          <span class="table-label">Table</span>
+          <span class="table-label">${escapeHtml(t(currentLang, 'tableLabel'))}</span>
           <span class="table-value">${escapeHtml(guest.table)}</span>
         </span>
       </div>
@@ -61,7 +77,7 @@ import { Storage, normalize } from './storage.js';
     guests.forEach((g) => {
       const li = document.createElement('li');
       li.className = 'guest-match';
-      li.innerHTML = `<span>${escapeHtml(g.name)}</span><span class="match-table">Table ${escapeHtml(g.table)}</span>`;
+      li.innerHTML = `<span>${escapeHtml(g.name)}</span><span class="match-table">${escapeHtml(t(currentLang, 'tableLabel'))} ${escapeHtml(g.table)}</span>`;
       li.addEventListener('click', () => showSingleGuest(g));
       matchListEl.appendChild(li);
     });
@@ -70,7 +86,7 @@ import { Storage, normalize } from './storage.js';
   function showNoMatch() {
     clearResult();
     resultEl.hidden = false;
-    resultEl.innerHTML = `<p class="error-msg">Aucun invité trouvé avec ce nom. Vérifiez l'orthographe.</p>`;
+    resultEl.innerHTML = `<p class="error-msg">${escapeHtml(t(currentLang, 'noMatch'))}</p>`;
   }
 
   function renderWeddingTitle(name) {
@@ -113,18 +129,28 @@ import { Storage, normalize } from './storage.js';
   }
 
   if (!weddingId) {
+    langMount.appendChild(buildLangSwitcher(currentLang, setLang));
+    applyTranslations(currentLang);
     await showWeddingPicker();
     return;
   }
 
   const wedding = await Storage.getWedding(weddingId);
   if (!wedding) {
+    langMount.appendChild(buildLangSwitcher(currentLang, setLang));
+    applyTranslations(currentLang);
     await showWeddingPicker();
     return;
   }
 
+  currentWedding = wedding;
+  if (!localStorage.getItem(LANG_KEY)) {
+    currentLang = wedding.lang || 'fr';
+  }
+  langMount.appendChild(buildLangSwitcher(currentLang, setLang));
+  applyTranslations(currentLang);
+
   renderWeddingTitle(wedding.name);
-  subtitleEl.textContent = 'Tapez votre nom pour découvrir votre table';
   searchSectionEl.hidden = false;
 
   inputEl.addEventListener('input', () => {
