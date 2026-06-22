@@ -6,6 +6,70 @@ import { getLandmarkType } from './landmarks.js';
 const LANG_KEY = 'tableme_lang';
 const WAYFINDING_VIEWBOX_W = 100;
 const WAYFINDING_VIEWBOX_H = 60;
+const WAYFINDING_OBSTACLE_HALF_W = 8;
+const WAYFINDING_OBSTACLE_HALF_H = 6;
+const WAYFINDING_ROUTE_MARGIN = 5;
+
+function segmentIntersectsRect(p1, p2, rect) {
+  if (p1.y === p2.y) {
+    const y = p1.y;
+    if (y < rect.y0 || y > rect.y1) return false;
+    const xMin = Math.min(p1.x, p2.x);
+    const xMax = Math.max(p1.x, p2.x);
+    return xMax >= rect.x0 && xMin <= rect.x1;
+  }
+  if (p1.x === p2.x) {
+    const x = p1.x;
+    if (x < rect.x0 || x > rect.x1) return false;
+    const yMin = Math.min(p1.y, p2.y);
+    const yMax = Math.max(p1.y, p2.y);
+    return yMax >= rect.y0 && yMin <= rect.y1;
+  }
+  return false;
+}
+
+function scoreRoute(points, obstacles) {
+  let score = 0;
+  for (let i = 0; i < points.length - 1; i += 1) {
+    obstacles.forEach((rect) => {
+      if (segmentIntersectsRect(points[i], points[i + 1], rect)) score += 1;
+    });
+  }
+  return score;
+}
+
+function buildOrthogonalRoute(a, b, obstacles) {
+  const clampX = (x) => Math.max(2, Math.min(WAYFINDING_VIEWBOX_W - 2, x));
+  const clampY = (y) => Math.max(2, Math.min(WAYFINDING_VIEWBOX_H - 2, y));
+
+  const candidates = [
+    [a, { x: b.x, y: a.y }, b],
+    [a, { x: a.x, y: b.y }, b],
+  ];
+
+  const obstacleXs = obstacles.flatMap((r) => [r.x0, r.x1]);
+  const obstacleYs = obstacles.flatMap((r) => [r.y0, r.y1]);
+  const topY = clampY(Math.min(a.y, b.y, ...obstacleYs) - WAYFINDING_ROUTE_MARGIN);
+  const bottomY = clampY(Math.max(a.y, b.y, ...obstacleYs) + WAYFINDING_ROUTE_MARGIN);
+  const leftX = clampX(Math.min(a.x, b.x, ...obstacleXs) - WAYFINDING_ROUTE_MARGIN);
+  const rightX = clampX(Math.max(a.x, b.x, ...obstacleXs) + WAYFINDING_ROUTE_MARGIN);
+
+  candidates.push([a, { x: a.x, y: topY }, { x: b.x, y: topY }, b]);
+  candidates.push([a, { x: a.x, y: bottomY }, { x: b.x, y: bottomY }, b]);
+  candidates.push([a, { x: leftX, y: a.y }, { x: leftX, y: b.y }, b]);
+  candidates.push([a, { x: rightX, y: a.y }, { x: rightX, y: b.y }, b]);
+
+  let best = candidates[0];
+  let bestScore = Infinity;
+  candidates.forEach((pts) => {
+    const score = scoreRoute(pts, obstacles);
+    if (score < bestScore) {
+      bestScore = score;
+      best = pts;
+    }
+  });
+  return best;
+}
 
 (async function () {
   const params = new URLSearchParams(window.location.search);
@@ -258,6 +322,22 @@ const WAYFINDING_VIEWBOX_H = 60;
       const fromPoint = points.find((p) => p.id === currentFrom);
       const toPoint = points.find((p) => p.id === currentTo);
       if (fromPoint && toPoint && fromPoint.id !== toPoint.id) {
+        const a = { x: fromPoint.x, y: fromPoint.y * (WAYFINDING_VIEWBOX_H / 100) };
+        const b = { x: toPoint.x, y: toPoint.y * (WAYFINDING_VIEWBOX_H / 100) };
+        const obstacles = points
+          .filter((p) => p.id !== currentFrom && p.id !== currentTo)
+          .map((p) => {
+            const cx = p.x;
+            const cy = p.y * (WAYFINDING_VIEWBOX_H / 100);
+            return {
+              x0: cx - WAYFINDING_OBSTACLE_HALF_W,
+              x1: cx + WAYFINDING_OBSTACLE_HALF_W,
+              y0: cy - WAYFINDING_OBSTACLE_HALF_H,
+              y1: cy + WAYFINDING_OBSTACLE_HALF_H,
+            };
+          });
+        const routePoints = buildOrthogonalRoute(a, b, obstacles);
+
         const svgNs = 'http://www.w3.org/2000/svg';
         const svg = document.createElementNS(svgNs, 'svg');
         svg.setAttribute('class', 'wayfinding-arrow-svg');
@@ -273,8 +353,8 @@ const WAYFINDING_VIEWBOX_H = 60;
         markerEl.setAttribute('viewBox', '0 0 10 10');
         markerEl.setAttribute('refX', '7');
         markerEl.setAttribute('refY', '5');
-        markerEl.setAttribute('markerWidth', '4.5');
-        markerEl.setAttribute('markerHeight', '4.5');
+        markerEl.setAttribute('markerWidth', '5');
+        markerEl.setAttribute('markerHeight', '5');
         markerEl.setAttribute('orient', 'auto-start-reverse');
         const arrowPath = document.createElementNS(svgNs, 'path');
         arrowPath.setAttribute('d', 'M0,0 L10,5 L0,10 z');
@@ -283,14 +363,11 @@ const WAYFINDING_VIEWBOX_H = 60;
         defs.appendChild(markerEl);
         svg.appendChild(defs);
 
-        const line = document.createElementNS(svgNs, 'line');
-        line.setAttribute('x1', fromPoint.x);
-        line.setAttribute('y1', fromPoint.y * (WAYFINDING_VIEWBOX_H / 100));
-        line.setAttribute('x2', toPoint.x);
-        line.setAttribute('y2', toPoint.y * (WAYFINDING_VIEWBOX_H / 100));
-        line.setAttribute('class', 'wayfinding-arrow-line');
-        line.setAttribute('marker-end', `url(#${arrowId})`);
-        svg.appendChild(line);
+        const polyline = document.createElementNS(svgNs, 'polyline');
+        polyline.setAttribute('points', routePoints.map((p) => `${p.x},${p.y}`).join(' '));
+        polyline.setAttribute('class', 'wayfinding-arrow-line');
+        polyline.setAttribute('marker-end', `url(#${arrowId})`);
+        svg.appendChild(polyline);
 
         mapWrap.appendChild(svg);
       }

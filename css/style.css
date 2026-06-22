@@ -1638,7 +1638,7 @@ select.mini-lang-select {
 .wayfinding-map {
   position: relative;
   width: 100%;
-  max-width: 320px;
+  max-width: 380px;
   aspect-ratio: 100 / 60;
   margin: 0 auto;
   background: var(--sage-light);
@@ -1652,23 +1652,23 @@ select.mini-lang-select {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1px;
+  gap: 2px;
   transform: translate(-50%, -50%);
   z-index: 1;
 }
 
 .wayfinding-marker-shape {
-  width: 10px;
-  height: 10px;
+  width: 16px;
+  height: 16px;
   border-radius: 50%;
   background: var(--paper);
-  border: 1.4px solid var(--sage-deep);
+  border: 2px solid var(--sage-deep);
 }
 
 .wayfinding-marker-table.rectangle .wayfinding-marker-shape {
-  width: 14px;
-  height: 8px;
-  border-radius: 2px;
+  width: 22px;
+  height: 13px;
+  border-radius: 3px;
 }
 
 .wayfinding-marker-icon {
@@ -1677,17 +1677,18 @@ select.mini-lang-select {
 }
 
 .wayfinding-marker-icon svg {
-  width: 12px;
-  height: 12px;
+  width: 17px;
+  height: 17px;
 }
 
 .wayfinding-marker-label {
   font-family: 'Lato', sans-serif;
-  font-size: 0.5rem;
+  font-size: 0.64rem;
   font-weight: 700;
   color: var(--charcoal);
   white-space: nowrap;
   line-height: 1;
+  text-shadow: 0 0 3px var(--sage-light), 0 0 3px var(--sage-light), 0 0 3px var(--sage-light);
 }
 
 .wayfinding-marker.active-from .wayfinding-marker-shape,
@@ -1719,9 +1720,11 @@ select.mini-lang-select {
 }
 
 .wayfinding-arrow-line {
+  fill: none;
   stroke: #8a6d3c;
-  stroke-width: 1.6;
+  stroke-width: 1.8;
   stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .unassigned-list {
