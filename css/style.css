@@ -321,7 +321,8 @@ button.secondary:hover, a.secondary:hover {
 .result {
   margin-top: 24px;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
 }
 
 .result .table-number {
@@ -1275,6 +1276,10 @@ select.mini-lang-select {
   border-color: var(--gold-deep);
 }
 
+.chair.chair-you {
+  box-shadow: 0 0 0 3px rgba(176, 141, 79, 0.45);
+}
+
 .chair.chair-fixed {
   transform: none;
 }
@@ -1350,6 +1355,101 @@ select.mini-lang-select {
 .table-shape-count {
   font-size: 0.7rem;
   color: var(--sage-deep);
+}
+
+.table-preview {
+  width: 100%;
+  margin-top: 26px;
+  padding-top: 22px;
+  border-top: 1px solid rgba(176, 141, 79, 0.18);
+}
+
+.table-preview-title {
+  margin: 0 0 14px;
+  text-align: center;
+  font-family: 'Playfair Display', serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--charcoal);
+}
+
+.table-preview-canvas[hidden] {
+  display: none;
+}
+
+.table-preview-switch {
+  display: flex;
+  width: fit-content;
+  margin: 0 auto 18px;
+}
+
+.table-preview-canvas {
+  position: relative;
+  height: 180px;
+  margin: 0 auto 18px;
+}
+
+.table-preview-canvas .table-shape {
+  cursor: default;
+  touch-action: auto;
+}
+
+.table-preview-canvas .table-shape:hover {
+  border-color: var(--gold);
+  box-shadow: 0 8px 18px rgba(138, 109, 60, 0.18);
+}
+
+.table-preview-canvas .chair.occupied {
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.chair-tooltip {
+  position: absolute;
+  transform: translate(-50%, calc(-100% - 8px));
+  white-space: nowrap;
+  background: var(--charcoal);
+  color: var(--paper);
+  font-family: 'Lato', sans-serif;
+  font-size: 0.74rem;
+  font-weight: 600;
+  padding: 5px 10px;
+  border-radius: var(--radius-sm);
+  pointer-events: none;
+  box-shadow: 0 6px 14px rgba(33, 31, 26, 0.25);
+  z-index: 10;
+}
+
+.chair-tooltip[hidden] {
+  display: none;
+}
+
+.table-preview-names {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
+.table-preview-names[hidden] {
+  display: none;
+}
+
+.table-preview-name {
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  background: var(--paper);
+  border: 1px solid rgba(176, 141, 79, 0.25);
+  font-family: 'Playfair Display', serif;
+  font-size: 0.88rem;
+  color: var(--ink);
+}
+
+.table-preview-name.you {
+  background: var(--gold-light);
+  border-color: var(--gold);
+  color: var(--charcoal);
+  font-weight: 700;
 }
 
 .unassigned-list {

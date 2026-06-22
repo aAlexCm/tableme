@@ -1,5 +1,6 @@
 import { Storage, normalize } from './storage.js';
 import { applyTranslations, buildLangSwitcher, t } from './i18n.js';
+import { DEFAULT_SEATS, getRectDimensions, buildChairs } from './table-shape.js';
 
 const LANG_KEY = 'tableme_lang';
 
@@ -19,6 +20,7 @@ const LANG_KEY = 'tableme_lang';
 
   let currentLang = localStorage.getItem(LANG_KEY) || 'fr';
   let currentWedding = null;
+  let outsideClickHandler = null;
 
   applyTranslations(currentLang);
 
@@ -44,6 +46,111 @@ const LANG_KEY = 'tableme_lang';
     resultEl.hidden = true;
     resultEl.innerHTML = '';
     matchListEl.innerHTML = '';
+    if (outsideClickHandler) {
+      document.removeEventListener('click', outsideClickHandler);
+      outsideClickHandler = null;
+    }
+  }
+
+  function buildTablePreview(guest, tableGuests) {
+    const table = (currentWedding.tables || []).find((tb) => tb.label === guest.table);
+    const shape = table?.shape === 'rectangle' ? 'rectangle' : 'round';
+    const seatCount = table?.seats != null ? table.seats : Math.max(DEFAULT_SEATS, tableGuests.length);
+
+    const wrap = document.createElement('div');
+    wrap.className = 'table-preview';
+
+    const heading = document.createElement('p');
+    heading.className = 'table-preview-title';
+    heading.textContent = t(currentLang, 'tablePreviewTitle');
+    wrap.appendChild(heading);
+
+    const switchEl = document.createElement('div');
+    switchEl.className = 'mode-switch table-preview-switch';
+    switchEl.innerHTML = `
+      <button type="button" class="mode-btn active" data-view="table">${escapeHtml(t(currentLang, 'tablePreviewViewTable'))}</button>
+      <button type="button" class="mode-btn" data-view="list">${escapeHtml(t(currentLang, 'tablePreviewViewList'))}</button>
+    `;
+    wrap.appendChild(switchEl);
+
+    const canvas = document.createElement('div');
+    canvas.className = 'table-preview-canvas';
+
+    const unitEl = document.createElement('div');
+    unitEl.className = 'table-unit';
+    unitEl.style.left = '50%';
+    unitEl.style.top = '50%';
+
+    const shapeEl = document.createElement('div');
+    shapeEl.className = `table-shape ${shape}`;
+    if (shape === 'rectangle') {
+      const { halfWidth } = getRectDimensions(seatCount);
+      shapeEl.style.width = `${halfWidth * 2}px`;
+    }
+    shapeEl.innerHTML = `<span class="table-shape-label">${escapeHtml(t(currentLang, 'tableLabel'))} ${escapeHtml(guest.table)}</span>`;
+    unitEl.appendChild(shapeEl);
+
+    buildChairs(unitEl, shape, seatCount, tableGuests, guest.id);
+    canvas.appendChild(unitEl);
+    wrap.appendChild(canvas);
+
+    const tooltipEl = document.createElement('div');
+    tooltipEl.className = 'chair-tooltip';
+    tooltipEl.hidden = true;
+    canvas.appendChild(tooltipEl);
+
+    function showChairTooltip(chairEl) {
+      const name = chairEl.dataset.name;
+      if (!name) return;
+      const canvasRect = canvas.getBoundingClientRect();
+      const chairRect = chairEl.getBoundingClientRect();
+      tooltipEl.textContent = name;
+      tooltipEl.style.left = `${chairRect.left + chairRect.width / 2 - canvasRect.left}px`;
+      tooltipEl.style.top = `${chairRect.top - canvasRect.top}px`;
+      tooltipEl.hidden = false;
+    }
+
+    function hideChairTooltip() {
+      tooltipEl.hidden = true;
+    }
+
+    unitEl.querySelectorAll('.chair.occupied').forEach((chairEl) => {
+      chairEl.addEventListener('mouseenter', () => showChairTooltip(chairEl));
+      chairEl.addEventListener('mouseleave', hideChairTooltip);
+      chairEl.addEventListener('click', (e) => {
+        e.stopPropagation();
+        showChairTooltip(chairEl);
+      });
+    });
+
+    outsideClickHandler = (e) => {
+      if (!canvas.contains(e.target)) hideChairTooltip();
+    };
+    document.addEventListener('click', outsideClickHandler);
+
+    const namesWrap = document.createElement('div');
+    namesWrap.className = 'table-preview-names';
+    namesWrap.hidden = true;
+    tableGuests.forEach((g) => {
+      const isYou = g.id === guest.id;
+      const chip = document.createElement('span');
+      chip.className = `table-preview-name${isYou ? ' you' : ''}`;
+      chip.textContent = isYou ? `${g.name} (${t(currentLang, 'youTag')})` : g.name;
+      namesWrap.appendChild(chip);
+    });
+    wrap.appendChild(namesWrap);
+
+    switchEl.addEventListener('click', (e) => {
+      const btn = e.target.closest('.mode-btn');
+      if (!btn) return;
+      switchEl.querySelectorAll('.mode-btn').forEach((b) => b.classList.toggle('active', b === btn));
+      const showTable = btn.dataset.view === 'table';
+      canvas.hidden = !showTable;
+      namesWrap.hidden = showTable;
+      if (!showTable) hideChairTooltip();
+    });
+
+    return wrap;
   }
 
   function showSingleGuest(guest) {
@@ -59,6 +166,13 @@ const LANG_KEY = 'tableme_lang';
         </span>
       </div>
     `;
+
+    if (guest.table) {
+      const tableGuests = currentWedding.guests.filter((g) => g.table === guest.table);
+      if (tableGuests.length > 0) {
+        resultEl.appendChild(buildTablePreview(guest, tableGuests));
+      }
+    }
   }
 
   function showMatchList(guests) {
