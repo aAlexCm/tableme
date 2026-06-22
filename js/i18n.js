@@ -10,7 +10,7 @@ const dict = {
   fr: {
     guestHeroTitle: 'Trouver ma table',
     guestSubtitle: 'Tapez votre nom pour découvrir votre table',
-    searchPlaceholder: 'Votre nom et prénom...',
+    searchPlaceholder: 'Votre nom et prénom, ou n° de table...',
     tableLabel: 'Table',
     noMatch: "Nous ne trouvons pas ce nom. Essayez une autre orthographe, ou demandez aux mariés — ils se feront un plaisir de vous aider !",
     tablePreviewTitle: 'Invités à votre table',
@@ -103,7 +103,7 @@ const dict = {
   en: {
     guestHeroTitle: 'Find my table',
     guestSubtitle: 'Type your name to find your table',
-    searchPlaceholder: 'Your first and last name...',
+    searchPlaceholder: 'Your name, or table number...',
     tableLabel: 'Table',
     noMatch: "We can't find this name. Try a different spelling, or ask the couple — they'll be happy to help!",
     tablePreviewTitle: 'Guests at your table',
@@ -194,7 +194,7 @@ const dict = {
   ro: {
     guestHeroTitle: 'Găsește-ți masa',
     guestSubtitle: 'Scrie-ți numele<br />pentru a-ți găsi masa',
-    searchPlaceholder: 'Numele și prenumele tău...',
+    searchPlaceholder: 'Numele tău, sau numărul mesei...',
     tableLabel: 'Masa',
     noMatch: 'Nu găsim acest nume. Încearcă o altă ortografie, sau întreabă mirii — te vor ajuta cu plăcere!',
     tablePreviewTitle: 'Invitați la masa ta',

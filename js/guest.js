@@ -188,6 +188,21 @@ const LANG_KEY = 'tableme_lang';
     });
   }
 
+  function showTableResult(table, tableGuests) {
+    clearResult();
+    resultEl.hidden = false;
+    resultEl.innerHTML = `
+      <div class="table-number">
+        <span class="table-tag">
+          <span class="table-label">${escapeHtml(t(currentLang, 'tableLabel'))}</span>
+          <span class="table-value">${escapeHtml(table.label)}</span>
+        </span>
+      </div>
+    `;
+    inputEl.blur();
+    resultEl.appendChild(buildTablePreview({ id: null, table: table.label }, tableGuests));
+  }
+
   function showNoMatch() {
     clearResult();
     resultEl.hidden = false;
@@ -226,13 +241,25 @@ const LANG_KEY = 'tableme_lang';
       const normalizedName = normalize(g.name);
       return queryWords.every((word) => normalizedName.includes(word));
     });
-    if (matches.length === 0) {
-      showNoMatch();
-    } else if (matches.length === 1) {
-      showSingleGuest(matches[0]);
-    } else {
-      showMatchList(matches);
+    if (matches.length > 0) {
+      if (matches.length === 1) {
+        showSingleGuest(matches[0]);
+      } else {
+        showMatchList(matches);
+      }
+      return;
     }
+
+    const table = (currentWedding.tables || []).find((tb) => normalize(tb.label) === q);
+    if (table) {
+      const tableGuests = guests.filter((g) => g.table === table.label);
+      if (tableGuests.length > 0) {
+        showTableResult(table, tableGuests);
+        return;
+      }
+    }
+
+    showNoMatch();
   }
 
   if (!weddingId) {
