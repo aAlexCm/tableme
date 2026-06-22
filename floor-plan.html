@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TableMe · Plan de salle</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Lato:wght@300;400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="page page-wide">
+    <div id="lang-switcher-mount" class="lang-switcher-mount"></div>
+
+    <div id="not-found" class="card" hidden>
+      <h2 data-i18n="weddingNotFoundTitle">Mariage introuvable</h2>
+      <p class="muted" data-i18n="weddingNotFoundDesc">Ce lien n'est pas valide ou ce mariage a été supprimé.</p>
+    </div>
+
+    <div id="floor-plan-content" hidden>
+      <nav class="admin-nav">
+        <strong id="floor-plan-wedding-name"></strong>
+        <div class="admin-nav-actions">
+          <a href="#" id="back-to-list-link" data-i18n="backToListLink">&larr; Liste des invités</a>
+        </div>
+      </nav>
+
+      <div class="card floor-plan-card">
+        <div class="card-header-row">
+          <h2 data-i18n="floorPlanTitle">Plan de salle</h2>
+          <button type="button" id="add-table-btn" data-i18n="addTableBtn">+ Ajouter une table</button>
+        </div>
+        <p class="muted small" data-i18n="floorPlanHint">Glissez les tables pour composer votre salle. Cliquez sur une table pour gérer ses invités.</p>
+        <div class="floor-canvas" id="floor-canvas"></div>
+      </div>
+
+      <div class="card">
+        <h2 data-i18n="unassignedGuestsTitle">Invités non assignés</h2>
+        <ul class="unassigned-list" id="unassigned-list"></ul>
+        <p class="empty-state" id="unassigned-empty" data-i18n="unassignedEmpty" hidden>Tous les invités sont placés.</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="table-modal" class="modal-overlay" hidden>
+    <div class="modal-panel modal-panel-wide">
+      <button type="button" class="modal-close" id="table-modal-close" aria-label="Close">&times;</button>
+
+      <div class="table-modal-header">
+        <input type="text" id="table-label-input" class="table-label-input" />
+        <button type="button" class="icon-btn icon-btn-danger" id="table-delete-btn"></button>
+      </div>
+
+      <div class="table-modal-options">
+        <label class="table-shape-toggle">
+          <input type="radio" name="table-shape" value="round" />
+          <span data-i18n="tableShapeRound">Ronde</span>
+        </label>
+        <label class="table-shape-toggle">
+          <input type="radio" name="table-shape" value="rectangle" />
+          <span data-i18n="tableShapeRectangle">Rectangulaire</span>
+        </label>
+        <div class="field table-seats-field">
+          <label for="table-seats-input" data-i18n="tableSeatsLabel">Places (optionnel)</label>
+          <input type="number" id="table-seats-input" min="0" />
+        </div>
+      </div>
+
+      <h3 class="table-modal-subtitle" data-i18n="tableGuestsTitle">Invités à cette table</h3>
+      <ul class="table-modal-guest-list" id="table-modal-guest-list"></ul>
+      <p class="empty-state small" id="table-modal-empty" data-i18n="tableGuestsEmpty" hidden>Aucun invité à cette table.</p>
+
+      <div class="table-modal-add">
+        <select id="table-add-existing-select"></select>
+        <button type="button" id="table-add-existing-btn" data-i18n="assignBtn">Assigner</button>
+      </div>
+      <div class="table-modal-add">
+        <input type="text" id="table-add-new-input" data-i18n-placeholder="guestNamePlaceholder" placeholder="Nom et prénom de l'invité" />
+        <button type="button" id="table-add-new-btn" data-i18n="addBtn">Ajouter</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="js/floor-plan.js"></script>
+</body>
+</html>

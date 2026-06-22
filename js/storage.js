@@ -10,7 +10,7 @@ import {
   deleteDoc,
 } from 'https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js';
 
-function generateId() {
+export function generateId() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 }
 
@@ -77,5 +77,13 @@ export const Storage = {
 
   async setGuests(weddingId, guests) {
     await updateDoc(doc(db, 'weddings', weddingId), { guests });
+  },
+
+  async setTables(weddingId, tables) {
+    await updateDoc(doc(db, 'weddings', weddingId), { tables });
+  },
+
+  async setBoard(weddingId, { guests, tables }) {
+    await updateDoc(doc(db, 'weddings', weddingId), { guests, tables });
   },
 };
