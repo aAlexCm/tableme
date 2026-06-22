@@ -209,9 +209,9 @@ header.hero p:not(.eyebrow) {
 
 input, select {
   font-family: 'Lato', sans-serif;
-  font-size: 0.95rem;
-  padding: 0 18px;
-  height: 50px;
+  font-size: 0.88rem;
+  padding: 0 14px;
+  height: 42px;
   border: 1px solid rgba(176, 141, 79, 0.3);
   border-radius: var(--radius-sm);
   background: var(--sage-light);
@@ -236,18 +236,18 @@ button, a.secondary {
   align-items: center;
   justify-content: center;
   font-family: 'Lato', sans-serif;
-  font-size: 0.95rem;
+  font-size: 0.88rem;
   letter-spacing: 0.2px;
   font-weight: 600;
-  padding: 0 28px;
-  height: 50px;
+  padding: 0 22px;
+  height: 42px;
   border: 1px solid transparent;
   border-radius: var(--radius-pill);
   background: linear-gradient(135deg, #c8a868, var(--gold-deep));
   color: #fff;
   cursor: pointer;
   white-space: nowrap;
-  box-shadow: 0 8px 18px rgba(138, 109, 60, 0.25);
+  box-shadow: 0 6px 14px rgba(138, 109, 60, 0.22);
   transition: filter 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
 }
 
@@ -420,6 +420,45 @@ form.inline-form input {
 form.inline-form select {
   width: auto;
   flex: 0 0 auto;
+}
+
+.field-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field label {
+  font-size: 0.68rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--sage-deep);
+}
+
+.field-grid > button {
+  margin-top: 4px;
+  width: 100%;
+}
+
+@media (min-width: 640px) {
+  .field-grid {
+    grid-template-columns: 2fr 1fr 1fr;
+    align-items: end;
+  }
+
+  .field-grid > button {
+    grid-column: 1 / -1;
+    margin-top: 0;
+    width: auto;
+    justify-self: start;
+  }
 }
 
 .wedding-list, .guest-list {

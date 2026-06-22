@@ -29,10 +29,19 @@
 
       <div class="card">
         <h2 data-i18n="newWeddingTitle">Nouveau mariage</h2>
-        <form id="wedding-form" class="inline-form">
-          <input type="text" id="wedding-name" placeholder="Nom du mariage (ex: Mariage de Léa & Tom)" data-i18n-placeholder="weddingNamePlaceholder" required />
-          <input type="date" id="wedding-date" />
-          <select id="wedding-lang"></select>
+        <form id="wedding-form" class="field-grid">
+          <div class="field">
+            <label for="wedding-name" data-i18n="weddingNameLabel">Nom du mariage</label>
+            <input type="text" id="wedding-name" placeholder="ex: Léa &amp; Tom" data-i18n-placeholder="weddingNamePlaceholder" required />
+          </div>
+          <div class="field">
+            <label for="wedding-date" data-i18n="weddingDateLabel">Date</label>
+            <input type="date" id="wedding-date" />
+          </div>
+          <div class="field">
+            <label for="wedding-lang" data-i18n="weddingLangLabel">Langue par défaut</label>
+            <select id="wedding-lang"></select>
+          </div>
           <button type="submit" data-i18n="createBtn">Créer</button>
         </form>
       </div>
