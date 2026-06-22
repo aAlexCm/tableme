@@ -449,12 +449,12 @@ form.inline-form select {
 
 @media (min-width: 640px) {
   .field-grid {
-    grid-template-columns: 2fr 1fr 1fr;
+    grid-template-columns: 2fr 1fr 1fr auto;
     align-items: end;
   }
 
   .field-grid > button {
-    grid-column: 1 / -1;
+    grid-column: auto;
     margin-top: 0;
     width: auto;
     justify-self: start;
