@@ -154,6 +154,9 @@ function reconcileTables(wedding) {
   const weddingNameEl = document.getElementById('floor-plan-wedding-name');
   const listTabLink = document.getElementById('view-tab-list');
 
+  const floorPlanCardEl = document.getElementById('floor-plan-card');
+  const fullscreenBtn = document.getElementById('fullscreen-btn');
+  const fullscreenCloseBtn = document.getElementById('fullscreen-close-btn');
   const addTableBtn = document.getElementById('add-table-btn');
   const floorCanvasViewportEl = document.getElementById('floor-canvas-viewport');
   const floorCanvasSizerEl = document.getElementById('floor-canvas-sizer');
@@ -161,6 +164,25 @@ function reconcileTables(wedding) {
   const zoomInBtn = document.getElementById('zoom-in-btn');
   const zoomOutBtn = document.getElementById('zoom-out-btn');
   const zoomResetBtn = document.getElementById('zoom-reset-btn');
+
+  const EXPAND_ICON = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M21 16v3a2 2 0 0 1-2 2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/></svg>';
+  fullscreenBtn.innerHTML = EXPAND_ICON;
+
+  function setFullscreen(active) {
+    floorPlanCardEl.classList.toggle('fullscreen-active', active);
+    fullscreenCloseBtn.hidden = !active;
+    document.body.style.overflow = active ? 'hidden' : '';
+  }
+
+  fullscreenBtn.addEventListener('click', () => setFullscreen(true));
+  fullscreenCloseBtn.addEventListener('click', () => setFullscreen(false));
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    if (!floorPlanCardEl.classList.contains('fullscreen-active')) return;
+    const modalEl = document.getElementById('table-modal');
+    if (modalEl && !modalEl.hidden) return;
+    setFullscreen(false);
+  });
 
   const unassignedListEl = document.getElementById('unassigned-list');
   const unassignedEmptyEl = document.getElementById('unassigned-empty');
@@ -206,11 +228,18 @@ function reconcileTables(wedding) {
     table.y = clamp(table.y, marginYPct, 100 - marginYPct);
   }
 
+  function updateFullscreenLabel() {
+    const label = t(currentLang, 'fullscreenBtn');
+    fullscreenBtn.title = label;
+    fullscreenBtn.setAttribute('aria-label', label);
+  }
+
   function setLang(lang) {
     currentLang = lang;
     localStorage.setItem(LANG_KEY, lang);
     applyTranslations(lang);
     tableModalApi.updateLabels();
+    updateFullscreenLabel();
     renderAll();
   }
 
@@ -444,6 +473,7 @@ function reconcileTables(wedding) {
   langMount.appendChild(buildLangSwitcher(currentLang, setLang));
   applyTranslations(currentLang);
   tableModalApi.updateLabels();
+  updateFullscreenLabel();
   renderAll();
 
   const openTableId = params.get('openTable');

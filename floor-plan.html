@@ -29,7 +29,8 @@
         <span class="view-switch-tab active" data-i18n="floorPlanNavLabel">Plan de salle</span>
       </div>
 
-      <div class="card floor-plan-card">
+      <div class="card floor-plan-card" id="floor-plan-card">
+        <button type="button" class="modal-close fullscreen-close-btn" id="fullscreen-close-btn" aria-label="Close" hidden>&times;</button>
         <div class="card-header-row">
           <h2 data-i18n="floorPlanTitle">Plan de salle</h2>
           <div class="floor-plan-toolbar">
@@ -38,6 +39,7 @@
               <button type="button" class="zoom-reset-btn" id="zoom-reset-btn">100%</button>
               <button type="button" class="icon-btn" id="zoom-in-btn" aria-label="+">+</button>
             </div>
+            <button type="button" class="icon-btn" id="fullscreen-btn"></button>
             <button type="button" id="add-table-btn" data-i18n="addTableBtn">+ Ajouter une table</button>
           </div>
         </div>

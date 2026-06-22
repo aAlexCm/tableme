@@ -1135,6 +1135,29 @@ select.mini-lang-select {
   user-select: none;
 }
 
+.fullscreen-close-btn {
+  z-index: 5;
+}
+
+.floor-plan-card.fullscreen-active {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  margin: 0;
+  border-radius: 0;
+  box-shadow: none;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.floor-plan-card.fullscreen-active .floor-canvas-viewport {
+  flex: 1 1 auto;
+  height: auto;
+  min-height: 0;
+  max-height: none;
+}
+
 .floor-canvas-viewport.panning {
   cursor: grabbing;
 }
