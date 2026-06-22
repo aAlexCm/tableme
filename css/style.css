@@ -612,14 +612,18 @@ form.inline-form select {
   background: #f8eeec;
 }
 
-.wedding-item .icon-btn {
+.wedding-item .icon-btn,
+.wedding-item .mini-lang-select {
   opacity: 0;
   pointer-events: none;
 }
 
 .wedding-item:hover .icon-btn,
+.wedding-item:hover .mini-lang-select,
 .wedding-item:focus-within .icon-btn,
-.wedding-item.revealed .icon-btn {
+.wedding-item:focus-within .mini-lang-select,
+.wedding-item.revealed .icon-btn,
+.wedding-item.revealed .mini-lang-select {
   opacity: 1;
   pointer-events: auto;
 }
