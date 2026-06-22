@@ -59,6 +59,15 @@ export const Storage = {
     return guest;
   },
 
+  async addGuests(weddingId, entries) {
+    const wedding = await this.getWedding(weddingId);
+    if (!wedding) return [];
+    const newGuests = entries.map((e) => ({ id: generateId(), name: e.name, table: e.table }));
+    const guests = [...wedding.guests, ...newGuests];
+    await updateDoc(doc(db, 'weddings', weddingId), { guests });
+    return newGuests;
+  },
+
   async deleteGuest(weddingId, guestId) {
     const wedding = await this.getWedding(weddingId);
     if (!wedding) return;

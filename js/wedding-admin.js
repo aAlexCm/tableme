@@ -9,7 +9,30 @@ const ICONS = {
   chevronDown: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>',
   link: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.07 0l2.83-2.83a5 5 0 1 0-7.07-7.07L11.5 4.5"/><path d="M14 11a5 5 0 0 0-7.07 0L4.1 13.83a5 5 0 1 0 7.07 7.07l1.39-1.39"/></svg>',
   check: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
+  qrcode: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 17h3v3h-3z"/><path d="M21 14v3"/><path d="M14 21h3"/></svg>',
 };
+
+function parseBulkGuests(text) {
+  const entries = [];
+  let skipped = 0;
+  text.split('\n').forEach((line) => {
+    const trimmed = line.trim();
+    if (!trimmed) return;
+    const idx = trimmed.lastIndexOf(',');
+    if (idx === -1) {
+      skipped += 1;
+      return;
+    }
+    const name = trimmed.slice(0, idx).trim();
+    const table = trimmed.slice(idx + 1).trim();
+    if (!name || !table) {
+      skipped += 1;
+      return;
+    }
+    entries.push({ name, table });
+  });
+  return { entries, skipped };
+}
 
 (async function () {
   const params = new URLSearchParams(window.location.search);
@@ -33,6 +56,20 @@ const ICONS = {
   const guestListEl = document.getElementById('guest-list');
   const guestEmptyEl = document.getElementById('guest-empty');
 
+  const modeSwitchEl = document.getElementById('add-mode-switch');
+  const bulkAddPanel = document.getElementById('bulk-add-panel');
+  const bulkAddTextarea = document.getElementById('bulk-add-textarea');
+  const bulkAddSubmitBtn = document.getElementById('bulk-add-submit');
+  const bulkAddFeedbackEl = document.getElementById('bulk-add-feedback');
+
+  const qrCodeBtn = document.getElementById('qr-code-btn');
+  const qrModal = document.getElementById('qr-modal');
+  const qrModalClose = document.getElementById('qr-modal-close');
+  const qrCanvas = document.getElementById('qr-canvas');
+  const qrLinkText = document.getElementById('qr-link-text');
+  const qrDownloadBtn = document.getElementById('qr-download-btn');
+  const qrShareBtn = document.getElementById('qr-share-btn');
+
   function escapeHtml(value) {
     return String(value).replace(/[&<>"']/g, (c) => ({
       '&': '&amp;',
@@ -48,6 +85,7 @@ const ICONS = {
     localStorage.setItem(LANG_KEY, lang);
     applyTranslations(lang);
     updateCopyLinkLabel();
+    updateQrCodeLabel();
     renderGuests();
   }
 
@@ -55,6 +93,12 @@ const ICONS = {
     const label = t(currentLang, 'copyGuestLinkBtn');
     copyLinkBtn.title = label;
     copyLinkBtn.setAttribute('aria-label', label);
+  }
+
+  function updateQrCodeLabel() {
+    const label = t(currentLang, 'qrCodeBtn');
+    qrCodeBtn.title = label;
+    qrCodeBtn.setAttribute('aria-label', label);
   }
 
   function groupGuestsByTable(guests) {
@@ -264,6 +308,30 @@ const ICONS = {
     await renderGuests();
   });
 
+  modeSwitchEl.addEventListener('click', (e) => {
+    const btn = e.target.closest('.mode-btn');
+    if (!btn) return;
+    const mode = btn.dataset.mode;
+    modeSwitchEl.querySelectorAll('.mode-btn').forEach((b) => b.classList.toggle('active', b === btn));
+    guestForm.hidden = mode !== 'single';
+    bulkAddPanel.hidden = mode !== 'bulk';
+    bulkAddFeedbackEl.hidden = true;
+  });
+
+  bulkAddSubmitBtn.addEventListener('click', async () => {
+    const { entries, skipped } = parseBulkGuests(bulkAddTextarea.value);
+    bulkAddFeedbackEl.hidden = false;
+    if (entries.length === 0) {
+      bulkAddFeedbackEl.textContent = t(currentLang, 'bulkAddEmpty');
+      return;
+    }
+    await Storage.addGuests(weddingId, entries);
+    bulkAddTextarea.value = '';
+    bulkAddFeedbackEl.textContent =
+      t(currentLang, 'bulkAddSuccess', entries.length) + (skipped > 0 ? t(currentLang, 'bulkAddSkipped', skipped) : '');
+    await renderGuests();
+  });
+
   guestListEl.addEventListener('click', async (e) => {
     const row = e.target.closest('.guest-row');
     if (!row) return;
@@ -306,6 +374,53 @@ const ICONS = {
     setTimeout(() => (copyLinkBtn.innerHTML = ICONS.link), 1200);
   });
 
+  function openQrModal() {
+    const url = guestLinkInput.value;
+    qrLinkText.textContent = url;
+    window.QRCode.toCanvas(
+      qrCanvas,
+      url,
+      { width: 220, margin: 1, color: { dark: '#38362f', light: '#fffdf9' } },
+      () => {}
+    );
+    qrShareBtn.hidden = !navigator.share;
+    qrModal.hidden = false;
+  }
+
+  function closeQrModal() {
+    qrModal.hidden = true;
+  }
+
+  qrCodeBtn.addEventListener('click', openQrModal);
+  qrModalClose.addEventListener('click', closeQrModal);
+  qrModal.addEventListener('click', (e) => {
+    if (e.target === qrModal) closeQrModal();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !qrModal.hidden) closeQrModal();
+  });
+
+  qrDownloadBtn.addEventListener('click', () => {
+    const link = document.createElement('a');
+    link.download = 'qrcode-tableme.png';
+    link.href = qrCanvas.toDataURL('image/png');
+    link.click();
+  });
+
+  qrShareBtn.addEventListener('click', async () => {
+    try {
+      const blob = await new Promise((resolve) => qrCanvas.toBlob(resolve, 'image/png'));
+      const file = new File([blob], 'qrcode-tableme.png', { type: 'image/png' });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], title: weddingNameEl.textContent, url: guestLinkInput.value });
+      } else {
+        await navigator.share({ title: weddingNameEl.textContent, url: guestLinkInput.value });
+      }
+    } catch {
+      // user cancelled the share sheet
+    }
+  });
+
   if (!weddingId) {
     notFoundEl.hidden = false;
     applyTranslations(currentLang);
@@ -331,6 +446,8 @@ const ICONS = {
   guestLinkInput.value = `${window.location.origin}${window.location.pathname.replace('wedding-admin.html', '')}index.html?id=${weddingId}`;
   copyLinkBtn.innerHTML = ICONS.link;
   updateCopyLinkLabel();
+  qrCodeBtn.innerHTML = ICONS.qrcode;
+  updateQrCodeLabel();
 
   langMount.appendChild(buildLangSwitcher(currentLang, setLang));
   applyTranslations(currentLang);

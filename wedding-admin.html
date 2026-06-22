@@ -23,6 +23,7 @@
       <nav class="admin-nav">
         <strong id="wedding-admin-name"></strong>
         <div class="admin-nav-actions">
+          <button type="button" class="icon-btn" id="qr-code-btn"></button>
           <button type="button" class="icon-btn" id="copy-link"></button>
           <a href="index.html" id="guest-page-link" data-i18n="adminNavGuestLink">Voir la page invité &rarr;</a>
           <input type="text" id="guest-link" hidden />
@@ -30,7 +31,14 @@
       </nav>
 
       <div class="card">
-        <h2 data-i18n="addGuestTitle">Ajouter un invité</h2>
+        <div class="card-header-row">
+          <h2 data-i18n="addGuestTitle">Ajouter un invité</h2>
+          <div class="mode-switch" id="add-mode-switch">
+            <button type="button" class="mode-btn active" data-mode="single" data-i18n="addModeSingle">Un par un</button>
+            <button type="button" class="mode-btn" data-mode="bulk" data-i18n="addModeBulk">Plusieurs</button>
+          </div>
+        </div>
+
         <form id="guest-form" class="field-grid field-grid-guest">
           <div class="field">
             <label for="guest-name" data-i18n="guestNameLabel">Nom et prénom</label>
@@ -42,6 +50,13 @@
           </div>
           <button type="submit" data-i18n="addBtn">Ajouter</button>
         </form>
+
+        <div id="bulk-add-panel" hidden>
+          <p class="muted small" data-i18n="bulkAddHint">Un invité par ligne, au format : Nom et prénom, numéro de table</p>
+          <textarea id="bulk-add-textarea" class="bulk-textarea" rows="6" placeholder="Jean Dupont, 1&#10;Claire Martin, 2" data-i18n-placeholder="bulkAddPlaceholder"></textarea>
+          <button type="button" id="bulk-add-submit" data-i18n="bulkAddBtn">Ajouter la liste</button>
+          <p class="bulk-add-feedback" id="bulk-add-feedback" hidden></p>
+        </div>
       </div>
 
       <div class="card">
@@ -52,6 +67,22 @@
     </div>
   </div>
 
+  <div id="qr-modal" class="modal-overlay" hidden>
+    <div class="modal-panel">
+      <button type="button" class="modal-close" id="qr-modal-close" aria-label="Close">&times;</button>
+      <h3 data-i18n="qrModalTitle">QR Code de la page invité</h3>
+      <div class="qr-canvas-wrap">
+        <canvas id="qr-canvas"></canvas>
+      </div>
+      <p class="qr-link-text" id="qr-link-text"></p>
+      <div class="qr-modal-actions">
+        <button type="button" class="secondary" id="qr-download-btn" data-i18n="qrDownloadBtn">Télécharger</button>
+        <button type="button" class="secondary" id="qr-share-btn" data-i18n="qrShareBtn" hidden>Partager</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
   <script type="module" src="js/wedding-admin.js"></script>
 </body>
 </html>
