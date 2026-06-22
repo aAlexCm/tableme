@@ -113,6 +113,10 @@ function parseSheetRows(rows) {
     })[c]);
   }
 
+  function updatePageTitle() {
+    document.title = `TableMe · ${t(currentLang, 'weddingAdminPageTitle')}`;
+  }
+
   function setLang(lang) {
     currentLang = lang;
     localStorage.setItem(LANG_KEY, lang);
@@ -120,6 +124,7 @@ function parseSheetRows(rows) {
     updateCopyLinkLabel();
     updateQrCodeLabel();
     tableModalApi.updateLabels();
+    updatePageTitle();
     renderGuests();
   }
 
@@ -632,6 +637,7 @@ function parseSheetRows(rows) {
   updateCopyLinkLabel();
   qrCodeBtn.innerHTML = ICONS.qrcode;
   updateQrCodeLabel();
+  updatePageTitle();
 
   langMount.appendChild(buildLangSwitcher(currentLang, setLang));
   applyTranslations(currentLang);

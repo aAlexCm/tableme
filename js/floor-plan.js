@@ -142,12 +142,17 @@ function reconcileTables(wedding) {
     fullscreenBtn.setAttribute('aria-label', label);
   }
 
+  function updatePageTitle() {
+    document.title = `TableMe · ${t(currentLang, 'floorPlanTitle')}`;
+  }
+
   function setLang(lang) {
     currentLang = lang;
     localStorage.setItem(LANG_KEY, lang);
     applyTranslations(lang);
     tableModalApi.updateLabels();
     updateFullscreenLabel();
+    updatePageTitle();
     renderAll();
   }
 
@@ -382,6 +387,7 @@ function reconcileTables(wedding) {
   applyTranslations(currentLang);
   tableModalApi.updateLabels();
   updateFullscreenLabel();
+  updatePageTitle();
   renderAll();
 
   const openTableId = params.get('openTable');

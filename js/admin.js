@@ -47,10 +47,15 @@ const ICONS = {
     });
   }
 
+  function updatePageTitle() {
+    document.title = `TableMe · ${t(currentLang, 'adminTitle')}`;
+  }
+
   function setLang(lang) {
     currentLang = lang;
     localStorage.setItem(ADMIN_LANG_KEY, lang);
     applyTranslations(lang);
+    updatePageTitle();
     renderWeddings();
   }
 
@@ -140,6 +145,7 @@ const ICONS = {
 
   langMount.appendChild(buildLangSwitcher(currentLang, setLang));
   applyTranslations(currentLang);
+  updatePageTitle();
   populateWeddingLangSelect();
   renderWeddings();
 })();
