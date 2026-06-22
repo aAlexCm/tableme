@@ -326,37 +326,81 @@ function reconcileTables(wedding) {
   zoomOutBtn.addEventListener('click', () => setZoom(zoom - ZOOM_STEP));
   zoomResetBtn.addEventListener('click', () => setZoom(1));
 
+  const activePointers = new Map();
   let panPointerId = null;
   let panStartX = 0;
   let panStartY = 0;
   let panStartScrollLeft = 0;
   let panStartScrollTop = 0;
+  let pinchStartDist = 0;
+  let pinchStartZoom = 1;
 
-  floorCanvasViewportEl.addEventListener('pointerdown', (e) => {
-    if (e.target.closest('.table-shape')) return;
-    panPointerId = e.pointerId;
-    panStartX = e.clientX;
-    panStartY = e.clientY;
+  function getPinchDistance() {
+    const pts = [...activePointers.values()];
+    return Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+  }
+
+  function startPan(pointerId, clientX, clientY) {
+    panPointerId = pointerId;
+    panStartX = clientX;
+    panStartY = clientY;
     panStartScrollLeft = floorCanvasViewportEl.scrollLeft;
     panStartScrollTop = floorCanvasViewportEl.scrollTop;
     floorCanvasViewportEl.classList.add('panning');
-    floorCanvasViewportEl.setPointerCapture(panPointerId);
+  }
+
+  floorCanvasViewportEl.addEventListener('pointerdown', (e) => {
+    if (e.target.closest('.table-shape')) return;
+    activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    floorCanvasViewportEl.setPointerCapture(e.pointerId);
+
+    if (activePointers.size === 2) {
+      panPointerId = null;
+      floorCanvasViewportEl.classList.remove('panning');
+      pinchStartDist = getPinchDistance();
+      pinchStartZoom = zoom;
+    } else if (activePointers.size === 1) {
+      startPan(e.pointerId, e.clientX, e.clientY);
+    }
   });
 
   floorCanvasViewportEl.addEventListener('pointermove', (e) => {
+    if (!activePointers.has(e.pointerId)) return;
+    activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+    if (activePointers.size === 2) {
+      if (pinchStartDist > 0) {
+        const dist = getPinchDistance();
+        setZoom(pinchStartZoom * (dist / pinchStartDist));
+      }
+      return;
+    }
+
     if (e.pointerId !== panPointerId) return;
     floorCanvasViewportEl.scrollLeft = panStartScrollLeft - (e.clientX - panStartX);
     floorCanvasViewportEl.scrollTop = panStartScrollTop - (e.clientY - panStartY);
   });
 
-  function endPan(e) {
-    if (e.pointerId !== panPointerId) return;
-    floorCanvasViewportEl.releasePointerCapture(panPointerId);
-    floorCanvasViewportEl.classList.remove('panning');
-    panPointerId = null;
+  function endPointer(e) {
+    if (!activePointers.has(e.pointerId)) return;
+    activePointers.delete(e.pointerId);
+    if (floorCanvasViewportEl.hasPointerCapture(e.pointerId)) {
+      floorCanvasViewportEl.releasePointerCapture(e.pointerId);
+    }
+    if (e.pointerId === panPointerId) {
+      panPointerId = null;
+      floorCanvasViewportEl.classList.remove('panning');
+    }
+    if (activePointers.size < 2) {
+      pinchStartDist = 0;
+    }
+    if (activePointers.size === 1) {
+      const [[id, pos]] = activePointers.entries();
+      startPan(id, pos.x, pos.y);
+    }
   }
-  floorCanvasViewportEl.addEventListener('pointerup', endPan);
-  floorCanvasViewportEl.addEventListener('pointercancel', endPan);
+  floorCanvasViewportEl.addEventListener('pointerup', endPointer);
+  floorCanvasViewportEl.addEventListener('pointercancel', endPointer);
 
   applyZoom();
 
