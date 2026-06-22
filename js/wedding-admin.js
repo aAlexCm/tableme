@@ -1,5 +1,6 @@
 import { Storage } from './storage.js';
 import { applyTranslations, buildLangSwitcher, t } from './i18n.js';
+import { createTableModal } from './table-modal.js';
 
 const LANG_KEY = 'tableme_wedding_admin_lang';
 const DEFAULT_SEATS = 8;
@@ -96,6 +97,12 @@ function parseSheetRows(rows) {
   const qrDownloadBtn = document.getElementById('qr-download-btn');
   const qrShareBtn = document.getElementById('qr-share-btn');
 
+  const tableModalApi = createTableModal({
+    weddingId,
+    getLang: () => currentLang,
+    onChange: renderGuests,
+  });
+
   function escapeHtml(value) {
     return String(value).replace(/[&<>"']/g, (c) => ({
       '&': '&amp;',
@@ -112,6 +119,7 @@ function parseSheetRows(rows) {
     applyTranslations(lang);
     updateCopyLinkLabel();
     updateQrCodeLabel();
+    tableModalApi.updateLabels();
     renderGuests();
   }
 
@@ -484,7 +492,7 @@ function parseSheetRows(rows) {
       }
       const { action, tableId } = tableBtn.dataset;
       if (action === 'edit-table') {
-        window.location.href = `floor-plan.html?id=${weddingId}&openTable=${tableId}`;
+        await tableModalApi.open(tableId);
       } else if (action === 'delete-table') {
         const wedding = await Storage.getWedding(weddingId);
         if (!wedding) return;

@@ -1,5 +1,6 @@
 import { Storage, generateId } from './storage.js';
 import { applyTranslations, buildLangSwitcher, t } from './i18n.js';
+import { createTableModal } from './table-modal.js';
 
 const LANG_KEY = 'tableme_wedding_admin_lang';
 const DEFAULT_SEATS = 8;
@@ -14,11 +15,6 @@ const RECT_INSET = 18;
 const RECT_USABLE_HALF = RECT_HALF_W - RECT_INSET;
 const RECT_Y_OFFSET = RECT_HALF_H + CHAIR_GAP + CHAIR_RADIUS_PX;
 const TABLE_REACH_PX = 72;
-
-const ICONS = {
-  trash: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>',
-  plus: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>',
-};
 
 function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value));
@@ -125,7 +121,6 @@ function reconcileTables(wedding) {
 
   let currentLang = localStorage.getItem(LANG_KEY) || 'fr';
   let wedding = null;
-  let activeTableId = null;
 
   const langMount = document.getElementById('lang-switcher-mount');
   const notFoundEl = document.getElementById('not-found');
@@ -139,23 +134,11 @@ function reconcileTables(wedding) {
   const unassignedListEl = document.getElementById('unassigned-list');
   const unassignedEmptyEl = document.getElementById('unassigned-empty');
 
-  const tableModal = document.getElementById('table-modal');
-  const tableModalClose = document.getElementById('table-modal-close');
-  const tableLabelInput = document.getElementById('table-label-input');
-  const tableDeleteBtn = document.getElementById('table-delete-btn');
-  const tableSeatsInput = document.getElementById('table-seats-input');
-  const shapeRadios = document.querySelectorAll('input[name="table-shape"]');
-  const tableModalGuestList = document.getElementById('table-modal-guest-list');
-  const tableModalGuestCount = document.getElementById('table-modal-guest-count');
-  const tableModalEmptyEl = document.getElementById('table-modal-empty');
-  const tableAddExistingWrap = document.getElementById('table-add-existing-wrap');
-  const tableAddExistingSelect = document.getElementById('table-add-existing-select');
-  const tableAddExistingBtn = document.getElementById('table-add-existing-btn');
-  const tableAddNewInput = document.getElementById('table-add-new-input');
-  const tableAddNewBtn = document.getElementById('table-add-new-btn');
-  const seatsDecrementBtn = document.getElementById('seats-decrement');
-  const seatsIncrementBtn = document.getElementById('seats-increment');
-  tableDeleteBtn.innerHTML = ICONS.trash;
+  const tableModalApi = createTableModal({
+    weddingId,
+    getLang: () => currentLang,
+    onChange: refreshAll,
+  });
 
   function escapeHtml(value) {
     return String(value).replace(/[&<>"']/g, (c) => ({
@@ -184,34 +167,14 @@ function reconcileTables(wedding) {
     currentLang = lang;
     localStorage.setItem(LANG_KEY, lang);
     applyTranslations(lang);
-    updateAddGuestButtonLabels();
+    tableModalApi.updateLabels();
     renderAll();
-  }
-
-  function updateAddGuestButtonLabels() {
-    const assignLabel = t(currentLang, 'assignBtn');
-    tableAddExistingBtn.innerHTML = ICONS.plus;
-    tableAddExistingBtn.title = assignLabel;
-    tableAddExistingBtn.setAttribute('aria-label', assignLabel);
-
-    const addLabel = t(currentLang, 'addBtn');
-    tableAddNewBtn.innerHTML = ICONS.plus;
-    tableAddNewBtn.title = addLabel;
-    tableAddNewBtn.setAttribute('aria-label', addLabel);
   }
 
   function buildAssignSelectHtml(tables) {
     const placeholder = `<option value="" disabled selected>${escapeHtml(t(currentLang, 'assignToTablePlaceholder'))}</option>`;
     const options = tables.map((tb) => `<option value="${escapeHtml(tb.label)}">${escapeHtml(tb.label)}</option>`).join('');
     return placeholder + options;
-  }
-
-  function buildMoveSelectHtml(tables, currentLabel) {
-    const unassignedOpt = `<option value="" ${currentLabel === '' ? 'selected' : ''}>${escapeHtml(t(currentLang, 'unassignedOption'))}</option>`;
-    const options = tables
-      .map((tb) => `<option value="${escapeHtml(tb.label)}" ${tb.label === currentLabel ? 'selected' : ''}>${escapeHtml(tb.label)}</option>`)
-      .join('');
-    return unassignedOpt + options;
   }
 
   async function fetchWeddingData() {
@@ -231,7 +194,6 @@ function reconcileTables(wedding) {
   function renderAll() {
     renderCanvas();
     renderUnassignedList();
-    if (activeTableId) renderTableModalContent();
   }
 
   async function refreshAll() {
@@ -278,7 +240,7 @@ function reconcileTables(wedding) {
       if (moved) {
         await Storage.setTables(weddingId, wedding.tables);
       } else {
-        openTableModal(table.id);
+        await tableModalApi.open(table.id);
       }
     }
 
@@ -320,7 +282,7 @@ function reconcileTables(wedding) {
       shapeEl.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
-          openTableModal(table.id);
+          tableModalApi.open(table.id);
         }
       });
       unitEl.appendChild(shapeEl);
@@ -348,60 +310,6 @@ function reconcileTables(wedding) {
     });
   }
 
-  function renderTableModalContent() {
-    const table = wedding.tables.find((tb) => tb.id === activeTableId);
-    if (!table) {
-      closeTableModal();
-      return;
-    }
-
-    tableLabelInput.value = table.label;
-    const deleteLabelText = t(currentLang, 'deleteTableBtn');
-    tableDeleteBtn.title = deleteLabelText;
-    tableDeleteBtn.setAttribute('aria-label', deleteLabelText);
-    shapeRadios.forEach((radio) => {
-      radio.checked = radio.value === (table.shape || 'round');
-    });
-    const seatCount = table.seats != null ? table.seats : DEFAULT_SEATS;
-    tableSeatsInput.value = seatCount;
-
-    const guests = wedding.guests.filter((g) => g.table === table.label);
-    tableModalGuestCount.textContent = `${guests.length}/${seatCount}`;
-    tableModalEmptyEl.hidden = guests.length > 0;
-    tableModalGuestList.innerHTML = '';
-    guests.forEach((g) => {
-      const deleteLabel = escapeHtml(t(currentLang, 'deleteBtn'));
-      const li = document.createElement('li');
-      li.className = 'table-modal-guest-row';
-      li.dataset.id = g.id;
-      li.innerHTML = `
-        <span class="guest-row-name">${escapeHtml(g.name)}</span>
-        <select class="move-to-table-select" data-id="${g.id}">${buildMoveSelectHtml(wedding.tables, table.label)}</select>
-        <button type="button" class="icon-btn icon-btn-danger" data-action="delete-guest" data-id="${g.id}" title="${deleteLabel}" aria-label="${deleteLabel}">${ICONS.trash}</button>
-      `;
-      tableModalGuestList.appendChild(li);
-    });
-
-    const unassigned = wedding.guests.filter((g) => !g.table);
-    tableAddExistingWrap.hidden = unassigned.length === 0;
-    if (unassigned.length > 0) {
-      const placeholder = `<option value="" disabled selected>${escapeHtml(t(currentLang, 'chooseGuestPlaceholder'))}</option>`;
-      const options = unassigned.map((g) => `<option value="${escapeHtml(g.id)}">${escapeHtml(g.name)}</option>`).join('');
-      tableAddExistingSelect.innerHTML = placeholder + options;
-    }
-  }
-
-  function openTableModal(tableId) {
-    activeTableId = tableId;
-    renderTableModalContent();
-    tableModal.hidden = false;
-  }
-
-  function closeTableModal() {
-    tableModal.hidden = true;
-    activeTableId = null;
-  }
-
   addTableBtn.addEventListener('click', async () => {
     const label = nextTableLabel(wedding.tables || []);
     const newTable = {
@@ -416,123 +324,12 @@ function reconcileTables(wedding) {
     const tables = [...(wedding.tables || []), newTable];
     await Storage.setTables(weddingId, tables);
     await refreshAll();
-    openTableModal(newTable.id);
+    await tableModalApi.open(newTable.id);
   });
 
   unassignedListEl.addEventListener('change', async (e) => {
     const select = e.target.closest('.assign-to-table-select');
     if (!select || !select.value) return;
-    await setGuestTable(select.dataset.id, select.value);
-  });
-
-  tableModalClose.addEventListener('click', closeTableModal);
-  tableModal.addEventListener('click', (e) => {
-    if (e.target === tableModal) closeTableModal();
-  });
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && !tableModal.hidden) closeTableModal();
-  });
-
-  tableLabelInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') tableLabelInput.blur();
-  });
-
-  tableLabelInput.addEventListener('change', async () => {
-    const table = wedding.tables.find((tb) => tb.id === activeTableId);
-    if (!table) return;
-    const newLabel = tableLabelInput.value.trim();
-    if (!newLabel) {
-      alert(t(currentLang, 'tableLabelEmptyError'));
-      tableLabelInput.value = table.label;
-      return;
-    }
-    if (newLabel === table.label) return;
-    if (wedding.tables.some((tb) => tb.label === newLabel)) {
-      alert(t(currentLang, 'tableLabelDuplicateError'));
-      tableLabelInput.value = table.label;
-      return;
-    }
-    const oldLabel = table.label;
-    const tables = wedding.tables.map((tb) => (tb.id === table.id ? { ...tb, label: newLabel } : tb));
-    const guests = wedding.guests.map((g) => (g.table === oldLabel ? { ...g, table: newLabel } : g));
-    await Storage.setBoard(weddingId, { guests, tables });
-    await refreshAll();
-  });
-
-  shapeRadios.forEach((radio) => {
-    radio.addEventListener('change', async () => {
-      if (!radio.checked) return;
-      const tables = wedding.tables.map((tb) => (tb.id === activeTableId ? { ...tb, shape: radio.value } : tb));
-      await Storage.setTables(weddingId, tables);
-      await refreshAll();
-    });
-  });
-
-  tableSeatsInput.addEventListener('change', async () => {
-    const value = tableSeatsInput.value.trim();
-    const seats = value === '' ? null : Math.max(0, parseInt(value, 10) || 0);
-    const tables = wedding.tables.map((tb) => (tb.id === activeTableId ? { ...tb, seats } : tb));
-    await Storage.setTables(weddingId, tables);
-    await refreshAll();
-  });
-
-  function stepSeats(delta) {
-    const current = parseInt(tableSeatsInput.value, 10) || 0;
-    tableSeatsInput.value = Math.max(0, current + delta);
-    tableSeatsInput.dispatchEvent(new Event('change'));
-  }
-
-  seatsDecrementBtn.addEventListener('click', () => stepSeats(-1));
-  seatsIncrementBtn.addEventListener('click', () => stepSeats(1));
-
-  tableDeleteBtn.addEventListener('click', async () => {
-    const table = wedding.tables.find((tb) => tb.id === activeTableId);
-    if (!table) return;
-    const affected = wedding.guests.filter((g) => g.table === table.label).length;
-    if (!confirm(t(currentLang, 'confirmDeleteTable', affected))) return;
-    const tables = wedding.tables.filter((tb) => tb.id !== table.id);
-    const guests = wedding.guests.map((g) => (g.table === table.label ? { ...g, table: '' } : g));
-    await Storage.setBoard(weddingId, { guests, tables });
-    closeTableModal();
-    await refreshAll();
-  });
-
-  tableAddExistingBtn.addEventListener('click', async () => {
-    const guestId = tableAddExistingSelect.value;
-    if (!guestId) return;
-    const table = wedding.tables.find((tb) => tb.id === activeTableId);
-    if (!table) return;
-    await setGuestTable(guestId, table.label);
-  });
-
-  async function addNewGuestToActiveTable() {
-    const name = tableAddNewInput.value.trim();
-    if (!name) return;
-    const table = wedding.tables.find((tb) => tb.id === activeTableId);
-    if (!table) return;
-    await Storage.addGuest(weddingId, name, table.label);
-    tableAddNewInput.value = '';
-    await refreshAll();
-  }
-
-  tableAddNewBtn.addEventListener('click', addNewGuestToActiveTable);
-  tableAddNewInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      addNewGuestToActiveTable();
-    }
-  });
-
-  tableModalGuestList.addEventListener('click', async (e) => {
-    const btn = e.target.closest('button[data-action="delete-guest"]');
-    if (!btn) return;
-    await Storage.deleteGuest(weddingId, btn.dataset.id);
-    await refreshAll();
-  });
-
-  tableModalGuestList.addEventListener('change', async (e) => {
-    const select = e.target.closest('.move-to-table-select');
-    if (!select) return;
     await setGuestTable(select.dataset.id, select.value);
   });
 
@@ -561,11 +358,11 @@ function reconcileTables(wedding) {
 
   langMount.appendChild(buildLangSwitcher(currentLang, setLang));
   applyTranslations(currentLang);
-  updateAddGuestButtonLabels();
+  tableModalApi.updateLabels();
   renderAll();
 
   const openTableId = params.get('openTable');
   if (openTableId && wedding.tables.some((tb) => tb.id === openTableId)) {
-    openTableModal(openTableId);
+    await tableModalApi.open(openTableId);
   }
 })();
