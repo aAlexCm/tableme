@@ -1,6 +1,7 @@
 import { Storage, generateId } from './storage.js';
 import { applyTranslations, buildLangSwitcher, t } from './i18n.js';
 import { createTableModal, ICONS } from './table-modal.js';
+import { createShareControls } from './share-controls.js';
 import { DEFAULT_SEATS, getRectShapeSize, getTableReach, buildChairs } from './table-shape.js';
 
 const LANG_KEY = 'tableme_wedding_admin_lang';
@@ -101,6 +102,11 @@ function reconcileTables(wedding) {
     onChange: refreshAll,
   });
 
+  const shareControls = createShareControls({
+    getLang: () => currentLang,
+    weddingNameEl,
+  });
+
   function escapeHtml(value) {
     return String(value).replace(/[&<>"']/g, (c) => ({
       '&': '&amp;',
@@ -151,6 +157,7 @@ function reconcileTables(wedding) {
     localStorage.setItem(LANG_KEY, lang);
     applyTranslations(lang);
     tableModalApi.updateLabels();
+    shareControls.updateLabels();
     updateFullscreenLabel();
     updatePageTitle();
     renderAll();
@@ -451,6 +458,7 @@ function reconcileTables(wedding) {
   contentEl.hidden = false;
   weddingNameEl.textContent = wedding.name;
   listTabLink.href = `wedding-admin.html?id=${weddingId}`;
+  shareControls.init(weddingId);
 
   langMount.appendChild(buildLangSwitcher(currentLang, setLang));
   applyTranslations(currentLang);

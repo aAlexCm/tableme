@@ -22,6 +22,12 @@
     <div id="floor-plan-content" hidden>
       <nav class="admin-nav">
         <strong id="floor-plan-wedding-name"></strong>
+        <div class="admin-nav-actions">
+          <button type="button" class="icon-btn" id="qr-code-btn"></button>
+          <button type="button" class="icon-btn" id="copy-link"></button>
+          <a href="index.html" id="guest-page-link" data-i18n="adminNavGuestLink">Voir la page invité &rarr;</a>
+          <input type="text" id="guest-link" hidden />
+        </div>
       </nav>
 
       <div class="view-switch">
@@ -55,6 +61,22 @@
         <h2 data-i18n="unassignedGuestsTitle">Invités non assignés</h2>
         <ul class="unassigned-list" id="unassigned-list"></ul>
         <p class="empty-state" id="unassigned-empty" data-i18n="unassignedEmpty" hidden>Tous les invités sont placés.</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="qr-modal" class="modal-overlay" hidden>
+    <div class="modal-panel">
+      <button type="button" class="modal-close" id="qr-modal-close" aria-label="Close">&times;</button>
+      <div class="modal-scroll">
+        <h3 data-i18n="qrModalTitle">QR Code de la page invité</h3>
+        <div class="qr-canvas-wrap">
+          <div id="qr-canvas-container"></div>
+        </div>
+        <div class="qr-modal-actions">
+          <button type="button" class="icon-btn icon-btn-large" id="qr-download-btn"></button>
+          <button type="button" class="icon-btn icon-btn-large" id="qr-share-btn" hidden></button>
+        </div>
       </div>
     </div>
   </div>
@@ -132,6 +154,7 @@
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
   <script type="module" src="js/floor-plan.js"></script>
 </body>
 </html>
