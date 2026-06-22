@@ -77,7 +77,7 @@ const dict = {
   },
   ro: {
     guestHeroTitle: 'Găsește-ți masa',
-    guestSubtitle: 'Scrie-ți numele pentru a-ți găsi masa',
+    guestSubtitle: 'Scrie-ți numele<br />pentru a-ți găsi masa',
     searchPlaceholder: 'Numele și prenumele tău...',
     tableLabel: 'Masa',
     noMatch: 'Niciun invitat găsit cu acest nume. Verifică ortografia.',
@@ -119,7 +119,7 @@ export function t(lang, key, ...args) {
 export function applyTranslations(lang) {
   document.documentElement.lang = lang;
   document.querySelectorAll('[data-i18n]').forEach((el) => {
-    el.textContent = t(lang, el.dataset.i18n);
+    el.innerHTML = t(lang, el.dataset.i18n);
   });
   document.querySelectorAll('[data-i18n-placeholder]').forEach((el) => {
     el.placeholder = t(lang, el.dataset.i18nPlaceholder);
