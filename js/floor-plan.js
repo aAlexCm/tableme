@@ -1,6 +1,6 @@
 import { Storage, generateId } from './storage.js';
 import { applyTranslations, buildLangSwitcher, t } from './i18n.js';
-import { createTableModal } from './table-modal.js';
+import { createTableModal, ICONS } from './table-modal.js';
 import { DEFAULT_SEATS, getRectShapeSize, getTableReach, buildChairs } from './table-shape.js';
 
 const LANG_KEY = 'tableme_wedding_admin_lang';
@@ -192,6 +192,12 @@ function reconcileTables(wedding) {
     await refreshAll();
   }
 
+  async function rotateTableInline(table) {
+    const tables = wedding.tables.map((tb) => (tb.id === table.id ? { ...tb, rotated: !tb.rotated } : tb));
+    await Storage.setTables(weddingId, tables);
+    await refreshAll();
+  }
+
   function attachTableDrag(unitEl, shapeEl, table) {
     let pointerId = null;
     let startClientX = 0;
@@ -230,6 +236,7 @@ function reconcileTables(wedding) {
     }
 
     shapeEl.addEventListener('pointerdown', (e) => {
+      if (e.target.closest('.table-rotate-overlay-btn')) return;
       pointerId = e.pointerId;
       startClientX = e.clientX;
       startClientY = e.clientY;
@@ -275,6 +282,23 @@ function reconcileTables(wedding) {
           tableModalApi.open(table.id);
         }
       });
+
+      if (shape === 'rectangle') {
+        const rotateLabel = table.rotated ? t(currentLang, 'rotateToHorizontalBtn') : t(currentLang, 'rotateToVerticalBtn');
+        const rotateBtn = document.createElement('button');
+        rotateBtn.type = 'button';
+        rotateBtn.className = 'icon-btn table-rotate-overlay-btn';
+        rotateBtn.innerHTML = table.rotated ? ICONS.rotateToHorizontal : ICONS.rotateToVertical;
+        rotateBtn.title = rotateLabel;
+        rotateBtn.setAttribute('aria-label', rotateLabel);
+        rotateBtn.addEventListener('pointerdown', (e) => e.stopPropagation());
+        rotateBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          rotateTableInline(table);
+        });
+        shapeEl.appendChild(rotateBtn);
+      }
+
       unitEl.appendChild(shapeEl);
 
       buildChairs(unitEl, shape, seatCount, tableGuests, undefined, table.rotated);

@@ -89,7 +89,8 @@ const dict = {
     chooseGuestPlaceholder: 'Choisir un invité…',
     addNewGuestLabel: 'Ou ajouter un nouvel invité',
     deleteTableBtn: 'Supprimer la table',
-    rotateTableBtn: 'Pivoter la table',
+    rotateToVerticalBtn: 'Mettre la table à la verticale',
+    rotateToHorizontalBtn: "Remettre la table à l'horizontale",
     editTableBtn: 'Modifier la table',
     unassignedOption: '— Non assigné —',
     confirmDeleteTable: (count) =>
@@ -181,7 +182,8 @@ const dict = {
     chooseGuestPlaceholder: 'Choose a guest…',
     addNewGuestLabel: 'Or add a new guest',
     deleteTableBtn: 'Delete table',
-    rotateTableBtn: 'Rotate table',
+    rotateToVerticalBtn: 'Turn the table vertical',
+    rotateToHorizontalBtn: 'Turn the table horizontal',
     editTableBtn: 'Edit table',
     unassignedOption: '— Unassigned —',
     confirmDeleteTable: (count) =>
@@ -271,7 +273,8 @@ const dict = {
     chooseGuestPlaceholder: 'Alege un invitat…',
     addNewGuestLabel: 'Sau adaugă un invitat nou',
     deleteTableBtn: 'Șterge masa',
-    rotateTableBtn: 'Rotește masa',
+    rotateToVerticalBtn: 'Pune masa pe verticală',
+    rotateToHorizontalBtn: 'Pune masa pe orizontală',
     editTableBtn: 'Editează masa',
     unassignedOption: '— Neasignat —',
     confirmDeleteTable: (count) =>

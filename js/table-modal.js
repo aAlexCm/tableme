@@ -3,10 +3,11 @@ import { t } from './i18n.js';
 
 const DEFAULT_SEATS = 8;
 
-const ICONS = {
+export const ICONS = {
   trash: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>',
   plus: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>',
-  rotate: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 2.64-6.36"/><path d="M3 4v5h5"/></svg>',
+  rotateToVertical: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="9" width="15" height="6" rx="1.3"/><path d="M15 3a6.5 6.5 0 0 1 6 7"/><path d="M18 8.5 21 10l-1 3"/><path d="M8 21a6.5 6.5 0 0 1-6-7"/><path d="M5 15.5 2 14l1-3"/></svg>',
+  rotateToHorizontal: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="4" width="6" height="15" rx="1.3"/><path d="M3 15a6.5 6.5 0 0 0 7 6"/><path d="M8.5 18 10 21l3-1"/><path d="M21 8a6.5 6.5 0 0 0-7-6"/><path d="M15.5 5 14 2l-3 1"/></svg>',
 };
 
 function escapeHtml(value) {
@@ -42,7 +43,6 @@ export function createTableModal({ weddingId, getLang, onChange }) {
   const seatsIncrementBtn = document.getElementById('seats-increment');
 
   tableDeleteBtn.innerHTML = ICONS.trash;
-  tableRotateBtn.innerHTML = ICONS.rotate;
 
   function updateLabels() {
     const lang = getLang();
@@ -55,8 +55,12 @@ export function createTableModal({ weddingId, getLang, onChange }) {
     tableAddNewBtn.innerHTML = ICONS.plus;
     tableAddNewBtn.title = addLabel;
     tableAddNewBtn.setAttribute('aria-label', addLabel);
+  }
 
-    const rotateLabel = t(lang, 'rotateTableBtn');
+  function updateRotateButton(table) {
+    const lang = getLang();
+    const rotateLabel = table.rotated ? t(lang, 'rotateToHorizontalBtn') : t(lang, 'rotateToVerticalBtn');
+    tableRotateBtn.innerHTML = table.rotated ? ICONS.rotateToHorizontal : ICONS.rotateToVertical;
     tableRotateBtn.title = rotateLabel;
     tableRotateBtn.setAttribute('aria-label', rotateLabel);
   }
@@ -91,7 +95,7 @@ export function createTableModal({ weddingId, getLang, onChange }) {
       radio.checked = radio.value === (table.shape || 'round');
     });
     tableRotateBtn.hidden = table.shape !== 'rectangle';
-    tableRotateBtn.classList.toggle('active', !!table.rotated);
+    if (table.shape === 'rectangle') updateRotateButton(table);
     const seatCount = table.seats != null ? table.seats : DEFAULT_SEATS;
     tableSeatsInput.value = seatCount;
 
