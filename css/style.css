@@ -1033,6 +1033,10 @@ select.mini-lang-select {
   border-color: var(--gold-deep);
 }
 
+.chair.chair-fixed {
+  transform: none;
+}
+
 .table-shape {
   position: absolute;
   top: 0;

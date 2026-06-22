@@ -3,7 +3,17 @@ import { applyTranslations, buildLangSwitcher, t } from './i18n.js';
 
 const LANG_KEY = 'tableme_wedding_admin_lang';
 const DEFAULT_SEATS = 8;
-const CHAIR_RADIUS = { round: 52, rectangle: 76 };
+const CHAIR_SIZE = 22;
+const CHAIR_RADIUS_PX = CHAIR_SIZE / 2;
+const CHAIR_GAP = 2;
+const ROUND_TABLE_R = 44;
+const ROUND_CHAIR_RADIUS = ROUND_TABLE_R + CHAIR_GAP + CHAIR_RADIUS_PX;
+const RECT_HALF_W = 65;
+const RECT_HALF_H = 32;
+const RECT_INSET = 18;
+const RECT_USABLE_HALF = RECT_HALF_W - RECT_INSET;
+const RECT_Y_OFFSET = RECT_HALF_H + CHAIR_GAP + CHAIR_RADIUS_PX;
+const TABLE_REACH_PX = 72;
 
 const ICONS = {
   trash: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>',
@@ -11,6 +21,45 @@ const ICONS = {
 
 function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value));
+}
+
+function buildChairs(unitEl, shape, seatCount, guestCount) {
+  if (shape === 'round') {
+    for (let i = 0; i < seatCount; i += 1) {
+      const angle = (360 / seatCount) * i;
+      const chairEl = document.createElement('div');
+      chairEl.className = `chair${i < guestCount ? ' occupied' : ''}`;
+      chairEl.style.setProperty('--chair-angle', `${angle}deg`);
+      chairEl.style.setProperty('--chair-radius', `-${ROUND_CHAIR_RADIUS}px`);
+      unitEl.appendChild(chairEl);
+    }
+    return;
+  }
+
+  const topCount = Math.ceil(seatCount / 2);
+  const bottomCount = seatCount - topCount;
+  const positions = [];
+  const placeRow = (count, y) => {
+    if (count <= 0) return;
+    if (count === 1) {
+      positions.push({ x: 0, y });
+      return;
+    }
+    const span = RECT_USABLE_HALF * 2;
+    for (let i = 0; i < count; i += 1) {
+      positions.push({ x: -RECT_USABLE_HALF + (i * span) / (count - 1), y });
+    }
+  };
+  placeRow(topCount, -RECT_Y_OFFSET);
+  placeRow(bottomCount, RECT_Y_OFFSET);
+
+  positions.forEach((pos, i) => {
+    const chairEl = document.createElement('div');
+    chairEl.className = `chair chair-fixed${i < guestCount ? ' occupied' : ''}`;
+    chairEl.style.left = `${pos.x}px`;
+    chairEl.style.top = `${pos.y}px`;
+    unitEl.appendChild(chairEl);
+  });
 }
 
 function nextTableLabel(tables) {
@@ -89,6 +138,19 @@ function reconcileTables(wedding) {
     })[c]);
   }
 
+  function getSafeMargins() {
+    const rect = floorCanvasEl.getBoundingClientRect();
+    const marginXPct = rect.width > 0 ? Math.min(45, (TABLE_REACH_PX / rect.width) * 100) : 12;
+    const marginYPct = rect.height > 0 ? Math.min(45, (TABLE_REACH_PX / rect.height) * 100) : 12;
+    return { marginXPct, marginYPct };
+  }
+
+  function clampTablePosition(table) {
+    const { marginXPct, marginYPct } = getSafeMargins();
+    table.x = clamp(table.x, marginXPct, 100 - marginXPct);
+    table.y = clamp(table.y, marginYPct, 100 - marginYPct);
+  }
+
   function setLang(lang) {
     currentLang = lang;
     localStorage.setItem(LANG_KEY, lang);
@@ -114,8 +176,14 @@ function reconcileTables(wedding) {
     wedding = await Storage.getWedding(weddingId);
     if (!wedding) return;
     const { tables, changed } = reconcileTables(wedding);
+    let positionsChanged = false;
+    tables.forEach((tb) => {
+      const before = `${tb.x},${tb.y}`;
+      clampTablePosition(tb);
+      if (`${tb.x},${tb.y}` !== before) positionsChanged = true;
+    });
     wedding.tables = tables;
-    if (changed) await Storage.setTables(weddingId, tables);
+    if (changed || positionsChanged) await Storage.setTables(weddingId, tables);
   }
 
   function renderAll() {
@@ -151,8 +219,9 @@ function reconcileTables(wedding) {
       if (Math.abs(rawDx) > 5 || Math.abs(rawDy) > 5) moved = true;
       const dx = (rawDx / rect.width) * 100;
       const dy = (rawDy / rect.height) * 100;
-      table.x = clamp(startX + dx, 4, 96);
-      table.y = clamp(startY + dy, 4, 92);
+      const { marginXPct, marginYPct } = getSafeMargins();
+      table.x = clamp(startX + dx, marginXPct, 100 - marginXPct);
+      table.y = clamp(startY + dy, marginYPct, 100 - marginYPct);
       unitEl.style.left = `${table.x}%`;
       unitEl.style.top = `${table.y}%`;
     }
@@ -213,15 +282,7 @@ function reconcileTables(wedding) {
       });
       unitEl.appendChild(shapeEl);
 
-      const radius = CHAIR_RADIUS[shape];
-      for (let i = 0; i < seatCount; i += 1) {
-        const angle = (360 / seatCount) * i;
-        const chairEl = document.createElement('div');
-        chairEl.className = `chair${i < guestCount ? ' occupied' : ''}`;
-        chairEl.style.setProperty('--chair-angle', `${angle}deg`);
-        chairEl.style.setProperty('--chair-radius', `-${radius}px`);
-        unitEl.appendChild(chairEl);
-      }
+      buildChairs(unitEl, shape, seatCount, guestCount);
 
       attachTableDrag(unitEl, shapeEl, table);
       floorCanvasEl.appendChild(unitEl);
@@ -308,6 +369,7 @@ function reconcileTables(wedding) {
       y: 50 + (Math.random() * 16 - 8),
       seats: null,
     };
+    clampTablePosition(newTable);
     const tables = [...(wedding.tables || []), newTable];
     await Storage.setTables(weddingId, tables);
     await refreshAll();
