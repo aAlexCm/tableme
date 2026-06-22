@@ -8,67 +8,141 @@ const WAYFINDING_VIEWBOX_W = 100;
 const WAYFINDING_VIEWBOX_H = 60;
 const WAYFINDING_OBSTACLE_HALF_W = 8;
 const WAYFINDING_OBSTACLE_HALF_H = 6;
-const WAYFINDING_ROUTE_MARGIN = 5;
+const WAYFINDING_GRID_COLS = 50;
+const WAYFINDING_GRID_ROWS = 30;
+const WAYFINDING_START_RETREAT = 3;
+const WAYFINDING_END_RETREAT = 4.5;
 
-function segmentIntersectsRect(p1, p2, rect) {
-  if (p1.y === p2.y) {
-    const y = p1.y;
-    if (y < rect.y0 || y > rect.y1) return false;
-    const xMin = Math.min(p1.x, p2.x);
-    const xMax = Math.max(p1.x, p2.x);
-    return xMax >= rect.x0 && xMin <= rect.x1;
-  }
-  if (p1.x === p2.x) {
-    const x = p1.x;
-    if (x < rect.x0 || x > rect.x1) return false;
-    const yMin = Math.min(p1.y, p2.y);
-    const yMax = Math.max(p1.y, p2.y);
-    return yMax >= rect.y0 && yMin <= rect.y1;
-  }
-  return false;
-}
-
-function scoreRoute(points, obstacles) {
-  let score = 0;
-  for (let i = 0; i < points.length - 1; i += 1) {
-    obstacles.forEach((rect) => {
-      if (segmentIntersectsRect(points[i], points[i + 1], rect)) score += 1;
-    });
-  }
-  return score;
-}
-
-function buildOrthogonalRoute(a, b, obstacles) {
-  const clampX = (x) => Math.max(2, Math.min(WAYFINDING_VIEWBOX_W - 2, x));
-  const clampY = (y) => Math.max(2, Math.min(WAYFINDING_VIEWBOX_H - 2, y));
-
-  const candidates = [
-    [a, { x: b.x, y: a.y }, b],
-    [a, { x: a.x, y: b.y }, b],
-  ];
-
-  const obstacleXs = obstacles.flatMap((r) => [r.x0, r.x1]);
-  const obstacleYs = obstacles.flatMap((r) => [r.y0, r.y1]);
-  const topY = clampY(Math.min(a.y, b.y, ...obstacleYs) - WAYFINDING_ROUTE_MARGIN);
-  const bottomY = clampY(Math.max(a.y, b.y, ...obstacleYs) + WAYFINDING_ROUTE_MARGIN);
-  const leftX = clampX(Math.min(a.x, b.x, ...obstacleXs) - WAYFINDING_ROUTE_MARGIN);
-  const rightX = clampX(Math.max(a.x, b.x, ...obstacleXs) + WAYFINDING_ROUTE_MARGIN);
-
-  candidates.push([a, { x: a.x, y: topY }, { x: b.x, y: topY }, b]);
-  candidates.push([a, { x: a.x, y: bottomY }, { x: b.x, y: bottomY }, b]);
-  candidates.push([a, { x: leftX, y: a.y }, { x: leftX, y: b.y }, b]);
-  candidates.push([a, { x: rightX, y: a.y }, { x: rightX, y: b.y }, b]);
-
-  let best = candidates[0];
-  let bestScore = Infinity;
-  candidates.forEach((pts) => {
-    const score = scoreRoute(pts, obstacles);
-    if (score < bestScore) {
-      bestScore = score;
-      best = pts;
+function findGridPath(blocked, start, end) {
+  const rows = blocked.length;
+  const cols = blocked[0].length;
+  const key = (r, c) => r * cols + c;
+  const visited = new Uint8Array(rows * cols);
+  const prev = new Int32Array(rows * cols).fill(-1);
+  const queue = [start];
+  visited[key(start.row, start.col)] = 1;
+  let qi = 0;
+  let found = false;
+  while (qi < queue.length) {
+    const cur = queue[qi];
+    qi += 1;
+    if (cur.row === end.row && cur.col === end.col) {
+      found = true;
+      break;
     }
+    const neighbors = [
+      { row: cur.row - 1, col: cur.col },
+      { row: cur.row + 1, col: cur.col },
+      { row: cur.row, col: cur.col - 1 },
+      { row: cur.row, col: cur.col + 1 },
+    ];
+    for (const n of neighbors) {
+      if (n.row < 0 || n.row >= rows || n.col < 0 || n.col >= cols) continue;
+      const k = key(n.row, n.col);
+      if (visited[k] || blocked[n.row][n.col]) continue;
+      visited[k] = 1;
+      prev[k] = key(cur.row, cur.col);
+      queue.push(n);
+    }
+  }
+  if (!found) return null;
+  const path = [];
+  let ck = key(end.row, end.col);
+  while (ck !== -1) {
+    path.push({ row: Math.floor(ck / cols), col: ck % cols });
+    ck = prev[ck];
+  }
+  path.reverse();
+  return path;
+}
+
+function simplifyGridPath(cells) {
+  if (cells.length <= 2) return cells;
+  const result = [cells[0]];
+  for (let i = 1; i < cells.length - 1; i += 1) {
+    const prev = result[result.length - 1];
+    const cur = cells[i];
+    const next = cells[i + 1];
+    const d1r = Math.sign(cur.row - prev.row);
+    const d1c = Math.sign(cur.col - prev.col);
+    const d2r = Math.sign(next.row - cur.row);
+    const d2c = Math.sign(next.col - cur.col);
+    if (d1r === d2r && d1c === d2c) continue;
+    result.push(cur);
+  }
+  result.push(cells[cells.length - 1]);
+  return result;
+}
+
+function buildRouteFromCells(cells, a, b, cellW, cellH) {
+  if (cells.length <= 1) return [a, b];
+  const cellCenter = (cell) => ({ x: (cell.col + 0.5) * cellW, y: (cell.row + 0.5) * cellH });
+
+  const points = [a];
+  for (let i = 1; i < cells.length - 1; i += 1) {
+    const prevCell = cells[i - 1];
+    const curCell = cells[i];
+    const center = cellCenter(curCell);
+    const prevPoint = points[points.length - 1];
+    const movedVertically = curCell.row !== prevCell.row;
+    points.push(movedVertically ? { x: prevPoint.x, y: center.y } : { x: center.x, y: prevPoint.y });
+  }
+
+  const lastPoint = points[points.length - 1];
+  const lastCell = cells[cells.length - 1];
+  const secondLastCell = cells[cells.length - 2];
+  const finalMovedVertically = lastCell.row !== secondLastCell.row;
+  points.push(finalMovedVertically ? { x: lastPoint.x, y: b.y } : { x: b.x, y: lastPoint.y });
+  points.push(b);
+  return points;
+}
+
+function computeWayfindingPath(a, b, obstacles) {
+  const cellW = WAYFINDING_VIEWBOX_W / WAYFINDING_GRID_COLS;
+  const cellH = WAYFINDING_VIEWBOX_H / WAYFINDING_GRID_ROWS;
+
+  const blocked = [];
+  for (let row = 0; row < WAYFINDING_GRID_ROWS; row += 1) {
+    const rowArr = [];
+    for (let col = 0; col < WAYFINDING_GRID_COLS; col += 1) {
+      const cx = (col + 0.5) * cellW;
+      const cy = (row + 0.5) * cellH;
+      rowArr.push(obstacles.some((r) => cx >= r.x0 && cx <= r.x1 && cy >= r.y0 && cy <= r.y1));
+    }
+    blocked.push(rowArr);
+  }
+
+  const toCell = (p) => ({
+    col: Math.max(0, Math.min(WAYFINDING_GRID_COLS - 1, Math.floor(p.x / cellW))),
+    row: Math.max(0, Math.min(WAYFINDING_GRID_ROWS - 1, Math.floor(p.y / cellH))),
   });
-  return best;
+  const startCell = toCell(a);
+  const endCell = toCell(b);
+  blocked[startCell.row][startCell.col] = false;
+  blocked[endCell.row][endCell.col] = false;
+
+  const cellPath = findGridPath(blocked, startCell, endCell);
+  if (!cellPath) return [a, { x: b.x, y: a.y }, b];
+
+  const simplified = simplifyGridPath(cellPath);
+  return buildRouteFromCells(simplified, a, b, cellW, cellH);
+}
+
+function trimRouteEnds(points, startRetreat, endRetreat) {
+  if (points.length < 2) return points;
+  const trim = (p0, p1, retreat) => {
+    const dx = p1.x - p0.x;
+    const dy = p1.y - p0.y;
+    const len = Math.hypot(dx, dy);
+    if (len <= 0.001) return p0;
+    const r = Math.min(retreat, len * 0.4);
+    return { x: p0.x + (dx / len) * r, y: p0.y + (dy / len) * r };
+  };
+  const result = points.map((p) => ({ ...p }));
+  const lastIdx = result.length - 1;
+  result[0] = trim(result[0], result[1], startRetreat);
+  result[lastIdx] = trim(result[lastIdx], result[lastIdx - 1], endRetreat);
+  return result;
 }
 
 (async function () {
@@ -336,7 +410,8 @@ function buildOrthogonalRoute(a, b, obstacles) {
               y1: cy + WAYFINDING_OBSTACLE_HALF_H,
             };
           });
-        const routePoints = buildOrthogonalRoute(a, b, obstacles);
+        const rawRoutePoints = computeWayfindingPath(a, b, obstacles);
+        const routePoints = trimRouteEnds(rawRoutePoints, WAYFINDING_START_RETREAT, WAYFINDING_END_RETREAT);
 
         const svgNs = 'http://www.w3.org/2000/svg';
         const svg = document.createElementNS(svgNs, 'svg');
@@ -353,8 +428,8 @@ function buildOrthogonalRoute(a, b, obstacles) {
         markerEl.setAttribute('viewBox', '0 0 10 10');
         markerEl.setAttribute('refX', '7');
         markerEl.setAttribute('refY', '5');
-        markerEl.setAttribute('markerWidth', '5');
-        markerEl.setAttribute('markerHeight', '5');
+        markerEl.setAttribute('markerWidth', '4');
+        markerEl.setAttribute('markerHeight', '4');
         markerEl.setAttribute('orient', 'auto-start-reverse');
         const arrowPath = document.createElementNS(svgNs, 'path');
         arrowPath.setAttribute('d', 'M0,0 L10,5 L0,10 z');
