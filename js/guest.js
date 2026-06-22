@@ -207,11 +207,14 @@ function trimRouteEnds(points, startRetreat, endRetreat) {
     heading.textContent = t(currentLang, 'tablePreviewTitle');
     wrap.appendChild(heading);
 
+    const wayfindingPanel = buildWayfindingPanel(table ? `table:${table.id}` : null);
+
     const switchEl = document.createElement('div');
     switchEl.className = 'mode-switch table-preview-switch';
     switchEl.innerHTML = `
       <button type="button" class="mode-btn active" data-view="table">${escapeHtml(t(currentLang, 'tablePreviewViewTable'))}</button>
       <button type="button" class="mode-btn" data-view="list">${escapeHtml(t(currentLang, 'tablePreviewViewList'))}</button>
+      ${wayfindingPanel ? `<button type="button" class="mode-btn" data-view="gps">${escapeHtml(t(currentLang, 'tablePreviewViewGps'))}</button>` : ''}
     `;
     wrap.appendChild(switchEl);
 
@@ -283,14 +286,20 @@ function trimRouteEnds(points, startRetreat, endRetreat) {
     });
     wrap.appendChild(namesWrap);
 
+    if (wayfindingPanel) {
+      wayfindingPanel.hidden = true;
+      wrap.appendChild(wayfindingPanel);
+    }
+
     switchEl.addEventListener('click', (e) => {
       const btn = e.target.closest('.mode-btn');
       if (!btn) return;
       switchEl.querySelectorAll('.mode-btn').forEach((b) => b.classList.toggle('active', b === btn));
-      const showTable = btn.dataset.view === 'table';
-      canvas.hidden = !showTable;
-      namesWrap.hidden = showTable;
-      if (!showTable) hideChairTooltip();
+      const view = btn.dataset.view;
+      canvas.hidden = view !== 'table';
+      namesWrap.hidden = view !== 'list';
+      if (wayfindingPanel) wayfindingPanel.hidden = view !== 'gps';
+      if (view !== 'table') hideChairTooltip();
     });
 
     return wrap;
@@ -319,7 +328,7 @@ function trimRouteEnds(points, startRetreat, endRetreat) {
     return [...landmarkPoints, ...tablePoints];
   }
 
-  function buildWayfindingSection(defaultToId) {
+  function buildWayfindingPanel(defaultToId) {
     const points = getWayfindingPoints();
     if (points.length < 2) return null;
 
@@ -331,12 +340,7 @@ function trimRouteEnds(points, startRetreat, endRetreat) {
       : (points.find((p) => p.id !== fromId)?.id || fromId);
 
     const wrap = document.createElement('div');
-    wrap.className = 'wayfinding';
-
-    const heading = document.createElement('p');
-    heading.className = 'wayfinding-title';
-    heading.textContent = t(currentLang, 'wayfindingTitle');
-    wrap.appendChild(heading);
+    wrap.className = 'wayfinding-panel';
 
     const landmarkOptionsHtml = points
       .filter((p) => p.kind === 'landmark')
@@ -475,11 +479,6 @@ function trimRouteEnds(points, startRetreat, endRetreat) {
       if (tableGuests.length > 0) {
         resultEl.appendChild(buildTablePreview(guest, tableGuests));
       }
-      const guestTable = (currentWedding.tables || []).find((tb) => tb.label === guest.table);
-      if (guestTable) {
-        const wayfinding = buildWayfindingSection(`table:${guestTable.id}`);
-        if (wayfinding) resultEl.appendChild(wayfinding);
-      }
     }
   }
 
@@ -507,8 +506,6 @@ function trimRouteEnds(points, startRetreat, endRetreat) {
     `;
     inputEl.blur();
     resultEl.appendChild(buildTablePreview({ id: null, table: table.label }, tableGuests));
-    const wayfinding = buildWayfindingSection(`table:${table.id}`);
-    if (wayfinding) resultEl.appendChild(wayfinding);
   }
 
   function showNoMatch() {

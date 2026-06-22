@@ -1588,20 +1588,12 @@ select.mini-lang-select {
   font-weight: 700;
 }
 
-.wayfinding {
+.wayfinding-panel {
   width: 100%;
-  margin-top: 26px;
-  padding-top: 22px;
-  border-top: 1px solid rgba(176, 141, 79, 0.18);
 }
 
-.wayfinding-title {
-  margin: 0 0 14px;
-  text-align: center;
-  font-family: 'Playfair Display', serif;
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: var(--charcoal);
+.wayfinding-panel[hidden] {
+  display: none;
 }
 
 .wayfinding-controls {
@@ -2046,6 +2038,11 @@ select.mini-lang-select {
   .lang-switcher-trigger {
     padding: 5px 10px;
     font-size: 0.66rem;
+  }
+
+  .table-preview-switch .mode-btn {
+    padding: 0 9px;
+    font-size: 0.68rem;
   }
 
   .wedding-item .actions,
