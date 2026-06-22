@@ -135,12 +135,16 @@ function parseSheetRows(rows) {
     qrShareBtn.setAttribute('aria-label', shareLabel);
   }
 
-  function groupGuestsByTable(guests) {
+  function groupGuestsByTable(guests, tableLabels) {
     const groups = new Map();
     guests.forEach((g) => {
       const key = g.table || '';
       if (!groups.has(key)) groups.set(key, []);
       groups.get(key).push(g);
+    });
+    (tableLabels || []).forEach((label) => {
+      const key = label || '';
+      if (!groups.has(key)) groups.set(key, []);
     });
     const sortedKeys = Array.from(groups.keys()).sort((a, b) => {
       const na = parseFloat(a);
@@ -291,7 +295,9 @@ function parseSheetRows(rows) {
     guestListEl.innerHTML = '';
     guestEmptyEl.hidden = wedding.guests.length > 0;
 
-    groupGuestsByTable(wedding.guests).forEach(({ key, guests }) => {
+    const tableLabels = (wedding.tables || []).map((tb) => tb.label).filter(Boolean);
+
+    groupGuestsByTable(wedding.guests, tableLabels).forEach(({ key, guests }) => {
       const groupEl = document.createElement('div');
       groupEl.className = 'table-group';
 
@@ -303,6 +309,13 @@ function parseSheetRows(rows) {
       const list = document.createElement('ul');
       list.className = 'table-guest-list';
       list.dataset.table = key;
+
+      if (guests.length === 0) {
+        const emptyLi = document.createElement('li');
+        emptyLi.className = 'table-guest-list-empty';
+        emptyLi.textContent = t(currentLang, 'tableGuestsEmpty');
+        list.appendChild(emptyLi);
+      }
 
       guests.forEach((g) => {
         const deleteLabel = escapeHtml(t(currentLang, 'deleteBtn'));

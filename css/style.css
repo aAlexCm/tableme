@@ -742,6 +742,13 @@ a.view-switch-tab:hover {
   background: rgba(138, 150, 120, 0.08);
 }
 
+.table-guest-list-empty {
+  padding: 10px 8px;
+  font-size: 0.85rem;
+  font-style: italic;
+  color: #998c77;
+}
+
 .guest-row {
   display: flex;
   align-items: center;
