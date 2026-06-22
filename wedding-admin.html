@@ -22,24 +22,31 @@
     <div id="wedding-admin-content" hidden>
       <nav class="admin-nav">
         <strong id="wedding-admin-name"></strong>
-        <a href="index.html" id="guest-page-link" data-i18n="adminNavGuestLink">Voir la page invité &rarr;</a>
+        <div class="admin-nav-actions">
+          <button type="button" class="icon-btn" id="copy-link"></button>
+          <a href="index.html" id="guest-page-link" data-i18n="adminNavGuestLink">Voir la page invité &rarr;</a>
+          <input type="text" id="guest-link" hidden />
+        </div>
       </nav>
 
       <div class="card">
-        <h2 id="guests-title">Invités</h2>
-
-        <div class="link-box">
-          <input type="text" id="guest-link" readonly />
-          <button type="button" class="secondary" id="copy-link" data-i18n="copyBtn">Copier</button>
-        </div>
-
-        <form id="guest-form" class="inline-form" style="margin-top: 20px">
-          <input type="text" id="guest-name" placeholder="Nom et prénom de l'invité" data-i18n-placeholder="guestNamePlaceholder" required />
-          <input type="text" id="guest-table" placeholder="N° de table" data-i18n-placeholder="guestTablePlaceholder" required />
+        <h2 data-i18n="addGuestTitle">Ajouter un invité</h2>
+        <form id="guest-form" class="field-grid field-grid-guest">
+          <div class="field">
+            <label for="guest-name" data-i18n="guestNameLabel">Nom et prénom</label>
+            <input type="text" id="guest-name" placeholder="Nom et prénom de l'invité" data-i18n-placeholder="guestNamePlaceholder" required />
+          </div>
+          <div class="field">
+            <label for="guest-table" data-i18n="guestTableLabel">Table</label>
+            <input type="text" id="guest-table" placeholder="N° de table" data-i18n-placeholder="guestTablePlaceholder" required />
+          </div>
           <button type="submit" data-i18n="addBtn">Ajouter</button>
         </form>
+      </div>
 
-        <div class="guest-groups" id="guest-list" style="margin-top: 16px"></div>
+      <div class="card">
+        <h2 id="guests-title">Invités</h2>
+        <div class="guest-groups" id="guest-list"></div>
         <p class="empty-state" id="guest-empty" data-i18n="guestsEmpty" hidden>Aucun invité ajouté pour le moment.</p>
       </div>
     </div>

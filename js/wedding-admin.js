@@ -7,6 +7,8 @@ const ICONS = {
   trash: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>',
   chevronUp: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15l-6-6-6 6"/></svg>',
   chevronDown: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>',
+  link: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.07 0l2.83-2.83a5 5 0 1 0-7.07-7.07L11.5 4.5"/><path d="M14 11a5 5 0 0 0-7.07 0L4.1 13.83a5 5 0 1 0 7.07 7.07l1.39-1.39"/></svg>',
+  check: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
 };
 
 (async function () {
@@ -45,7 +47,14 @@ const ICONS = {
     currentLang = lang;
     localStorage.setItem(LANG_KEY, lang);
     applyTranslations(lang);
+    updateCopyLinkLabel();
     renderGuests();
+  }
+
+  function updateCopyLinkLabel() {
+    const label = t(currentLang, 'copyGuestLinkBtn');
+    copyLinkBtn.title = label;
+    copyLinkBtn.setAttribute('aria-label', label);
   }
 
   function groupGuestsByTable(guests) {
@@ -292,10 +301,9 @@ const ICONS = {
   });
 
   copyLinkBtn.addEventListener('click', () => {
-    guestLinkInput.select();
     navigator.clipboard?.writeText(guestLinkInput.value).catch(() => {});
-    copyLinkBtn.textContent = t(currentLang, 'copiedBtn');
-    setTimeout(() => (copyLinkBtn.textContent = t(currentLang, 'copyBtn')), 1500);
+    copyLinkBtn.innerHTML = ICONS.check;
+    setTimeout(() => (copyLinkBtn.innerHTML = ICONS.link), 1200);
   });
 
   if (!weddingId) {
@@ -321,6 +329,8 @@ const ICONS = {
   weddingNameEl.textContent = wedding.name;
   guestPageLink.href = `index.html?id=${weddingId}`;
   guestLinkInput.value = `${window.location.origin}${window.location.pathname.replace('wedding-admin.html', '')}index.html?id=${weddingId}`;
+  copyLinkBtn.innerHTML = ICONS.link;
+  updateCopyLinkLabel();
 
   langMount.appendChild(buildLangSwitcher(currentLang, setLang));
   applyTranslations(currentLang);

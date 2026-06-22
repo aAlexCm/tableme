@@ -393,20 +393,10 @@ nav.admin-nav a:hover {
   color: var(--charcoal);
 }
 
-form.inline-form {
+.admin-nav-actions {
   display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-form.inline-form input {
-  flex: 1;
-  min-width: 140px;
-}
-
-form.inline-form select {
-  width: auto;
-  flex: 0 0 auto;
+  align-items: center;
+  gap: 12px;
 }
 
 .field-grid {
@@ -438,6 +428,10 @@ form.inline-form select {
   .field-grid {
     grid-template-columns: 2fr 1fr 1fr auto;
     align-items: end;
+  }
+
+  .field-grid.field-grid-guest {
+    grid-template-columns: 2fr 1fr auto;
   }
 
   .field-grid > button {
@@ -662,17 +656,6 @@ form.inline-form select {
   pointer-events: auto;
 }
 
-.link-box {
-  display: flex;
-  gap: 8px;
-  margin-top: 10px;
-}
-
-.link-box input {
-  background: var(--sage-light);
-  font-size: 0.85rem;
-}
-
 h2 {
   margin-top: 0;
   font-family: 'Playfair Display', serif;
@@ -838,5 +821,10 @@ select.mini-lang-select {
   .guest-row-actions {
     width: 100%;
     justify-content: flex-end;
+  }
+
+  nav.admin-nav {
+    flex-wrap: wrap;
+    gap: 10px;
   }
 }
