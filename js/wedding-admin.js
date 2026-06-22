@@ -65,7 +65,7 @@ function parseBulkGuests(text) {
   const qrCodeBtn = document.getElementById('qr-code-btn');
   const qrModal = document.getElementById('qr-modal');
   const qrModalClose = document.getElementById('qr-modal-close');
-  const qrCanvas = document.getElementById('qr-canvas');
+  const qrCanvasContainer = document.getElementById('qr-canvas-container');
   const qrLinkText = document.getElementById('qr-link-text');
   const qrDownloadBtn = document.getElementById('qr-download-btn');
   const qrShareBtn = document.getElementById('qr-share-btn');
@@ -377,12 +377,14 @@ function parseBulkGuests(text) {
   function openQrModal() {
     const url = guestLinkInput.value;
     qrLinkText.textContent = url;
-    window.QRCode.toCanvas(
-      qrCanvas,
-      url,
-      { width: 220, margin: 1, color: { dark: '#38362f', light: '#fffdf9' } },
-      () => {}
-    );
+    qrCanvasContainer.innerHTML = '';
+    new window.QRCode(qrCanvasContainer, {
+      text: url,
+      width: 220,
+      height: 220,
+      colorDark: '#38362f',
+      colorLight: '#fffdf9',
+    });
     qrShareBtn.hidden = !navigator.share;
     qrModal.hidden = false;
   }
@@ -401,15 +403,19 @@ function parseBulkGuests(text) {
   });
 
   qrDownloadBtn.addEventListener('click', () => {
+    const canvas = qrCanvasContainer.querySelector('canvas');
+    if (!canvas) return;
     const link = document.createElement('a');
     link.download = 'qrcode-tableme.png';
-    link.href = qrCanvas.toDataURL('image/png');
+    link.href = canvas.toDataURL('image/png');
     link.click();
   });
 
   qrShareBtn.addEventListener('click', async () => {
+    const canvas = qrCanvasContainer.querySelector('canvas');
+    if (!canvas) return;
     try {
-      const blob = await new Promise((resolve) => qrCanvas.toBlob(resolve, 'image/png'));
+      const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
       const file = new File([blob], 'qrcode-tableme.png', { type: 'image/png' });
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
         await navigator.share({ files: [file], title: weddingNameEl.textContent, url: guestLinkInput.value });

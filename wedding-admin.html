@@ -72,7 +72,7 @@
       <button type="button" class="modal-close" id="qr-modal-close" aria-label="Close">&times;</button>
       <h3 data-i18n="qrModalTitle">QR Code de la page invité</h3>
       <div class="qr-canvas-wrap">
-        <canvas id="qr-canvas"></canvas>
+        <div id="qr-canvas-container"></div>
       </div>
       <p class="qr-link-text" id="qr-link-text"></p>
       <div class="qr-modal-actions">
@@ -82,7 +82,7 @@
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
   <script type="module" src="js/wedding-admin.js"></script>
 </body>
 </html>
