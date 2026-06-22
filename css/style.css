@@ -230,7 +230,10 @@ input:focus, select:focus {
   box-shadow: 0 0 0 4px rgba(176, 141, 79, 0.14);
 }
 
-button {
+button, a.secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   font-family: 'Lato', sans-serif;
   font-size: 0.92rem;
   letter-spacing: 0.2px;
@@ -246,17 +249,17 @@ button {
   transition: filter 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
 }
 
-button:hover {
+button:hover, a.secondary:hover {
   filter: brightness(1.06);
   transform: translateY(-1px);
   box-shadow: 0 10px 22px rgba(138, 109, 60, 0.3);
 }
 
-button:active {
+button:active, a.secondary:active {
   transform: translateY(0);
 }
 
-button.secondary {
+button.secondary, a.secondary {
   background: transparent;
   color: var(--sage-deep);
   border: 1.5px solid var(--sage-deep);
@@ -266,7 +269,7 @@ button.secondary {
   box-shadow: none;
 }
 
-button.secondary:hover {
+button.secondary:hover, a.secondary:hover {
   background: var(--sage-light);
   color: var(--charcoal);
   filter: none;
