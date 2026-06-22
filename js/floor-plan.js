@@ -9,12 +9,18 @@ const CHAIR_RADIUS_PX = CHAIR_SIZE / 2;
 const CHAIR_GAP = 2;
 const ROUND_TABLE_R = 44;
 const ROUND_CHAIR_RADIUS = ROUND_TABLE_R + CHAIR_GAP + CHAIR_RADIUS_PX;
-const RECT_HALF_W = 65;
+const RECT_HALF_W_MIN = 65;
 const RECT_HALF_H = 32;
 const RECT_INSET = 18;
-const RECT_USABLE_HALF = RECT_HALF_W - RECT_INSET;
+const RECT_USABLE_HALF_MIN = RECT_HALF_W_MIN - RECT_INSET;
 const RECT_Y_OFFSET = RECT_HALF_H + CHAIR_GAP + CHAIR_RADIUS_PX;
-const TABLE_REACH_PX = 72;
+const CHAIR_SPACING = CHAIR_SIZE + CHAIR_GAP;
+
+const CANVAS_WIDTH = 1500;
+const CANVAS_HEIGHT = 900;
+const ZOOM_MIN = 0.5;
+const ZOOM_MAX = 1.5;
+const ZOOM_STEP = 0.15;
 
 function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value));
@@ -25,6 +31,24 @@ function getInitials(name) {
   if (parts.length === 0) return '';
   if (parts.length === 1) return parts[0][0].toUpperCase();
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
+
+function getRectDimensions(seatCount) {
+  const topCount = Math.ceil(seatCount / 2);
+  const neededUsableHalf = topCount > 1 ? ((topCount - 1) * CHAIR_SPACING) / 2 : 0;
+  const usableHalf = Math.max(RECT_USABLE_HALF_MIN, neededUsableHalf);
+  const halfWidth = usableHalf + RECT_INSET;
+  return { halfWidth, usableHalf };
+}
+
+function getTableReach(table) {
+  if ((table.shape || 'round') !== 'rectangle') {
+    const r = ROUND_CHAIR_RADIUS + CHAIR_RADIUS_PX;
+    return { x: r, y: r };
+  }
+  const seatCount = table.seats != null ? table.seats : DEFAULT_SEATS;
+  const { halfWidth } = getRectDimensions(seatCount);
+  return { x: halfWidth, y: RECT_Y_OFFSET + CHAIR_RADIUS_PX };
 }
 
 function buildChairs(unitEl, shape, seatCount, guests) {
@@ -49,6 +73,7 @@ function buildChairs(unitEl, shape, seatCount, guests) {
     return;
   }
 
+  const { usableHalf } = getRectDimensions(seatCount);
   const topCount = Math.ceil(seatCount / 2);
   const bottomCount = seatCount - topCount;
   const positions = [];
@@ -58,9 +83,9 @@ function buildChairs(unitEl, shape, seatCount, guests) {
       positions.push({ x: 0, y });
       return;
     }
-    const span = RECT_USABLE_HALF * 2;
+    const span = usableHalf * 2;
     for (let i = 0; i < count; i += 1) {
-      positions.push({ x: -RECT_USABLE_HALF + (i * span) / (count - 1), y });
+      positions.push({ x: -usableHalf + (i * span) / (count - 1), y });
     }
   };
   placeRow(topCount, -RECT_Y_OFFSET);
@@ -121,6 +146,7 @@ function reconcileTables(wedding) {
 
   let currentLang = localStorage.getItem(LANG_KEY) || 'fr';
   let wedding = null;
+  let zoom = 1;
 
   const langMount = document.getElementById('lang-switcher-mount');
   const notFoundEl = document.getElementById('not-found');
@@ -129,7 +155,12 @@ function reconcileTables(wedding) {
   const listTabLink = document.getElementById('view-tab-list');
 
   const addTableBtn = document.getElementById('add-table-btn');
+  const floorCanvasViewportEl = document.getElementById('floor-canvas-viewport');
+  const floorCanvasSizerEl = document.getElementById('floor-canvas-sizer');
   const floorCanvasEl = document.getElementById('floor-canvas');
+  const zoomInBtn = document.getElementById('zoom-in-btn');
+  const zoomOutBtn = document.getElementById('zoom-out-btn');
+  const zoomResetBtn = document.getElementById('zoom-reset-btn');
 
   const unassignedListEl = document.getElementById('unassigned-list');
   const unassignedEmptyEl = document.getElementById('unassigned-empty');
@@ -150,15 +181,27 @@ function reconcileTables(wedding) {
     })[c]);
   }
 
-  function getSafeMargins() {
-    const rect = floorCanvasEl.getBoundingClientRect();
-    const marginXPct = rect.width > 0 ? Math.min(45, (TABLE_REACH_PX / rect.width) * 100) : 12;
-    const marginYPct = rect.height > 0 ? Math.min(45, (TABLE_REACH_PX / rect.height) * 100) : 12;
+  function applyZoom() {
+    floorCanvasEl.style.transform = `scale(${zoom})`;
+    floorCanvasSizerEl.style.width = `${CANVAS_WIDTH * zoom}px`;
+    floorCanvasSizerEl.style.height = `${CANVAS_HEIGHT * zoom}px`;
+    zoomResetBtn.textContent = `${Math.round(zoom * 100)}%`;
+  }
+
+  function setZoom(value) {
+    zoom = clamp(Math.round(value * 100) / 100, ZOOM_MIN, ZOOM_MAX);
+    applyZoom();
+  }
+
+  function getSafeMargins(table) {
+    const reach = getTableReach(table);
+    const marginXPct = Math.min(45, (reach.x / CANVAS_WIDTH) * 100);
+    const marginYPct = Math.min(45, (reach.y / CANVAS_HEIGHT) * 100);
     return { marginXPct, marginYPct };
   }
 
   function clampTablePosition(table) {
-    const { marginXPct, marginYPct } = getSafeMargins();
+    const { marginXPct, marginYPct } = getSafeMargins(table);
     table.x = clamp(table.x, marginXPct, 100 - marginXPct);
     table.y = clamp(table.y, marginYPct, 100 - marginYPct);
   }
@@ -223,7 +266,7 @@ function reconcileTables(wedding) {
       if (Math.abs(rawDx) > 5 || Math.abs(rawDy) > 5) moved = true;
       const dx = (rawDx / rect.width) * 100;
       const dy = (rawDy / rect.height) * 100;
-      const { marginXPct, marginYPct } = getSafeMargins();
+      const { marginXPct, marginYPct } = getSafeMargins(table);
       table.x = clamp(startX + dx, marginXPct, 100 - marginXPct);
       table.y = clamp(startY + dy, marginYPct, 100 - marginYPct);
       unitEl.style.left = `${table.x}%`;
@@ -275,6 +318,10 @@ function reconcileTables(wedding) {
       const shapeEl = document.createElement('div');
       shapeEl.className = `table-shape ${shape}`;
       shapeEl.tabIndex = 0;
+      if (shape === 'rectangle') {
+        const { halfWidth } = getRectDimensions(seatCount);
+        shapeEl.style.width = `${halfWidth * 2}px`;
+      }
       shapeEl.innerHTML = `
         <span class="table-shape-label">${escapeHtml(t(currentLang, 'tableLabel'))} ${escapeHtml(table.label)}</span>
         <span class="table-shape-count">${guestCount}/${seatCount}</span>
@@ -332,6 +379,44 @@ function reconcileTables(wedding) {
     if (!select || !select.value) return;
     await setGuestTable(select.dataset.id, select.value);
   });
+
+  zoomInBtn.addEventListener('click', () => setZoom(zoom + ZOOM_STEP));
+  zoomOutBtn.addEventListener('click', () => setZoom(zoom - ZOOM_STEP));
+  zoomResetBtn.addEventListener('click', () => setZoom(1));
+
+  let panPointerId = null;
+  let panStartX = 0;
+  let panStartY = 0;
+  let panStartScrollLeft = 0;
+  let panStartScrollTop = 0;
+
+  floorCanvasViewportEl.addEventListener('pointerdown', (e) => {
+    if (e.target.closest('.table-shape')) return;
+    panPointerId = e.pointerId;
+    panStartX = e.clientX;
+    panStartY = e.clientY;
+    panStartScrollLeft = floorCanvasViewportEl.scrollLeft;
+    panStartScrollTop = floorCanvasViewportEl.scrollTop;
+    floorCanvasViewportEl.classList.add('panning');
+    floorCanvasViewportEl.setPointerCapture(panPointerId);
+  });
+
+  floorCanvasViewportEl.addEventListener('pointermove', (e) => {
+    if (e.pointerId !== panPointerId) return;
+    floorCanvasViewportEl.scrollLeft = panStartScrollLeft - (e.clientX - panStartX);
+    floorCanvasViewportEl.scrollTop = panStartScrollTop - (e.clientY - panStartY);
+  });
+
+  function endPan(e) {
+    if (e.pointerId !== panPointerId) return;
+    floorCanvasViewportEl.releasePointerCapture(panPointerId);
+    floorCanvasViewportEl.classList.remove('panning');
+    panPointerId = null;
+  }
+  floorCanvasViewportEl.addEventListener('pointerup', endPan);
+  floorCanvasViewportEl.addEventListener('pointercancel', endPan);
+
+  applyZoom();
 
   if (!weddingId) {
     notFoundEl.hidden = false;

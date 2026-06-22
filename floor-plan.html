@@ -32,10 +32,21 @@
       <div class="card floor-plan-card">
         <div class="card-header-row">
           <h2 data-i18n="floorPlanTitle">Plan de salle</h2>
-          <button type="button" id="add-table-btn" data-i18n="addTableBtn">+ Ajouter une table</button>
+          <div class="floor-plan-toolbar">
+            <div class="zoom-controls">
+              <button type="button" class="icon-btn" id="zoom-out-btn" aria-label="-">&minus;</button>
+              <button type="button" class="zoom-reset-btn" id="zoom-reset-btn">100%</button>
+              <button type="button" class="icon-btn" id="zoom-in-btn" aria-label="+">+</button>
+            </div>
+            <button type="button" id="add-table-btn" data-i18n="addTableBtn">+ Ajouter une table</button>
+          </div>
         </div>
-        <p class="muted small" data-i18n="floorPlanHint">Glissez les tables pour composer votre salle. Cliquez sur une table pour gérer ses invités.</p>
-        <div class="floor-canvas" id="floor-canvas"></div>
+        <p class="muted small" data-i18n="floorPlanHint">Glissez les tables pour composer votre salle. Faites glisser un espace vide pour vous déplacer, et utilisez le zoom pour voir plus de tables.</p>
+        <div class="floor-canvas-viewport" id="floor-canvas-viewport">
+          <div class="floor-canvas-sizer" id="floor-canvas-sizer">
+            <div class="floor-canvas" id="floor-canvas"></div>
+          </div>
+        </div>
       </div>
 
       <div class="card">
