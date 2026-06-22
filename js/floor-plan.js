@@ -24,12 +24,28 @@ function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value));
 }
 
-function buildChairs(unitEl, shape, seatCount, guestCount) {
+function getInitials(name) {
+  const parts = (name || '').trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return '';
+  if (parts.length === 1) return parts[0][0].toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
+
+function buildChairs(unitEl, shape, seatCount, guests) {
+  const guestCount = guests.length;
   if (shape === 'round') {
     for (let i = 0; i < seatCount; i += 1) {
       const angle = (360 / seatCount) * i;
+      const occupied = i < guestCount;
       const chairEl = document.createElement('div');
-      chairEl.className = `chair${i < guestCount ? ' occupied' : ''}`;
+      chairEl.className = `chair${occupied ? ' occupied' : ''}`;
+      if (occupied) {
+        const initialsEl = document.createElement('span');
+        initialsEl.className = 'chair-initials';
+        initialsEl.style.setProperty('--chair-counter-angle', `-${angle}deg`);
+        initialsEl.textContent = getInitials(guests[i].name);
+        chairEl.appendChild(initialsEl);
+      }
       chairEl.style.setProperty('--chair-angle', `${angle}deg`);
       chairEl.style.setProperty('--chair-radius', `-${ROUND_CHAIR_RADIUS}px`);
       unitEl.appendChild(chairEl);
@@ -55,8 +71,15 @@ function buildChairs(unitEl, shape, seatCount, guestCount) {
   placeRow(bottomCount, RECT_Y_OFFSET);
 
   positions.forEach((pos, i) => {
+    const occupied = i < guestCount;
     const chairEl = document.createElement('div');
-    chairEl.className = `chair chair-fixed${i < guestCount ? ' occupied' : ''}`;
+    chairEl.className = `chair chair-fixed${occupied ? ' occupied' : ''}`;
+    if (occupied) {
+      const initialsEl = document.createElement('span');
+      initialsEl.className = 'chair-initials';
+      initialsEl.textContent = getInitials(guests[i].name);
+      chairEl.appendChild(initialsEl);
+    }
     chairEl.style.left = `${pos.x}px`;
     chairEl.style.top = `${pos.y}px`;
     unitEl.appendChild(chairEl);
@@ -276,7 +299,8 @@ function reconcileTables(wedding) {
   function renderCanvas() {
     floorCanvasEl.innerHTML = '';
     (wedding.tables || []).forEach((table) => {
-      const guestCount = wedding.guests.filter((g) => g.table === table.label).length;
+      const tableGuests = wedding.guests.filter((g) => g.table === table.label);
+      const guestCount = tableGuests.length;
       const shape = table.shape === 'rectangle' ? 'rectangle' : 'round';
       const seatCount = table.seats != null ? table.seats : DEFAULT_SEATS;
 
@@ -301,7 +325,7 @@ function reconcileTables(wedding) {
       });
       unitEl.appendChild(shapeEl);
 
-      buildChairs(unitEl, shape, seatCount, guestCount);
+      buildChairs(unitEl, shape, seatCount, tableGuests);
 
       attachTableDrag(unitEl, shapeEl, table);
       floorCanvasEl.appendChild(unitEl);

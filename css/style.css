@@ -1074,6 +1074,9 @@ select.mini-lang-select {
   border: 2px solid var(--sage-deep);
   transform: rotate(var(--chair-angle, 0deg)) translate(0, var(--chair-radius, -60px));
   pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .chair.occupied {
@@ -1083,6 +1086,18 @@ select.mini-lang-select {
 
 .chair.chair-fixed {
   transform: none;
+}
+
+.chair-initials {
+  display: block;
+  font-family: 'Lato', sans-serif;
+  font-size: 8px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--charcoal);
+  text-transform: uppercase;
+  user-select: none;
+  transform: rotate(var(--chair-counter-angle, 0deg));
 }
 
 .table-shape {
