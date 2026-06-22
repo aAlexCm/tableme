@@ -574,7 +574,21 @@ form.inline-form select {
 .actions {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 8px;
+}
+
+.actions button,
+.actions a.secondary {
+  padding: 8px 16px;
+  font-size: 0.8rem;
+  box-shadow: none;
+}
+
+.actions button:hover,
+.actions a.secondary:hover {
+  transform: none;
+  box-shadow: none;
 }
 
 .link-box {
@@ -694,9 +708,9 @@ h2 {
 
 select.mini-lang-select {
   width: auto;
-  font-size: 0.78rem;
-  padding: 9px 10px;
-  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  padding: 8px 10px;
+  border-radius: var(--radius-pill);
   background: var(--sage-light);
   color: var(--sage-deep);
   border: 1px solid rgba(138, 150, 120, 0.3);
