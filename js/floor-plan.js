@@ -563,4 +563,9 @@ function reconcileTables(wedding) {
   applyTranslations(currentLang);
   updateAddGuestButtonLabels();
   renderAll();
+
+  const openTableId = params.get('openTable');
+  if (openTableId && wedding.tables.some((tb) => tb.id === openTableId)) {
+    openTableModal(openTableId);
+  }
 })();

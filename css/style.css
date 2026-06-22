@@ -725,12 +725,44 @@ a.view-switch-tab:hover {
   margin-bottom: 0;
 }
 
+.table-group-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
 .table-group-title {
-  margin: 0 0 10px;
+  margin: 0;
   font-family: 'Playfair Display', serif;
   font-size: 1rem;
   font-weight: 700;
   color: var(--gold-deep);
+}
+
+.table-group-count {
+  font-family: 'Lato', sans-serif;
+  font-weight: 400;
+  font-size: 0.85rem;
+  color: #998c77;
+}
+
+.table-group-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+
+.table-group-title-row:hover .table-group-actions,
+.table-group-title-row:focus-within .table-group-actions,
+.table-group-title-row.revealed .table-group-actions {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .table-guest-list {

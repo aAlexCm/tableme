@@ -83,6 +83,7 @@ const dict = {
     chooseGuestPlaceholder: 'Choisir un invité…',
     addNewGuestLabel: 'Ou ajouter un nouvel invité',
     deleteTableBtn: 'Supprimer la table',
+    editTableBtn: 'Modifier la table',
     unassignedOption: '— Non assigné —',
     confirmDeleteTable: (count) =>
       count > 0
@@ -167,6 +168,7 @@ const dict = {
     chooseGuestPlaceholder: 'Choose a guest…',
     addNewGuestLabel: 'Or add a new guest',
     deleteTableBtn: 'Delete table',
+    editTableBtn: 'Edit table',
     unassignedOption: '— Unassigned —',
     confirmDeleteTable: (count) =>
       count > 0 ? `Delete this table? ${count} guest(s) will become unassigned.` : 'Delete this table?',
@@ -249,6 +251,7 @@ const dict = {
     chooseGuestPlaceholder: 'Alege un invitat…',
     addNewGuestLabel: 'Sau adaugă un invitat nou',
     deleteTableBtn: 'Șterge masa',
+    editTableBtn: 'Editează masa',
     unassignedOption: '— Neasignat —',
     confirmDeleteTable: (count) =>
       count > 0 ? `Ștergi această masă? ${count} invitat(i) vor deveni neasignați.` : 'Ștergi această masă?',

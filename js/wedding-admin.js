@@ -2,9 +2,11 @@ import { Storage } from './storage.js';
 import { applyTranslations, buildLangSwitcher, t } from './i18n.js';
 
 const LANG_KEY = 'tableme_wedding_admin_lang';
+const DEFAULT_SEATS = 8;
 
 const ICONS = {
   trash: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>',
+  pencil: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z"/></svg>',
   chevronUp: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15l-6-6-6 6"/></svg>',
   chevronDown: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>',
   link: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.07 0l2.83-2.83a5 5 0 1 0-7.07-7.07L11.5 4.5"/><path d="M14 11a5 5 0 0 0-7.07 0L4.1 13.83a5 5 0 1 0 7.07 7.07l1.39-1.39"/></svg>',
@@ -296,15 +298,36 @@ function parseSheetRows(rows) {
     guestEmptyEl.hidden = wedding.guests.length > 0;
 
     const tableLabels = (wedding.tables || []).map((tb) => tb.label).filter(Boolean);
+    const tableByLabel = new Map((wedding.tables || []).map((tb) => [tb.label, tb]));
 
     groupGuestsByTable(wedding.guests, tableLabels).forEach(({ key, guests }) => {
       const groupEl = document.createElement('div');
       groupEl.className = 'table-group';
 
+      const table = tableByLabel.get(key);
+      const editLabel = escapeHtml(t(currentLang, 'editTableBtn'));
+      const deleteTableLabel = escapeHtml(t(currentLang, 'deleteTableBtn'));
+
+      const titleRow = document.createElement('div');
+      titleRow.className = 'table-group-title-row';
+
       const title = document.createElement('h3');
       title.className = 'table-group-title';
-      title.textContent = `${t(currentLang, 'tableLabel')} ${key || '—'}`;
-      groupEl.appendChild(title);
+      title.innerHTML = `${escapeHtml(t(currentLang, 'tableLabel'))} ${escapeHtml(key || '—')}`
+        + (table ? ` <span class="table-group-count">(${guests.length}/${table.seats != null ? table.seats : DEFAULT_SEATS})</span>` : '');
+      titleRow.appendChild(title);
+
+      if (table) {
+        const actions = document.createElement('span');
+        actions.className = 'table-group-actions';
+        actions.innerHTML = `
+          <button type="button" class="icon-btn" data-action="edit-table" data-table-id="${table.id}" title="${editLabel}" aria-label="${editLabel}">${ICONS.pencil}</button>
+          <button type="button" class="icon-btn icon-btn-danger" data-action="delete-table" data-table-id="${table.id}" title="${deleteTableLabel}" aria-label="${deleteTableLabel}">${ICONS.trash}</button>
+        `;
+        titleRow.appendChild(actions);
+      }
+
+      groupEl.appendChild(titleRow);
 
       const list = document.createElement('ul');
       list.className = 'table-guest-list';
@@ -449,6 +472,34 @@ function parseSheetRows(rows) {
   });
 
   guestListEl.addEventListener('click', async (e) => {
+    const titleRow = e.target.closest('.table-group-title-row');
+    if (titleRow) {
+      const tableBtn = e.target.closest('button');
+      if (!tableBtn) {
+        document.querySelectorAll('.revealed').forEach((el) => {
+          if (el !== titleRow) el.classList.remove('revealed');
+        });
+        titleRow.classList.toggle('revealed');
+        return;
+      }
+      const { action, tableId } = tableBtn.dataset;
+      if (action === 'edit-table') {
+        window.location.href = `floor-plan.html?id=${weddingId}&openTable=${tableId}`;
+      } else if (action === 'delete-table') {
+        const wedding = await Storage.getWedding(weddingId);
+        if (!wedding) return;
+        const table = (wedding.tables || []).find((tb) => tb.id === tableId);
+        if (!table) return;
+        const affected = wedding.guests.filter((g) => g.table === table.label).length;
+        if (!confirm(t(currentLang, 'confirmDeleteTable', affected))) return;
+        const tables = wedding.tables.filter((tb) => tb.id !== table.id);
+        const guests = wedding.guests.map((g) => (g.table === table.label ? { ...g, table: '' } : g));
+        await Storage.setBoard(weddingId, { guests, tables });
+        await renderGuests();
+      }
+      return;
+    }
+
     const row = e.target.closest('.guest-row');
     if (!row) return;
 
@@ -481,6 +532,9 @@ function parseSheetRows(rows) {
   document.addEventListener('click', (e) => {
     if (!e.target.closest('.guest-row')) {
       document.querySelectorAll('.guest-row.revealed').forEach((el) => el.classList.remove('revealed'));
+    }
+    if (!e.target.closest('.table-group-title-row')) {
+      document.querySelectorAll('.table-group-title-row.revealed').forEach((el) => el.classList.remove('revealed'));
     }
   });
 
