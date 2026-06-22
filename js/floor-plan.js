@@ -17,6 +17,7 @@ const TABLE_REACH_PX = 72;
 
 const ICONS = {
   trash: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>',
+  plus: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>',
 };
 
 function clamp(value, min, max) {
@@ -131,8 +132,7 @@ function reconcileTables(wedding) {
   const tableAddNewBtn = document.getElementById('table-add-new-btn');
   const seatsDecrementBtn = document.getElementById('seats-decrement');
   const seatsIncrementBtn = document.getElementById('seats-increment');
-  const tableDeleteIcon = tableDeleteBtn.querySelector('.danger-link-icon');
-  tableDeleteIcon.innerHTML = ICONS.trash;
+  tableDeleteBtn.innerHTML = ICONS.trash;
 
   function escapeHtml(value) {
     return String(value).replace(/[&<>"']/g, (c) => ({
@@ -161,7 +161,20 @@ function reconcileTables(wedding) {
     currentLang = lang;
     localStorage.setItem(LANG_KEY, lang);
     applyTranslations(lang);
+    updateAddGuestButtonLabels();
     renderAll();
+  }
+
+  function updateAddGuestButtonLabels() {
+    const assignLabel = t(currentLang, 'assignBtn');
+    tableAddExistingBtn.innerHTML = ICONS.plus;
+    tableAddExistingBtn.title = assignLabel;
+    tableAddExistingBtn.setAttribute('aria-label', assignLabel);
+
+    const addLabel = t(currentLang, 'addBtn');
+    tableAddNewBtn.innerHTML = ICONS.plus;
+    tableAddNewBtn.title = addLabel;
+    tableAddNewBtn.setAttribute('aria-label', addLabel);
   }
 
   function buildAssignSelectHtml(tables) {
@@ -319,6 +332,9 @@ function reconcileTables(wedding) {
     }
 
     tableLabelInput.value = table.label;
+    const deleteLabelText = t(currentLang, 'deleteTableBtn');
+    tableDeleteBtn.title = deleteLabelText;
+    tableDeleteBtn.setAttribute('aria-label', deleteLabelText);
     shapeRadios.forEach((radio) => {
       radio.checked = radio.value === (table.shape || 'round');
     });
@@ -521,5 +537,6 @@ function reconcileTables(wedding) {
 
   langMount.appendChild(buildLangSwitcher(currentLang, setLang));
   applyTranslations(currentLang);
+  updateAddGuestButtonLabels();
   renderAll();
 })();
