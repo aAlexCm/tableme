@@ -405,6 +405,10 @@ nav.admin-nav a:hover {
   gap: 14px;
 }
 
+.field-grid[hidden] {
+  display: none;
+}
+
 .field {
   display: flex;
   flex-direction: column;
@@ -519,6 +523,10 @@ nav.admin-nav a:hover {
   padding: 20px;
   background: rgba(33, 31, 26, 0.55);
   z-index: 100;
+}
+
+.modal-overlay[hidden] {
+  display: none;
 }
 
 .modal-panel {
