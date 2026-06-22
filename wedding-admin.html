@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TableMe · Invités</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Lato:wght@300;400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="page">
+    <div id="lang-switcher-mount" class="lang-switcher-mount"></div>
+
+    <div id="not-found" class="card" hidden>
+      <h2 data-i18n="weddingNotFoundTitle">Mariage introuvable</h2>
+      <p class="muted" data-i18n="weddingNotFoundDesc">Ce lien n'est pas valide ou ce mariage a été supprimé.</p>
+    </div>
+
+    <div id="wedding-admin-content" hidden>
+      <nav class="admin-nav">
+        <strong id="wedding-admin-name"></strong>
+        <a href="index.html" id="guest-page-link" data-i18n="adminNavGuestLink">Voir la page invité &rarr;</a>
+      </nav>
+
+      <div class="card">
+        <h2 id="guests-title">Invités</h2>
+
+        <div class="link-box">
+          <input type="text" id="guest-link" readonly />
+          <button type="button" class="secondary" id="copy-link" data-i18n="copyBtn">Copier</button>
+        </div>
+
+        <form id="guest-form" class="inline-form" style="margin-top: 20px">
+          <input type="text" id="guest-name" placeholder="Nom et prénom de l'invité" data-i18n-placeholder="guestNamePlaceholder" required />
+          <input type="text" id="guest-table" placeholder="N° de table" data-i18n-placeholder="guestTablePlaceholder" required />
+          <button type="submit" data-i18n="addBtn">Ajouter</button>
+        </form>
+
+        <div class="guest-groups" id="guest-list" style="margin-top: 16px"></div>
+        <p class="empty-state" id="guest-empty" data-i18n="guestsEmpty" hidden>Aucun invité ajouté pour le moment.</p>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="js/wedding-admin.js"></script>
+</body>
+</html>

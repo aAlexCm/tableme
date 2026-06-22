@@ -10,8 +10,6 @@ const LANG_KEY = 'tableme_lang';
   const titleEl = document.getElementById('wedding-title');
   const subtitleEl = document.getElementById('wedding-subtitle');
   const noWeddingEl = document.getElementById('no-wedding');
-  const weddingPickerEl = document.getElementById('wedding-picker');
-  const noWeddingEmptyEl = document.getElementById('no-wedding-empty');
   const searchSectionEl = document.getElementById('search-section');
   const inputEl = document.getElementById('guest-input');
   const resultEl = document.getElementById('result');
@@ -36,25 +34,9 @@ const LANG_KEY = 'tableme_lang';
     }
   }
 
-  async function showWeddingPicker() {
-    const weddings = await Storage.getWeddings();
+  function showInvalidLink() {
     noWeddingEl.hidden = false;
     searchSectionEl.hidden = true;
-
-    if (weddings.length === 0) {
-      noWeddingEmptyEl.hidden = false;
-      return;
-    }
-
-    weddings.forEach((w) => {
-      const li = document.createElement('li');
-      li.className = 'wedding-item';
-      const a = document.createElement('a');
-      a.href = `index.html?id=${encodeURIComponent(w.id)}`;
-      a.textContent = w.name;
-      li.appendChild(a);
-      weddingPickerEl.appendChild(li);
-    });
   }
 
   function clearResult() {
@@ -141,7 +123,7 @@ const LANG_KEY = 'tableme_lang';
     applyTranslations(currentLang);
     titleEl.textContent = t(currentLang, 'guestHeroTitle');
     document.title = `TableMe · ${t(currentLang, 'guestHeroTitle')}`;
-    await showWeddingPicker();
+    showInvalidLink();
     return;
   }
 
@@ -151,7 +133,7 @@ const LANG_KEY = 'tableme_lang';
     applyTranslations(currentLang);
     titleEl.textContent = t(currentLang, 'guestHeroTitle');
     document.title = `TableMe · ${t(currentLang, 'guestHeroTitle')}`;
-    await showWeddingPicker();
+    showInvalidLink();
     return;
   }
 
