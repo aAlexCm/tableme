@@ -166,6 +166,7 @@ const LANG_KEY = 'tableme_lang';
         </span>
       </div>
     `;
+    inputEl.blur();
 
     if (guest.table) {
       const tableGuests = currentWedding.guests.filter((g) => g.table === guest.table);
