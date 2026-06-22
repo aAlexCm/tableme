@@ -3,11 +3,14 @@ import { applyTranslations, buildLangSwitcher, t } from './i18n.js';
 import { createTableModal, ICONS } from './table-modal.js';
 import { createShareControls } from './share-controls.js';
 import { DEFAULT_SEATS, getRectShapeSize, getTableReach, buildChairs } from './table-shape.js';
+import { LANDMARK_TYPES, getLandmarkType } from './landmarks.js';
 
 const LANG_KEY = 'tableme_wedding_admin_lang';
 
 const CANVAS_WIDTH = 1500;
 const CANVAS_HEIGHT = 900;
+const LANDMARK_REACH_X = 48;
+const LANDMARK_REACH_Y = 36;
 const ZOOM_MIN = 0.5;
 const ZOOM_MAX = 1.5;
 const ZOOM_STEP = 0.15;
@@ -67,6 +70,8 @@ function reconcileTables(wedding) {
   const fullscreenBtn = document.getElementById('fullscreen-btn');
   const fullscreenCloseBtn = document.getElementById('fullscreen-close-btn');
   const addTableBtn = document.getElementById('add-table-btn');
+  const addLandmarkBtn = document.getElementById('add-landmark-btn');
+  const landmarkPickerEl = document.getElementById('landmark-picker');
   const floorCanvasViewportEl = document.getElementById('floor-canvas-viewport');
   const floorCanvasSizerEl = document.getElementById('floor-canvas-sizer');
   const floorCanvasEl = document.getElementById('floor-canvas');
@@ -142,6 +147,18 @@ function reconcileTables(wedding) {
     table.y = clamp(table.y, marginYPct, 100 - marginYPct);
   }
 
+  function getLandmarkSafeMargins() {
+    const marginXPct = Math.min(45, (LANDMARK_REACH_X / CANVAS_WIDTH) * 100);
+    const marginYPct = Math.min(45, (LANDMARK_REACH_Y / CANVAS_HEIGHT) * 100);
+    return { marginXPct, marginYPct };
+  }
+
+  function clampLandmarkPosition(landmark) {
+    const { marginXPct, marginYPct } = getLandmarkSafeMargins();
+    landmark.x = clamp(landmark.x, marginXPct, 100 - marginXPct);
+    landmark.y = clamp(landmark.y, marginYPct, 100 - marginYPct);
+  }
+
   function updateFullscreenLabel() {
     const label = t(currentLang, 'fullscreenBtn');
     fullscreenBtn.title = label;
@@ -160,6 +177,7 @@ function reconcileTables(wedding) {
     shareControls.updateLabels();
     updateFullscreenLabel();
     updatePageTitle();
+    renderLandmarkPicker();
     renderAll();
   }
 
@@ -167,6 +185,15 @@ function reconcileTables(wedding) {
     const placeholder = `<option value="" disabled selected>${escapeHtml(t(currentLang, 'assignToTablePlaceholder'))}</option>`;
     const options = tables.map((tb) => `<option value="${escapeHtml(tb.label)}">${escapeHtml(tb.label)}</option>`).join('');
     return placeholder + options;
+  }
+
+  function renderLandmarkPicker() {
+    landmarkPickerEl.innerHTML = LANDMARK_TYPES.map((lt) => `
+      <button type="button" class="landmark-picker-option" data-type="${lt.type}">
+        ${lt.icon}
+        <span>${escapeHtml(t(currentLang, lt.labelKey))}</span>
+      </button>
+    `).join('');
   }
 
   async function fetchWeddingData() {
@@ -180,11 +207,13 @@ function reconcileTables(wedding) {
       if (`${tb.x},${tb.y}` !== before) positionsChanged = true;
     });
     wedding.tables = tables;
+    wedding.landmarks = Array.isArray(wedding.landmarks) ? wedding.landmarks : [];
     if (changed || positionsChanged) await Storage.setTables(weddingId, tables);
   }
 
   function renderAll() {
     renderCanvas();
+    renderLandmarks();
     renderUnassignedList();
   }
 
@@ -315,6 +344,99 @@ function reconcileTables(wedding) {
     });
   }
 
+  async function deleteLandmarkInline(landmark) {
+    const landmarks = wedding.landmarks.filter((lm) => lm.id !== landmark.id);
+    await Storage.setLandmarks(weddingId, landmarks);
+    await refreshAll();
+  }
+
+  function attachLandmarkDrag(unitEl, shapeEl, landmark) {
+    let pointerId = null;
+    let startClientX = 0;
+    let startClientY = 0;
+    let startX = 0;
+    let startY = 0;
+    let moved = false;
+
+    function onPointerMove(e) {
+      if (e.pointerId !== pointerId) return;
+      const rect = floorCanvasEl.getBoundingClientRect();
+      const rawDx = e.clientX - startClientX;
+      const rawDy = e.clientY - startClientY;
+      if (Math.abs(rawDx) > 5 || Math.abs(rawDy) > 5) moved = true;
+      const dx = (rawDx / rect.width) * 100;
+      const dy = (rawDy / rect.height) * 100;
+      const { marginXPct, marginYPct } = getLandmarkSafeMargins();
+      landmark.x = clamp(startX + dx, marginXPct, 100 - marginXPct);
+      landmark.y = clamp(startY + dy, marginYPct, 100 - marginYPct);
+      unitEl.style.left = `${landmark.x}%`;
+      unitEl.style.top = `${landmark.y}%`;
+    }
+
+    async function onPointerUp(e) {
+      if (e.pointerId !== pointerId) return;
+      shapeEl.releasePointerCapture(pointerId);
+      shapeEl.removeEventListener('pointermove', onPointerMove);
+      shapeEl.removeEventListener('pointerup', onPointerUp);
+      shapeEl.classList.remove('dragging-landmark');
+      pointerId = null;
+      if (moved) {
+        await Storage.setLandmarks(weddingId, wedding.landmarks);
+      }
+    }
+
+    shapeEl.addEventListener('pointerdown', (e) => {
+      if (e.target.closest('.landmark-delete-btn')) return;
+      pointerId = e.pointerId;
+      startClientX = e.clientX;
+      startClientY = e.clientY;
+      startX = landmark.x;
+      startY = landmark.y;
+      moved = false;
+      shapeEl.classList.add('dragging-landmark');
+      shapeEl.setPointerCapture(pointerId);
+      shapeEl.addEventListener('pointermove', onPointerMove);
+      shapeEl.addEventListener('pointerup', onPointerUp);
+    });
+  }
+
+  function renderLandmarks() {
+    (wedding.landmarks || []).forEach((landmark) => {
+      const landmarkType = getLandmarkType(landmark.type);
+
+      const unitEl = document.createElement('div');
+      unitEl.className = 'landmark-unit';
+      unitEl.style.left = `${landmark.x}%`;
+      unitEl.style.top = `${landmark.y}%`;
+      unitEl.dataset.id = landmark.id;
+
+      const shapeEl = document.createElement('div');
+      shapeEl.className = 'landmark-shape';
+      shapeEl.innerHTML = `
+        ${landmarkType.icon}
+        <span class="landmark-label">${escapeHtml(t(currentLang, landmarkType.labelKey))}</span>
+      `;
+      unitEl.appendChild(shapeEl);
+
+      const deleteLabel = t(currentLang, 'deleteLandmarkBtn');
+      const deleteBtn = document.createElement('button');
+      deleteBtn.type = 'button';
+      deleteBtn.className = 'icon-btn icon-btn-danger landmark-delete-btn';
+      deleteBtn.innerHTML = ICONS.trash;
+      deleteBtn.title = deleteLabel;
+      deleteBtn.setAttribute('aria-label', deleteLabel);
+      deleteBtn.addEventListener('pointerdown', (e) => e.stopPropagation());
+      deleteBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        deleteLandmarkInline(landmark);
+      });
+      shapeEl.appendChild(deleteBtn);
+
+      attachLandmarkDrag(unitEl, shapeEl, landmark);
+      floorCanvasEl.appendChild(unitEl);
+    });
+  }
+
   function renderUnassignedList() {
     const unassigned = wedding.guests.filter((g) => !g.table);
     unassignedListEl.innerHTML = '';
@@ -354,6 +476,33 @@ function reconcileTables(wedding) {
     await setGuestTable(select.dataset.id, select.value);
   });
 
+  addLandmarkBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    landmarkPickerEl.hidden = !landmarkPickerEl.hidden;
+  });
+
+  landmarkPickerEl.addEventListener('click', async (e) => {
+    const btn = e.target.closest('.landmark-picker-option');
+    if (!btn) return;
+    landmarkPickerEl.hidden = true;
+    const newLandmark = {
+      id: generateId(),
+      type: btn.dataset.type,
+      x: 50 + (Math.random() * 16 - 8),
+      y: 50 + (Math.random() * 16 - 8),
+    };
+    clampLandmarkPosition(newLandmark);
+    const landmarks = [...(wedding.landmarks || []), newLandmark];
+    await Storage.setLandmarks(weddingId, landmarks);
+    await refreshAll();
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!landmarkPickerEl.hidden && !e.target.closest('.landmark-picker-wrap')) {
+      landmarkPickerEl.hidden = true;
+    }
+  });
+
   zoomInBtn.addEventListener('click', () => setZoom(zoom + ZOOM_STEP));
   zoomOutBtn.addEventListener('click', () => setZoom(zoom - ZOOM_STEP));
   zoomResetBtn.addEventListener('click', () => setZoom(1));
@@ -382,7 +531,7 @@ function reconcileTables(wedding) {
   }
 
   floorCanvasViewportEl.addEventListener('pointerdown', (e) => {
-    if (e.target.closest('.table-shape')) return;
+    if (e.target.closest('.table-shape') || e.target.closest('.landmark-shape')) return;
     activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
     floorCanvasViewportEl.setPointerCapture(e.pointerId);
 
@@ -465,6 +614,7 @@ function reconcileTables(wedding) {
   tableModalApi.updateLabels();
   updateFullscreenLabel();
   updatePageTitle();
+  renderLandmarkPicker();
   renderAll();
 
   const openTableId = params.get('openTable');

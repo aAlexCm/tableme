@@ -1123,6 +1123,124 @@ select.mini-lang-select {
   flex: 0 0 auto;
 }
 
+.landmark-picker-wrap {
+  position: relative;
+  flex: 0 0 auto;
+}
+
+#add-landmark-btn {
+  flex: 0 0 auto;
+}
+
+.landmark-picker {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 10;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(120px, 1fr));
+  gap: 4px;
+  padding: 8px;
+  background: var(--paper);
+  border: 1px solid rgba(176, 141, 79, 0.3);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 12px 26px rgba(138, 109, 60, 0.22);
+}
+
+.landmark-picker[hidden] {
+  display: none;
+}
+
+.landmark-picker-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  border-radius: var(--radius-sm);
+  background: none;
+  border: none;
+  box-shadow: none;
+  color: var(--charcoal);
+  font-family: 'Lato', sans-serif;
+  font-size: 0.82rem;
+  text-align: left;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.landmark-picker-option:hover {
+  background: var(--sage-light);
+  transform: none;
+  box-shadow: none;
+}
+
+.landmark-picker-option svg {
+  flex: 0 0 auto;
+  color: var(--sage-deep);
+}
+
+.landmark-unit {
+  position: absolute;
+  width: 0;
+  height: 0;
+}
+
+.landmark-shape {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 6px 8px;
+  background: var(--paper);
+  border: 1px solid rgba(138, 150, 120, 0.4);
+  border-radius: var(--radius-sm);
+  color: var(--sage-deep);
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+  z-index: 1;
+}
+
+.landmark-shape:hover {
+  border-color: var(--gold);
+  color: var(--charcoal);
+}
+
+.landmark-shape.dragging-landmark {
+  border-color: var(--gold-deep);
+  box-shadow: 0 10px 22px rgba(138, 109, 60, 0.25);
+  z-index: 5;
+  cursor: grabbing;
+}
+
+.landmark-label {
+  font-family: 'Lato', sans-serif;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--charcoal);
+  white-space: nowrap;
+}
+
+.landmark-delete-btn {
+  position: absolute;
+  top: -9px;
+  right: -9px;
+  width: 22px;
+  height: 22px;
+  z-index: 2;
+  cursor: pointer;
+  touch-action: auto;
+}
+
+.landmark-delete-btn svg {
+  width: 11px;
+  height: 11px;
+}
+
 .floor-plan-toolbar {
   display: flex;
   align-items: center;

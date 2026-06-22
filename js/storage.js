@@ -83,6 +83,10 @@ export const Storage = {
     await updateDoc(doc(db, 'weddings', weddingId), { tables });
   },
 
+  async setLandmarks(weddingId, landmarks) {
+    await updateDoc(doc(db, 'weddings', weddingId), { landmarks });
+  },
+
   async setBoard(weddingId, { guests, tables }) {
     await updateDoc(doc(db, 'weddings', weddingId), { guests, tables });
   },
