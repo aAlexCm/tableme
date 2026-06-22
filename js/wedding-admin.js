@@ -3,6 +3,12 @@ import { applyTranslations, buildLangSwitcher, t } from './i18n.js';
 
 const LANG_KEY = 'tableme_wedding_admin_lang';
 
+const ICONS = {
+  trash: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>',
+  chevronUp: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15l-6-6-6 6"/></svg>',
+  chevronDown: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>',
+};
+
 (async function () {
   const params = new URLSearchParams(window.location.search);
   const weddingId = params.get('id');
@@ -212,6 +218,7 @@ const LANG_KEY = 'tableme_wedding_admin_lang';
       list.dataset.table = key;
 
       guests.forEach((g) => {
+        const deleteLabel = escapeHtml(t(currentLang, 'deleteBtn'));
         const li = document.createElement('li');
         li.className = 'guest-row';
         li.draggable = true;
@@ -219,12 +226,14 @@ const LANG_KEY = 'tableme_wedding_admin_lang';
         li.innerHTML = `
           <span class="drag-handle">&#10303;</span>
           <span class="guest-row-name">${escapeHtml(g.name)}</span>
-          <input type="text" class="guest-table-edit" data-id="${g.id}" value="${escapeHtml(g.table)}" aria-label="${escapeHtml(t(currentLang, 'tableLabel'))}" />
-          <span class="row-arrows">
-            <button type="button" class="arrow-btn" data-action="move-up" data-id="${g.id}" aria-label="up">&#9650;</button>
-            <button type="button" class="arrow-btn" data-action="move-down" data-id="${g.id}" aria-label="down">&#9660;</button>
+          <span class="guest-row-actions">
+            <input type="text" class="guest-table-edit" data-id="${g.id}" value="${escapeHtml(g.table)}" aria-label="${escapeHtml(t(currentLang, 'tableLabel'))}" />
+            <span class="row-arrows">
+              <button type="button" class="icon-btn" data-action="move-up" data-id="${g.id}" aria-label="up">${ICONS.chevronUp}</button>
+              <button type="button" class="icon-btn" data-action="move-down" data-id="${g.id}" aria-label="down">${ICONS.chevronDown}</button>
+            </span>
+            <button type="button" class="icon-btn icon-btn-danger" data-action="delete-guest" data-id="${g.id}" title="${deleteLabel}" aria-label="${deleteLabel}">${ICONS.trash}</button>
           </span>
-          <button type="button" class="danger" data-action="delete-guest" data-id="${g.id}">${escapeHtml(t(currentLang, 'deleteBtn'))}</button>
         `;
         attachRowDragEvents(li);
         list.appendChild(li);
@@ -247,6 +256,18 @@ const LANG_KEY = 'tableme_wedding_admin_lang';
   });
 
   guestListEl.addEventListener('click', async (e) => {
+    const row = e.target.closest('.guest-row');
+    if (!row) return;
+
+    const interactive = e.target.closest('button, a, input, select');
+    if (!interactive) {
+      document.querySelectorAll('.guest-row.revealed').forEach((el) => {
+        if (el !== row) el.classList.remove('revealed');
+      });
+      row.classList.toggle('revealed');
+      return;
+    }
+
     const btn = e.target.closest('button');
     if (!btn) return;
     const { action, id } = btn.dataset;
@@ -262,6 +283,12 @@ const LANG_KEY = 'tableme_wedding_admin_lang';
     const input = e.target.closest('.guest-table-edit');
     if (!input) return;
     await updateGuestTable(input.dataset.id, input.value);
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.guest-row')) {
+      document.querySelectorAll('.guest-row.revealed').forEach((el) => el.classList.remove('revealed'));
+    }
   });
 
   copyLinkBtn.addEventListener('click', () => {
