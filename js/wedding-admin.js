@@ -64,7 +64,7 @@ function parseSheetRows(rows) {
   const contentEl = document.getElementById('wedding-admin-content');
   const weddingNameEl = document.getElementById('wedding-admin-name');
   const guestPageLink = document.getElementById('guest-page-link');
-  const floorPlanLink = document.getElementById('floor-plan-link');
+  const floorPlanTabLink = document.getElementById('view-tab-floorplan');
 
   const guestsTitle = document.getElementById('guests-title');
   const guestLinkInput = document.getElementById('guest-link');
@@ -551,7 +551,7 @@ function parseSheetRows(rows) {
   contentEl.hidden = false;
   weddingNameEl.textContent = wedding.name;
   guestPageLink.href = `index.html?id=${weddingId}`;
-  floorPlanLink.href = `floor-plan.html?id=${weddingId}`;
+  floorPlanTabLink.href = `floor-plan.html?id=${weddingId}`;
   guestLinkInput.value = `${window.location.origin}${window.location.pathname.replace('wedding-admin.html', '')}index.html?id=${weddingId}`;
   copyLinkBtn.innerHTML = ICONS.link;
   updateCopyLinkLabel();

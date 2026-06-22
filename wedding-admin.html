@@ -25,11 +25,15 @@
         <div class="admin-nav-actions">
           <button type="button" class="icon-btn" id="qr-code-btn"></button>
           <button type="button" class="icon-btn" id="copy-link"></button>
-          <a href="#" id="floor-plan-link" data-i18n="floorPlanNavLabel">Plan de salle</a>
           <a href="index.html" id="guest-page-link" data-i18n="adminNavGuestLink">Voir la page invité &rarr;</a>
           <input type="text" id="guest-link" hidden />
         </div>
       </nav>
+
+      <div class="view-switch">
+        <span class="view-switch-tab active" data-i18n="viewTabList">Liste des invités</span>
+        <a href="#" id="view-tab-floorplan" class="view-switch-tab" data-i18n="floorPlanNavLabel">Plan de salle</a>
+      </div>
 
       <div class="card">
         <div class="card-header-row">

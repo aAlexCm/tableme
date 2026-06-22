@@ -107,7 +107,7 @@ function reconcileTables(wedding) {
   const notFoundEl = document.getElementById('not-found');
   const contentEl = document.getElementById('floor-plan-content');
   const weddingNameEl = document.getElementById('floor-plan-wedding-name');
-  const backToListLink = document.getElementById('back-to-list-link');
+  const listTabLink = document.getElementById('view-tab-list');
 
   const addTableBtn = document.getElementById('add-table-btn');
   const floorCanvasEl = document.getElementById('floor-canvas');
@@ -505,7 +505,7 @@ function reconcileTables(wedding) {
 
   contentEl.hidden = false;
   weddingNameEl.textContent = wedding.name;
-  backToListLink.href = `wedding-admin.html?id=${weddingId}`;
+  listTabLink.href = `wedding-admin.html?id=${weddingId}`;
 
   langMount.appendChild(buildLangSwitcher(currentLang, setLang));
   applyTranslations(currentLang);

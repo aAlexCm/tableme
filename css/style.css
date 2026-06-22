@@ -484,6 +484,43 @@ nav.admin-nav a:hover {
   box-shadow: 0 2px 8px rgba(138, 109, 60, 0.18);
 }
 
+.view-switch {
+  display: inline-flex;
+  padding: 4px;
+  gap: 2px;
+  margin-bottom: 28px;
+  border-radius: var(--radius-pill);
+  background: var(--sage-light);
+}
+
+.view-switch-tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 38px;
+  padding: 0 20px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--sage-deep);
+  text-decoration: none;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+a.view-switch-tab:hover {
+  background: rgba(255, 255, 255, 0.5);
+  color: var(--charcoal);
+}
+
+.view-switch-tab.active {
+  background: var(--paper);
+  color: var(--charcoal);
+  box-shadow: 0 2px 8px rgba(138, 109, 60, 0.18);
+  cursor: default;
+}
+
 .muted.small {
   font-size: 0.78rem;
   margin-bottom: 10px;
