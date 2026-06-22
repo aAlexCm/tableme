@@ -34,10 +34,19 @@ export function getTableReach(table) {
   }
   const seatCount = table.seats != null ? table.seats : DEFAULT_SEATS;
   const { halfWidth } = getRectDimensions(seatCount);
-  return { x: halfWidth, y: RECT_Y_OFFSET + CHAIR_RADIUS_PX };
+  const reachLong = halfWidth;
+  const reachShort = RECT_Y_OFFSET + CHAIR_RADIUS_PX;
+  return table.rotated ? { x: reachShort, y: reachLong } : { x: reachLong, y: reachShort };
 }
 
-export function buildChairs(unitEl, shape, seatCount, guests, highlightGuestId) {
+export function getRectShapeSize(seatCount, rotated) {
+  const { halfWidth } = getRectDimensions(seatCount);
+  const long = halfWidth * 2;
+  const short = RECT_HALF_H * 2;
+  return rotated ? { width: short, height: long } : { width: long, height: short };
+}
+
+export function buildChairs(unitEl, shape, seatCount, guests, highlightGuestId, rotated) {
   const guestCount = guests.length;
   if (shape === 'round') {
     for (let i = 0; i < seatCount; i += 1) {
@@ -65,15 +74,16 @@ export function buildChairs(unitEl, shape, seatCount, guests, highlightGuestId) 
   const topCount = Math.ceil(seatCount / 2);
   const bottomCount = seatCount - topCount;
   const positions = [];
-  const placeRow = (count, y) => {
+  const placeRow = (count, offset) => {
     if (count <= 0) return;
     if (count === 1) {
-      positions.push({ x: 0, y });
+      positions.push(rotated ? { x: offset, y: 0 } : { x: 0, y: offset });
       return;
     }
     const span = usableHalf * 2;
     for (let i = 0; i < count; i += 1) {
-      positions.push({ x: -usableHalf + (i * span) / (count - 1), y });
+      const along = -usableHalf + (i * span) / (count - 1);
+      positions.push(rotated ? { x: offset, y: along } : { x: along, y: offset });
     }
   };
   placeRow(topCount, -RECT_Y_OFFSET);

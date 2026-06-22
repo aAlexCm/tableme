@@ -1557,9 +1557,32 @@ select.mini-lang-select {
   flex: 1;
 }
 
+.shape-picker-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .shape-picker {
   display: flex;
+  flex: 1;
   gap: 6px;
+}
+
+.table-rotate-btn {
+  flex: 0 0 auto;
+  width: 38px;
+  height: 38px;
+}
+
+.table-rotate-btn.active {
+  border-color: var(--gold-deep);
+  background: var(--sage-light);
+  color: var(--charcoal);
+}
+
+.table-rotate-btn[hidden] {
+  display: none;
 }
 
 .shape-option {

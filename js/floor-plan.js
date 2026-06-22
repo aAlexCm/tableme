@@ -1,7 +1,7 @@
 import { Storage, generateId } from './storage.js';
 import { applyTranslations, buildLangSwitcher, t } from './i18n.js';
 import { createTableModal } from './table-modal.js';
-import { DEFAULT_SEATS, getRectDimensions, getTableReach, buildChairs } from './table-shape.js';
+import { DEFAULT_SEATS, getRectShapeSize, getTableReach, buildChairs } from './table-shape.js';
 
 const LANG_KEY = 'tableme_wedding_admin_lang';
 
@@ -261,8 +261,9 @@ function reconcileTables(wedding) {
       shapeEl.className = `table-shape ${shape}`;
       shapeEl.tabIndex = 0;
       if (shape === 'rectangle') {
-        const { halfWidth } = getRectDimensions(seatCount);
-        shapeEl.style.width = `${halfWidth * 2}px`;
+        const { width, height } = getRectShapeSize(seatCount, table.rotated);
+        shapeEl.style.width = `${width}px`;
+        shapeEl.style.height = `${height}px`;
       }
       shapeEl.innerHTML = `
         <span class="table-shape-label">${escapeHtml(t(currentLang, 'tableLabel'))} ${escapeHtml(table.label)}</span>
@@ -276,7 +277,7 @@ function reconcileTables(wedding) {
       });
       unitEl.appendChild(shapeEl);
 
-      buildChairs(unitEl, shape, seatCount, tableGuests);
+      buildChairs(unitEl, shape, seatCount, tableGuests, undefined, table.rotated);
 
       attachTableDrag(unitEl, shapeEl, table);
       floorCanvasEl.appendChild(unitEl);

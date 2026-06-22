@@ -118,17 +118,20 @@
       <div class="table-modal-row">
         <div class="field">
           <label data-i18n="tableShapeLabel">Forme</label>
-          <div class="shape-picker" id="shape-picker">
-            <label class="shape-option">
-              <input type="radio" name="table-shape" value="round" />
-              <span class="shape-option-icon shape-option-icon-round"></span>
-              <span data-i18n="tableShapeRound">Ronde</span>
-            </label>
-            <label class="shape-option">
-              <input type="radio" name="table-shape" value="rectangle" />
-              <span class="shape-option-icon shape-option-icon-rectangle"></span>
-              <span data-i18n="tableShapeRectangle">Rectangulaire</span>
-            </label>
+          <div class="shape-picker-row">
+            <div class="shape-picker" id="shape-picker">
+              <label class="shape-option">
+                <input type="radio" name="table-shape" value="round" />
+                <span class="shape-option-icon shape-option-icon-round"></span>
+                <span data-i18n="tableShapeRound">Ronde</span>
+              </label>
+              <label class="shape-option">
+                <input type="radio" name="table-shape" value="rectangle" />
+                <span class="shape-option-icon shape-option-icon-rectangle"></span>
+                <span data-i18n="tableShapeRectangle">Rectangulaire</span>
+              </label>
+            </div>
+            <button type="button" class="icon-btn table-rotate-btn" id="table-rotate-btn" hidden></button>
           </div>
         </div>
 

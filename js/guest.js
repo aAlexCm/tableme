@@ -1,6 +1,6 @@
 import { Storage, normalize } from './storage.js';
 import { applyTranslations, buildLangSwitcher, t } from './i18n.js';
-import { DEFAULT_SEATS, getRectDimensions, buildChairs } from './table-shape.js';
+import { DEFAULT_SEATS, getRectShapeSize, buildChairs } from './table-shape.js';
 
 const LANG_KEY = 'tableme_lang';
 
@@ -84,13 +84,14 @@ const LANG_KEY = 'tableme_lang';
     const shapeEl = document.createElement('div');
     shapeEl.className = `table-shape ${shape}`;
     if (shape === 'rectangle') {
-      const { halfWidth } = getRectDimensions(seatCount);
-      shapeEl.style.width = `${halfWidth * 2}px`;
+      const { width, height } = getRectShapeSize(seatCount, table?.rotated);
+      shapeEl.style.width = `${width}px`;
+      shapeEl.style.height = `${height}px`;
     }
     shapeEl.innerHTML = `<span class="table-shape-label">${escapeHtml(t(currentLang, 'tableLabel'))} ${escapeHtml(guest.table)}</span>`;
     unitEl.appendChild(shapeEl);
 
-    buildChairs(unitEl, shape, seatCount, tableGuests, guest.id);
+    buildChairs(unitEl, shape, seatCount, tableGuests, guest.id, table?.rotated);
     canvas.appendChild(unitEl);
     wrap.appendChild(canvas);
 
