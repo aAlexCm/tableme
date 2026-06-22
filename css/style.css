@@ -213,7 +213,7 @@ header.hero p:not(.eyebrow) {
 
 input, select {
   font-family: 'Lato', sans-serif;
-  font-size: 0.88rem;
+  font-size: 16px;
   padding: 0 14px;
   height: 42px;
   border: 1px solid rgba(176, 141, 79, 0.3);
@@ -571,7 +571,7 @@ a.view-switch-tab:hover {
   min-height: 120px;
   padding: 12px 14px;
   font-family: 'Lato', sans-serif;
-  font-size: 0.88rem;
+  font-size: 16px;
   line-height: 1.5;
   color: var(--charcoal);
   background: var(--sage-light);
@@ -886,7 +886,7 @@ a.view-switch-tab:hover {
   width: 56px;
   flex: 0 0 auto;
   padding: 6px 8px;
-  font-size: 0.85rem;
+  font-size: 16px;
   text-align: center;
   border-radius: var(--radius-sm);
 }
@@ -1788,7 +1788,7 @@ select.mini-lang-select {
   .guest-table-edit {
     width: 38px;
     padding: 6px 4px;
-    font-size: 0.78rem;
+    font-size: 16px;
   }
 
   .row-arrows {
