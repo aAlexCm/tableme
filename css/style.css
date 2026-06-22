@@ -235,6 +235,39 @@ input:focus, select:focus {
   box-shadow: 0 0 0 4px rgba(176, 141, 79, 0.14);
 }
 
+.search-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-field .search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--sage-deep);
+  pointer-events: none;
+}
+
+.search-field input {
+  padding-left: 42px;
+  padding-right: 42px;
+}
+
+.search-clear-btn {
+  position: absolute;
+  right: 5px;
+  top: 50%;
+  margin-top: -15px;
+  width: 30px;
+  height: 30px;
+}
+
+.search-clear-btn[hidden] {
+  display: none;
+}
+
 button, a.secondary {
   display: inline-flex;
   align-items: center;
@@ -342,7 +375,8 @@ button.secondary:hover, a.secondary:hover {
   cursor: pointer;
   font-family: 'Playfair Display', serif;
   font-size: 1.05rem;
-  background: var(--sage-light);
+  background: var(--paper);
+  border: 1px solid rgba(176, 141, 79, 0.18);
   transition: background 0.15s ease, transform 0.1s ease;
 }
 
@@ -352,6 +386,7 @@ button.secondary:hover, a.secondary:hover {
 
 .guest-match .match-table {
   font-weight: 700;
+  font-size: 1.2rem;
   color: var(--gold-deep);
 }
 

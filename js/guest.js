@@ -12,6 +12,7 @@ const LANG_KEY = 'tableme_lang';
   const noWeddingEl = document.getElementById('no-wedding');
   const searchSectionEl = document.getElementById('search-section');
   const inputEl = document.getElementById('guest-input');
+  const clearBtn = document.getElementById('search-clear-btn');
   const resultEl = document.getElementById('result');
   const matchListEl = document.getElementById('match-list');
   const langMount = document.getElementById('lang-switcher-mount');
@@ -148,6 +149,14 @@ const LANG_KEY = 'tableme_lang';
   searchSectionEl.hidden = false;
 
   inputEl.addEventListener('input', () => {
+    clearBtn.hidden = inputEl.value.length === 0;
     handleSearch(inputEl.value, wedding.guests);
+  });
+
+  clearBtn.addEventListener('click', () => {
+    inputEl.value = '';
+    clearBtn.hidden = true;
+    clearResult();
+    inputEl.focus();
   });
 })();
