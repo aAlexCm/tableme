@@ -260,6 +260,9 @@ input:focus, select:focus {
   right: 5px;
   top: 50%;
   margin-top: -15px;
+}
+
+.icon-btn.search-clear-btn {
   width: 30px;
   height: 30px;
 }
