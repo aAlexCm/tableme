@@ -1186,7 +1186,7 @@ select.mini-lang-select {
 }
 
 .table-modal > .field {
-  margin-bottom: 10px;
+  margin-bottom: 16px;
 }
 
 .table-modal > .field:last-child {
@@ -1396,13 +1396,14 @@ select.mini-lang-select {
 
 .table-modal-add {
   display: flex;
-  gap: 6px;
+  align-items: center;
+  gap: 8px;
 }
 
 .table-modal-add select,
 .table-modal-add input {
   flex: 1;
-  height: 38px;
+  height: 42px;
 }
 
 .table-modal-add button {
@@ -1410,8 +1411,8 @@ select.mini-lang-select {
 }
 
 .table-modal-add .icon-btn {
-  width: 38px;
-  height: 38px;
+  width: 42px;
+  height: 42px;
 }
 
 @media (max-width: 600px) {
@@ -1484,9 +1485,5 @@ select.mini-lang-select {
   .table-modal-row {
     flex-direction: column;
     gap: 10px;
-  }
-
-  .table-modal-add {
-    flex-direction: column;
   }
 }

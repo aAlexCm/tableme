@@ -361,9 +361,9 @@ function reconcileTables(wedding) {
     const unassigned = wedding.guests.filter((g) => !g.table);
     tableAddExistingWrap.hidden = unassigned.length === 0;
     if (unassigned.length > 0) {
-      tableAddExistingSelect.innerHTML = unassigned
-        .map((g) => `<option value="${escapeHtml(g.id)}">${escapeHtml(g.name)}</option>`)
-        .join('');
+      const placeholder = `<option value="" disabled selected>${escapeHtml(t(currentLang, 'chooseGuestPlaceholder'))}</option>`;
+      const options = unassigned.map((g) => `<option value="${escapeHtml(g.id)}">${escapeHtml(g.name)}</option>`).join('');
+      tableAddExistingSelect.innerHTML = placeholder + options;
     }
   }
 
