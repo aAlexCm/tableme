@@ -47,40 +47,69 @@
   </div>
 
   <div id="table-modal" class="modal-overlay" hidden>
-    <div class="modal-panel modal-panel-wide">
+    <div class="modal-panel modal-panel-wide table-modal">
       <button type="button" class="modal-close" id="table-modal-close" aria-label="Close">&times;</button>
 
-      <div class="table-modal-header">
+      <div class="field table-name-field">
+        <label for="table-label-input" data-i18n="tableNameLabel">Nom de la table</label>
         <input type="text" id="table-label-input" class="table-label-input" />
-        <button type="button" class="icon-btn icon-btn-danger" id="table-delete-btn"></button>
       </div>
 
-      <div class="table-modal-options">
-        <label class="table-shape-toggle">
-          <input type="radio" name="table-shape" value="round" />
-          <span data-i18n="tableShapeRound">Ronde</span>
-        </label>
-        <label class="table-shape-toggle">
-          <input type="radio" name="table-shape" value="rectangle" />
-          <span data-i18n="tableShapeRectangle">Rectangulaire</span>
-        </label>
-        <div class="field table-seats-field">
-          <label for="table-seats-input" data-i18n="tableSeatsLabel">Places (optionnel)</label>
-          <input type="number" id="table-seats-input" min="0" />
+      <button type="button" class="danger-link" id="table-delete-btn">
+        <span class="danger-link-icon"></span>
+        <span data-i18n="deleteTableBtn">Supprimer la table</span>
+      </button>
+
+      <div class="table-modal-divider"></div>
+
+      <div class="field">
+        <label data-i18n="tableShapeLabel">Forme</label>
+        <div class="shape-picker" id="shape-picker">
+          <label class="shape-option">
+            <input type="radio" name="table-shape" value="round" />
+            <span class="shape-option-icon shape-option-icon-round"></span>
+            <span data-i18n="tableShapeRound">Ronde</span>
+          </label>
+          <label class="shape-option">
+            <input type="radio" name="table-shape" value="rectangle" />
+            <span class="shape-option-icon shape-option-icon-rectangle"></span>
+            <span data-i18n="tableShapeRectangle">Rectangulaire</span>
+          </label>
         </div>
       </div>
 
-      <h3 class="table-modal-subtitle" data-i18n="tableGuestsTitle">Invités à cette table</h3>
+      <div class="field table-seats-field">
+        <label for="table-seats-input" data-i18n="tableSeatsLabel">Nombre de places</label>
+        <div class="seats-stepper">
+          <button type="button" class="icon-btn" id="seats-decrement" aria-label="-">&minus;</button>
+          <input type="number" id="table-seats-input" min="0" />
+          <button type="button" class="icon-btn" id="seats-increment" aria-label="+">+</button>
+        </div>
+      </div>
+
+      <div class="table-modal-divider"></div>
+
+      <div class="table-modal-guests-header">
+        <h3 class="table-modal-subtitle" data-i18n="tableGuestsTitle">Invités à cette table</h3>
+        <span class="table-modal-guest-count" id="table-modal-guest-count"></span>
+      </div>
       <ul class="table-modal-guest-list" id="table-modal-guest-list"></ul>
       <p class="empty-state small" id="table-modal-empty" data-i18n="tableGuestsEmpty" hidden>Aucun invité à cette table.</p>
 
-      <div class="table-modal-add">
-        <select id="table-add-existing-select"></select>
-        <button type="button" id="table-add-existing-btn" data-i18n="assignBtn">Assigner</button>
+      <div class="field" id="table-add-existing-wrap">
+        <label for="table-add-existing-select" data-i18n="addExistingGuestLabel">Ajouter un invité existant</label>
+        <div class="table-modal-add">
+          <select id="table-add-existing-select"></select>
+          <button type="button" id="table-add-existing-btn" data-i18n="assignBtn">Assigner</button>
+        </div>
       </div>
-      <div class="table-modal-add">
-        <input type="text" id="table-add-new-input" data-i18n-placeholder="guestNamePlaceholder" placeholder="Nom et prénom de l'invité" />
-        <button type="button" id="table-add-new-btn" data-i18n="addBtn">Ajouter</button>
+
+      <div class="field">
+        <label for="table-add-new-input" data-i18n="addNewGuestLabel">Ou ajouter un nouvel invité</label>
+        <div class="table-modal-add">
+          <input type="text" id="table-add-new-input" data-i18n-placeholder="guestNamePlaceholder" placeholder="Nom et prénom de l'invité" />
+          <button type="button" id="table-add-new-btn" data-i18n="addBtn">Ajouter</button>
+        </div>
       </div>
     </div>
   </div>

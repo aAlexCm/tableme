@@ -122,11 +122,17 @@ function reconcileTables(wedding) {
   const tableSeatsInput = document.getElementById('table-seats-input');
   const shapeRadios = document.querySelectorAll('input[name="table-shape"]');
   const tableModalGuestList = document.getElementById('table-modal-guest-list');
+  const tableModalGuestCount = document.getElementById('table-modal-guest-count');
   const tableModalEmptyEl = document.getElementById('table-modal-empty');
+  const tableAddExistingWrap = document.getElementById('table-add-existing-wrap');
   const tableAddExistingSelect = document.getElementById('table-add-existing-select');
   const tableAddExistingBtn = document.getElementById('table-add-existing-btn');
   const tableAddNewInput = document.getElementById('table-add-new-input');
   const tableAddNewBtn = document.getElementById('table-add-new-btn');
+  const seatsDecrementBtn = document.getElementById('seats-decrement');
+  const seatsIncrementBtn = document.getElementById('seats-increment');
+  const tableDeleteIcon = tableDeleteBtn.querySelector('.danger-link-icon');
+  tableDeleteIcon.innerHTML = ICONS.trash;
 
   function escapeHtml(value) {
     return String(value).replace(/[&<>"']/g, (c) => ({
@@ -316,9 +322,11 @@ function reconcileTables(wedding) {
     shapeRadios.forEach((radio) => {
       radio.checked = radio.value === (table.shape || 'round');
     });
-    tableSeatsInput.value = table.seats != null ? table.seats : DEFAULT_SEATS;
+    const seatCount = table.seats != null ? table.seats : DEFAULT_SEATS;
+    tableSeatsInput.value = seatCount;
 
     const guests = wedding.guests.filter((g) => g.table === table.label);
+    tableModalGuestCount.textContent = `${guests.length}/${seatCount}`;
     tableModalEmptyEl.hidden = guests.length > 0;
     tableModalGuestList.innerHTML = '';
     guests.forEach((g) => {
@@ -335,13 +343,8 @@ function reconcileTables(wedding) {
     });
 
     const unassigned = wedding.guests.filter((g) => !g.table);
-    if (unassigned.length === 0) {
-      tableAddExistingSelect.innerHTML = '';
-      tableAddExistingSelect.disabled = true;
-      tableAddExistingBtn.disabled = true;
-    } else {
-      tableAddExistingSelect.disabled = false;
-      tableAddExistingBtn.disabled = false;
+    tableAddExistingWrap.hidden = unassigned.length === 0;
+    if (unassigned.length > 0) {
       tableAddExistingSelect.innerHTML = unassigned
         .map((g) => `<option value="${escapeHtml(g.id)}">${escapeHtml(g.name)}</option>`)
         .join('');
@@ -432,6 +435,15 @@ function reconcileTables(wedding) {
     await Storage.setTables(weddingId, tables);
     await refreshAll();
   });
+
+  function stepSeats(delta) {
+    const current = parseInt(tableSeatsInput.value, 10) || 0;
+    tableSeatsInput.value = Math.max(0, current + delta);
+    tableSeatsInput.dispatchEvent(new Event('change'));
+  }
+
+  seatsDecrementBtn.addEventListener('click', () => stepSeats(-1));
+  seatsIncrementBtn.addEventListener('click', () => stepSeats(1));
 
   tableDeleteBtn.addEventListener('click', async () => {
     const table = wedding.tables.find((tb) => tb.id === activeTableId);
