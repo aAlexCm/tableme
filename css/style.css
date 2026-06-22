@@ -514,6 +514,40 @@ nav.admin-nav a:hover {
   color: var(--sage-deep);
 }
 
+#download-template-btn {
+  margin-bottom: 14px;
+}
+
+.file-dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 36px 20px;
+  text-align: center;
+  color: var(--sage-deep);
+  background: var(--sage-light);
+  border: 2px dashed rgba(138, 150, 120, 0.4);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.file-dropzone p {
+  margin: 0;
+  font-size: 0.85rem;
+}
+
+.file-dropzone:hover,
+.file-dropzone:focus-visible {
+  border-color: var(--gold);
+}
+
+.file-dropzone.dragover {
+  background: var(--gold-light);
+  border-color: var(--gold-deep);
+}
+
 .modal-overlay {
   position: fixed;
   inset: 0;

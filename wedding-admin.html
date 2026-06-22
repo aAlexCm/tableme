@@ -36,6 +36,7 @@
           <div class="mode-switch" id="add-mode-switch">
             <button type="button" class="mode-btn active" data-mode="single" data-i18n="addModeSingle">Un par un</button>
             <button type="button" class="mode-btn" data-mode="bulk" data-i18n="addModeBulk">Plusieurs</button>
+            <button type="button" class="mode-btn" data-mode="file" data-i18n="addModeFile">Fichier</button>
           </div>
         </div>
 
@@ -56,6 +57,17 @@
           <textarea id="bulk-add-textarea" class="bulk-textarea" rows="6" placeholder="Jean Dupont, 1&#10;Claire Martin, 2" data-i18n-placeholder="bulkAddPlaceholder"></textarea>
           <button type="button" id="bulk-add-submit" data-i18n="bulkAddBtn">Ajouter la liste</button>
           <p class="bulk-add-feedback" id="bulk-add-feedback" hidden></p>
+        </div>
+
+        <div id="file-add-panel" hidden>
+          <p class="muted small" data-i18n="fileAddHint">Téléchargez le modèle, remplissez-le, puis importez-le ci-dessous (CSV ou Excel).</p>
+          <button type="button" class="secondary" id="download-template-btn" data-i18n="downloadTemplateBtn">Télécharger le modèle</button>
+          <div class="file-dropzone" id="file-dropzone" tabindex="0">
+            <svg class="file-dropzone-icon" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg>
+            <p data-i18n="fileDropzoneText">Glissez-déposez un fichier ici, ou cliquez pour le sélectionner</p>
+            <input type="file" id="file-import-input" accept=".csv,.xlsx,.xls" hidden />
+          </div>
+          <p class="bulk-add-feedback" id="file-add-feedback" hidden></p>
         </div>
       </div>
 
@@ -82,6 +94,7 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script type="module" src="js/wedding-admin.js"></script>
 </body>
 </html>

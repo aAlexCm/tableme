@@ -36,6 +36,22 @@ function parseBulkGuests(text) {
   return { entries, skipped };
 }
 
+function parseSheetRows(rows) {
+  const entries = [];
+  let skipped = 0;
+  rows.slice(1).forEach((row) => {
+    const name = (row[0] ?? '').toString().trim();
+    const table = (row[1] ?? '').toString().trim();
+    if (!name && !table) return;
+    if (!name || !table) {
+      skipped += 1;
+      return;
+    }
+    entries.push({ name, table });
+  });
+  return { entries, skipped };
+}
+
 (async function () {
   const params = new URLSearchParams(window.location.search);
   const weddingId = params.get('id');
@@ -63,6 +79,12 @@ function parseBulkGuests(text) {
   const bulkAddTextarea = document.getElementById('bulk-add-textarea');
   const bulkAddSubmitBtn = document.getElementById('bulk-add-submit');
   const bulkAddFeedbackEl = document.getElementById('bulk-add-feedback');
+
+  const fileAddPanel = document.getElementById('file-add-panel');
+  const downloadTemplateBtn = document.getElementById('download-template-btn');
+  const fileDropzone = document.getElementById('file-dropzone');
+  const fileImportInput = document.getElementById('file-import-input');
+  const fileAddFeedbackEl = document.getElementById('file-add-feedback');
 
   const qrCodeBtn = document.getElementById('qr-code-btn');
   const qrModal = document.getElementById('qr-modal');
@@ -326,7 +348,9 @@ function parseBulkGuests(text) {
     modeSwitchEl.querySelectorAll('.mode-btn').forEach((b) => b.classList.toggle('active', b === btn));
     guestForm.hidden = mode !== 'single';
     bulkAddPanel.hidden = mode !== 'bulk';
+    fileAddPanel.hidden = mode !== 'file';
     bulkAddFeedbackEl.hidden = true;
+    fileAddFeedbackEl.hidden = true;
   });
 
   bulkAddSubmitBtn.addEventListener('click', async () => {
@@ -341,6 +365,73 @@ function parseBulkGuests(text) {
     bulkAddFeedbackEl.textContent =
       t(currentLang, 'bulkAddSuccess', entries.length) + (skipped > 0 ? t(currentLang, 'bulkAddSkipped', skipped) : '');
     await renderGuests();
+  });
+
+  downloadTemplateBtn.addEventListener('click', () => {
+    const header = `${t(currentLang, 'guestNameLabel')},${t(currentLang, 'guestTableLabel')}`;
+    const examples = t(currentLang, 'bulkAddPlaceholder');
+    const csv = `${header}\n${examples}\n`;
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'modele-invites-tableme.csv';
+    link.click();
+    URL.revokeObjectURL(link.href);
+  });
+
+  async function processImportedFile(file) {
+    fileAddFeedbackEl.hidden = false;
+    try {
+      const buffer = await file.arrayBuffer();
+      const workbook = window.XLSX.read(buffer, { type: 'array' });
+      const sheet = workbook.Sheets[workbook.SheetNames[0]];
+      const rows = window.XLSX.utils.sheet_to_json(sheet, { header: 1 });
+      const { entries, skipped } = parseSheetRows(rows);
+      if (entries.length === 0) {
+        fileAddFeedbackEl.textContent = t(currentLang, 'bulkAddEmpty');
+        return;
+      }
+      await Storage.addGuests(weddingId, entries);
+      fileAddFeedbackEl.textContent =
+        t(currentLang, 'bulkAddSuccess', entries.length) + (skipped > 0 ? t(currentLang, 'bulkAddSkipped', skipped) : '');
+      await renderGuests();
+    } catch {
+      fileAddFeedbackEl.textContent = t(currentLang, 'fileImportError');
+    } finally {
+      fileImportInput.value = '';
+    }
+  }
+
+  fileDropzone.addEventListener('click', () => fileImportInput.click());
+  fileDropzone.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      fileImportInput.click();
+    }
+  });
+
+  fileImportInput.addEventListener('change', () => {
+    const file = fileImportInput.files[0];
+    if (file) processImportedFile(file);
+  });
+
+  ['dragenter', 'dragover'].forEach((evt) => {
+    fileDropzone.addEventListener(evt, (e) => {
+      e.preventDefault();
+      fileDropzone.classList.add('dragover');
+    });
+  });
+
+  ['dragleave', 'dragend', 'drop'].forEach((evt) => {
+    fileDropzone.addEventListener(evt, (e) => {
+      e.preventDefault();
+      fileDropzone.classList.remove('dragover');
+    });
+  });
+
+  fileDropzone.addEventListener('drop', (e) => {
+    const file = e.dataTransfer.files[0];
+    if (file) processImportedFile(file);
   });
 
   guestListEl.addEventListener('click', async (e) => {
