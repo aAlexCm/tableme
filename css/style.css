@@ -1515,11 +1515,42 @@ select.mini-lang-select {
 
   .guest-row {
     padding: 10px 12px;
+    flex-wrap: nowrap;
+    gap: 6px;
+  }
+
+  .guest-row-name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.95rem;
   }
 
   .guest-row-actions {
-    width: 100%;
-    justify-content: flex-end;
+    width: auto;
+    flex: 0 0 auto;
+    gap: 4px;
+  }
+
+  .guest-table-edit {
+    width: 38px;
+    padding: 6px 4px;
+    font-size: 0.78rem;
+  }
+
+  .row-arrows {
+    gap: 0;
+  }
+
+  .guest-row .icon-btn {
+    width: 28px;
+    height: 28px;
+  }
+
+  .drag-handle {
+    min-width: 22px;
+    min-height: 28px;
   }
 
   nav.admin-nav {
