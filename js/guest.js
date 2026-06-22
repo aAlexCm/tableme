@@ -12,6 +12,11 @@ const WAYFINDING_GRID_COLS = 50;
 const WAYFINDING_GRID_ROWS = 30;
 const WAYFINDING_START_RETREAT = 3;
 const WAYFINDING_END_RETREAT = 4.5;
+const WAYFINDING_MAP_INSET_PCT = 13;
+
+function toWayfindingMapPct(rawPct) {
+  return WAYFINDING_MAP_INSET_PCT + (rawPct / 100) * (100 - 2 * WAYFINDING_MAP_INSET_PCT);
+}
 
 function findGridPath(blocked, start, end) {
   const rows = blocked.length;
@@ -387,8 +392,8 @@ function trimRouteEnds(points, startRetreat, endRetreat) {
       points.forEach((p) => {
         const marker = document.createElement('div');
         marker.className = `wayfinding-marker wayfinding-marker-${p.kind}${p.kind === 'table' ? ` ${p.shape}` : ''}`;
-        marker.style.left = `${p.x}%`;
-        marker.style.top = `${p.y}%`;
+        marker.style.left = `${toWayfindingMapPct(p.x)}%`;
+        marker.style.top = `${toWayfindingMapPct(p.y)}%`;
         marker.classList.toggle('active-from', p.id === currentFrom);
         marker.classList.toggle('active-to', p.id === currentTo);
         marker.innerHTML = p.kind === 'landmark'
@@ -400,13 +405,13 @@ function trimRouteEnds(points, startRetreat, endRetreat) {
       const fromPoint = points.find((p) => p.id === currentFrom);
       const toPoint = points.find((p) => p.id === currentTo);
       if (fromPoint && toPoint && fromPoint.id !== toPoint.id) {
-        const a = { x: fromPoint.x, y: fromPoint.y * (WAYFINDING_VIEWBOX_H / 100) };
-        const b = { x: toPoint.x, y: toPoint.y * (WAYFINDING_VIEWBOX_H / 100) };
+        const a = { x: toWayfindingMapPct(fromPoint.x), y: toWayfindingMapPct(fromPoint.y) * (WAYFINDING_VIEWBOX_H / 100) };
+        const b = { x: toWayfindingMapPct(toPoint.x), y: toWayfindingMapPct(toPoint.y) * (WAYFINDING_VIEWBOX_H / 100) };
         const obstacles = points
           .filter((p) => p.id !== currentFrom && p.id !== currentTo)
           .map((p) => {
-            const cx = p.x;
-            const cy = p.y * (WAYFINDING_VIEWBOX_H / 100);
+            const cx = toWayfindingMapPct(p.x);
+            const cy = toWayfindingMapPct(p.y) * (WAYFINDING_VIEWBOX_H / 100);
             return {
               x0: cx - WAYFINDING_OBSTACLE_HALF_W,
               x1: cx + WAYFINDING_OBSTACLE_HALF_W,
