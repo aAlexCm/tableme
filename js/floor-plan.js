@@ -2,6 +2,8 @@ import { Storage, generateId } from './storage.js';
 import { applyTranslations, buildLangSwitcher, t } from './i18n.js';
 
 const LANG_KEY = 'tableme_wedding_admin_lang';
+const DEFAULT_SEATS = 8;
+const CHAIR_RADIUS = { round: 52, rectangle: 76 };
 
 const ICONS = {
   trash: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>',
@@ -133,7 +135,7 @@ function reconcileTables(wedding) {
     await refreshAll();
   }
 
-  function attachTableDrag(shapeEl, table) {
+  function attachTableDrag(unitEl, shapeEl, table) {
     let pointerId = null;
     let startClientX = 0;
     let startClientY = 0;
@@ -151,8 +153,8 @@ function reconcileTables(wedding) {
       const dy = (rawDy / rect.height) * 100;
       table.x = clamp(startX + dx, 4, 96);
       table.y = clamp(startY + dy, 4, 92);
-      shapeEl.style.left = `${table.x}%`;
-      shapeEl.style.top = `${table.y}%`;
+      unitEl.style.left = `${table.x}%`;
+      unitEl.style.top = `${table.y}%`;
     }
 
     async function onPointerUp(e) {
@@ -187,15 +189,21 @@ function reconcileTables(wedding) {
     floorCanvasEl.innerHTML = '';
     (wedding.tables || []).forEach((table) => {
       const guestCount = wedding.guests.filter((g) => g.table === table.label).length;
+      const shape = table.shape === 'rectangle' ? 'rectangle' : 'round';
+      const seatCount = table.seats != null ? table.seats : DEFAULT_SEATS;
+
+      const unitEl = document.createElement('div');
+      unitEl.className = 'table-unit';
+      unitEl.style.left = `${table.x}%`;
+      unitEl.style.top = `${table.y}%`;
+      unitEl.dataset.id = table.id;
+
       const shapeEl = document.createElement('div');
-      shapeEl.className = `table-shape ${table.shape === 'rectangle' ? 'rectangle' : 'round'}`;
-      shapeEl.style.left = `${table.x}%`;
-      shapeEl.style.top = `${table.y}%`;
-      shapeEl.dataset.id = table.id;
+      shapeEl.className = `table-shape ${shape}`;
       shapeEl.tabIndex = 0;
       shapeEl.innerHTML = `
-        <span class="table-shape-label">${escapeHtml(table.label)}</span>
-        <span class="table-shape-count">${guestCount}${table.seats ? ` / ${escapeHtml(String(table.seats))}` : ''}</span>
+        <span class="table-shape-label">${escapeHtml(t(currentLang, 'tableLabel'))} ${escapeHtml(table.label)}</span>
+        <span class="table-shape-count">${guestCount}/${seatCount}</span>
       `;
       shapeEl.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' || e.key === ' ') {
@@ -203,8 +211,20 @@ function reconcileTables(wedding) {
           openTableModal(table.id);
         }
       });
-      attachTableDrag(shapeEl, table);
-      floorCanvasEl.appendChild(shapeEl);
+      unitEl.appendChild(shapeEl);
+
+      const radius = CHAIR_RADIUS[shape];
+      for (let i = 0; i < seatCount; i += 1) {
+        const angle = (360 / seatCount) * i;
+        const chairEl = document.createElement('div');
+        chairEl.className = `chair${i < guestCount ? ' occupied' : ''}`;
+        chairEl.style.setProperty('--chair-angle', `${angle}deg`);
+        chairEl.style.setProperty('--chair-radius', `-${radius}px`);
+        unitEl.appendChild(chairEl);
+      }
+
+      attachTableDrag(unitEl, shapeEl, table);
+      floorCanvasEl.appendChild(unitEl);
     });
   }
 
@@ -235,7 +255,7 @@ function reconcileTables(wedding) {
     shapeRadios.forEach((radio) => {
       radio.checked = radio.value === (table.shape || 'round');
     });
-    tableSeatsInput.value = table.seats ?? '';
+    tableSeatsInput.value = table.seats != null ? table.seats : DEFAULT_SEATS;
 
     const guests = wedding.guests.filter((g) => g.table === table.label);
     tableModalEmptyEl.hidden = guests.length > 0;
