@@ -1,8 +1,11 @@
 import { Storage, normalize } from './storage.js';
 import { applyTranslations, buildLangSwitcher, t } from './i18n.js';
 import { DEFAULT_SEATS, getRectShapeSize, buildChairs } from './table-shape.js';
+import { getLandmarkType } from './landmarks.js';
 
 const LANG_KEY = 'tableme_lang';
+const WAYFINDING_VIEWBOX_W = 100;
+const WAYFINDING_VIEWBOX_H = 60;
 
 (async function () {
   const params = new URLSearchParams(window.location.search);
@@ -21,6 +24,7 @@ const LANG_KEY = 'tableme_lang';
   let currentLang = localStorage.getItem(LANG_KEY) || 'fr';
   let currentWedding = null;
   let outsideClickHandler = null;
+  let wayfindingArrowSeq = 0;
 
   applyTranslations(currentLang);
 
@@ -154,6 +158,151 @@ const LANG_KEY = 'tableme_lang';
     return wrap;
   }
 
+  function getWayfindingPoints() {
+    const tablePoints = (currentWedding.tables || []).map((tb) => ({
+      id: `table:${tb.id}`,
+      kind: 'table',
+      shape: tb.shape === 'rectangle' ? 'rectangle' : 'round',
+      x: tb.x,
+      y: tb.y,
+      label: `${t(currentLang, 'tableLabel')} ${tb.label}`,
+    }));
+    const landmarkPoints = (currentWedding.landmarks || []).map((lm) => {
+      const landmarkType = getLandmarkType(lm.type);
+      return {
+        id: `landmark:${lm.id}`,
+        kind: 'landmark',
+        icon: landmarkType.icon,
+        x: lm.x,
+        y: lm.y,
+        label: t(currentLang, landmarkType.labelKey),
+      };
+    });
+    return [...landmarkPoints, ...tablePoints];
+  }
+
+  function buildWayfindingSection(defaultToId) {
+    const points = getWayfindingPoints();
+    if (points.length < 2) return null;
+
+    const entranceLandmark = (currentWedding.landmarks || []).find((lm) => lm.type === 'entrance');
+    const fromId = entranceLandmark ? `landmark:${entranceLandmark.id}` : points[0].id;
+    const toCandidate = defaultToId && points.some((p) => p.id === defaultToId) ? defaultToId : null;
+    const toId = toCandidate && toCandidate !== fromId
+      ? toCandidate
+      : (points.find((p) => p.id !== fromId)?.id || fromId);
+
+    const wrap = document.createElement('div');
+    wrap.className = 'wayfinding';
+
+    const heading = document.createElement('p');
+    heading.className = 'wayfinding-title';
+    heading.textContent = t(currentLang, 'wayfindingTitle');
+    wrap.appendChild(heading);
+
+    const landmarkOptionsHtml = points
+      .filter((p) => p.kind === 'landmark')
+      .map((p) => `<option value="${p.id}">${escapeHtml(p.label)}</option>`)
+      .join('');
+    const tableOptionsHtml = points
+      .filter((p) => p.kind === 'table')
+      .map((p) => `<option value="${p.id}">${escapeHtml(p.label)}</option>`)
+      .join('');
+    const groupedOptionsHtml = `
+      ${landmarkOptionsHtml ? `<optgroup label="${escapeHtml(t(currentLang, 'wayfindingLandmarksGroup'))}">${landmarkOptionsHtml}</optgroup>` : ''}
+      ${tableOptionsHtml ? `<optgroup label="${escapeHtml(t(currentLang, 'wayfindingTablesGroup'))}">${tableOptionsHtml}</optgroup>` : ''}
+    `;
+
+    const controls = document.createElement('div');
+    controls.className = 'wayfinding-controls';
+    controls.innerHTML = `
+      <div class="wayfinding-field">
+        <label>${escapeHtml(t(currentLang, 'wayfindingFromLabel'))}</label>
+        <select class="wayfinding-from">${groupedOptionsHtml}</select>
+      </div>
+      <span class="wayfinding-arrow-sep">&rarr;</span>
+      <div class="wayfinding-field">
+        <label>${escapeHtml(t(currentLang, 'wayfindingToLabel'))}</label>
+        <select class="wayfinding-to">${groupedOptionsHtml}</select>
+      </div>
+    `;
+    wrap.appendChild(controls);
+
+    const fromSelect = controls.querySelector('.wayfinding-from');
+    const toSelect = controls.querySelector('.wayfinding-to');
+    fromSelect.value = fromId;
+    toSelect.value = toId;
+
+    const mapWrap = document.createElement('div');
+    mapWrap.className = 'wayfinding-map';
+    wrap.appendChild(mapWrap);
+
+    function renderMap() {
+      mapWrap.innerHTML = '';
+      const currentFrom = fromSelect.value;
+      const currentTo = toSelect.value;
+
+      points.forEach((p) => {
+        const marker = document.createElement('div');
+        marker.className = `wayfinding-marker wayfinding-marker-${p.kind}${p.kind === 'table' ? ` ${p.shape}` : ''}`;
+        marker.style.left = `${p.x}%`;
+        marker.style.top = `${p.y}%`;
+        marker.classList.toggle('active-from', p.id === currentFrom);
+        marker.classList.toggle('active-to', p.id === currentTo);
+        marker.innerHTML = p.kind === 'landmark'
+          ? `<span class="wayfinding-marker-icon">${p.icon}</span><span class="wayfinding-marker-label">${escapeHtml(p.label)}</span>`
+          : `<span class="wayfinding-marker-shape"></span><span class="wayfinding-marker-label">${escapeHtml(p.label)}</span>`;
+        mapWrap.appendChild(marker);
+      });
+
+      const fromPoint = points.find((p) => p.id === currentFrom);
+      const toPoint = points.find((p) => p.id === currentTo);
+      if (fromPoint && toPoint && fromPoint.id !== toPoint.id) {
+        const svgNs = 'http://www.w3.org/2000/svg';
+        const svg = document.createElementNS(svgNs, 'svg');
+        svg.setAttribute('class', 'wayfinding-arrow-svg');
+        svg.setAttribute('viewBox', `0 0 ${WAYFINDING_VIEWBOX_W} ${WAYFINDING_VIEWBOX_H}`);
+        svg.setAttribute('preserveAspectRatio', 'none');
+
+        wayfindingArrowSeq += 1;
+        const arrowId = `wayfinding-arrowhead-${wayfindingArrowSeq}`;
+
+        const defs = document.createElementNS(svgNs, 'defs');
+        const markerEl = document.createElementNS(svgNs, 'marker');
+        markerEl.setAttribute('id', arrowId);
+        markerEl.setAttribute('viewBox', '0 0 10 10');
+        markerEl.setAttribute('refX', '7');
+        markerEl.setAttribute('refY', '5');
+        markerEl.setAttribute('markerWidth', '4.5');
+        markerEl.setAttribute('markerHeight', '4.5');
+        markerEl.setAttribute('orient', 'auto-start-reverse');
+        const arrowPath = document.createElementNS(svgNs, 'path');
+        arrowPath.setAttribute('d', 'M0,0 L10,5 L0,10 z');
+        arrowPath.setAttribute('fill', '#8a6d3c');
+        markerEl.appendChild(arrowPath);
+        defs.appendChild(markerEl);
+        svg.appendChild(defs);
+
+        const line = document.createElementNS(svgNs, 'line');
+        line.setAttribute('x1', fromPoint.x);
+        line.setAttribute('y1', fromPoint.y * (WAYFINDING_VIEWBOX_H / 100));
+        line.setAttribute('x2', toPoint.x);
+        line.setAttribute('y2', toPoint.y * (WAYFINDING_VIEWBOX_H / 100));
+        line.setAttribute('class', 'wayfinding-arrow-line');
+        line.setAttribute('marker-end', `url(#${arrowId})`);
+        svg.appendChild(line);
+
+        mapWrap.appendChild(svg);
+      }
+    }
+
+    fromSelect.addEventListener('change', renderMap);
+    toSelect.addEventListener('change', renderMap);
+
+    renderMap();
+    return wrap;
+  }
+
   function showSingleGuest(guest) {
     clearResult();
     resultEl.hidden = false;
@@ -173,6 +322,11 @@ const LANG_KEY = 'tableme_lang';
       const tableGuests = currentWedding.guests.filter((g) => g.table === guest.table);
       if (tableGuests.length > 0) {
         resultEl.appendChild(buildTablePreview(guest, tableGuests));
+      }
+      const guestTable = (currentWedding.tables || []).find((tb) => tb.label === guest.table);
+      if (guestTable) {
+        const wayfinding = buildWayfindingSection(`table:${guestTable.id}`);
+        if (wayfinding) resultEl.appendChild(wayfinding);
       }
     }
   }
@@ -201,6 +355,8 @@ const LANG_KEY = 'tableme_lang';
     `;
     inputEl.blur();
     resultEl.appendChild(buildTablePreview({ id: null, table: table.label }, tableGuests));
+    const wayfinding = buildWayfindingSection(`table:${table.id}`);
+    if (wayfinding) resultEl.appendChild(wayfinding);
   }
 
   function showNoMatch() {

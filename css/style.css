@@ -1588,6 +1588,142 @@ select.mini-lang-select {
   font-weight: 700;
 }
 
+.wayfinding {
+  width: 100%;
+  margin-top: 26px;
+  padding-top: 22px;
+  border-top: 1px solid rgba(176, 141, 79, 0.18);
+}
+
+.wayfinding-title {
+  margin: 0 0 14px;
+  text-align: center;
+  font-family: 'Playfair Display', serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--charcoal);
+}
+
+.wayfinding-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.wayfinding-field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.wayfinding-field label {
+  font-size: 0.7rem;
+  color: var(--sage-deep);
+}
+
+.wayfinding-field select {
+  font-size: 0.85rem;
+  padding: 7px 10px;
+}
+
+.wayfinding-arrow-sep {
+  margin-top: 16px;
+  color: var(--gold-deep);
+  font-size: 1.1rem;
+}
+
+.wayfinding-map {
+  position: relative;
+  width: 100%;
+  max-width: 320px;
+  aspect-ratio: 100 / 60;
+  margin: 0 auto;
+  background: var(--sage-light);
+  border: 1px solid rgba(176, 141, 79, 0.3);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.wayfinding-marker {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+}
+
+.wayfinding-marker-shape {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--paper);
+  border: 1.4px solid var(--sage-deep);
+}
+
+.wayfinding-marker-table.rectangle .wayfinding-marker-shape {
+  width: 14px;
+  height: 8px;
+  border-radius: 2px;
+}
+
+.wayfinding-marker-icon {
+  display: flex;
+  color: var(--sage-deep);
+}
+
+.wayfinding-marker-icon svg {
+  width: 12px;
+  height: 12px;
+}
+
+.wayfinding-marker-label {
+  font-family: 'Lato', sans-serif;
+  font-size: 0.5rem;
+  font-weight: 700;
+  color: var(--charcoal);
+  white-space: nowrap;
+  line-height: 1;
+}
+
+.wayfinding-marker.active-from .wayfinding-marker-shape,
+.wayfinding-marker.active-from .wayfinding-marker-icon {
+  color: var(--sage-deep);
+  box-shadow: 0 0 0 3px rgba(95, 107, 83, 0.3);
+}
+
+.wayfinding-marker.active-from .wayfinding-marker-shape {
+  box-shadow: 0 0 0 3px rgba(95, 107, 83, 0.3);
+}
+
+.wayfinding-marker.active-to .wayfinding-marker-shape {
+  background: var(--gold);
+  border-color: var(--gold-deep);
+  box-shadow: 0 0 0 3px rgba(176, 141, 79, 0.35);
+}
+
+.wayfinding-marker.active-to .wayfinding-marker-icon {
+  color: var(--gold-deep);
+}
+
+.wayfinding-arrow-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.wayfinding-arrow-line {
+  stroke: #8a6d3c;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+}
+
 .unassigned-list {
   list-style: none;
   margin: 0;
