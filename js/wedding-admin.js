@@ -3,6 +3,7 @@ import { applyTranslations, buildLangSwitcher, t } from './i18n.js';
 import { createTableModal } from './table-modal.js';
 import { createShareControls } from './share-controls.js';
 import { createThemeSettings } from './theme-settings.js';
+import { assignSeats } from './table-shape.js';
 
 const LANG_KEY = 'tableme_wedding_admin_lang';
 const DEFAULT_SEATS = 8;
@@ -170,7 +171,8 @@ function parseSheetRows(rows) {
       const guest = guestMap.get(row.dataset.id);
       if (!guest) return;
       const table = row.closest('.table-guest-list').dataset.table;
-      newGuests.push({ ...guest, table });
+      const seat = table === guest.table ? guest.seat : null;
+      newGuests.push({ ...guest, table, seat });
     });
     await Storage.setGuests(weddingId, newGuests);
     await renderGuests();
@@ -205,7 +207,7 @@ function parseSheetRows(rows) {
     }
     const wedding = await Storage.getWedding(weddingId);
     if (!wedding) return;
-    const guests = wedding.guests.map((g) => (g.id === guestId ? { ...g, table } : g));
+    const guests = wedding.guests.map((g) => (g.id === guestId ? { ...g, table, seat: null } : g));
     await Storage.setGuests(weddingId, guests);
     await renderGuests();
   }
@@ -322,14 +324,7 @@ function parseSheetRows(rows) {
       list.className = 'table-guest-list';
       list.dataset.table = key;
 
-      if (guests.length === 0) {
-        const emptyLi = document.createElement('li');
-        emptyLi.className = 'table-guest-list-empty';
-        emptyLi.textContent = t(currentLang, 'tableGuestsEmpty');
-        list.appendChild(emptyLi);
-      }
-
-      guests.forEach((g) => {
+      function renderGuestRow(g) {
         const deleteLabel = escapeHtml(t(currentLang, 'deleteBtn'));
         const li = document.createElement('li');
         li.className = 'guest-row';
@@ -348,8 +343,30 @@ function parseSheetRows(rows) {
           </span>
         `;
         attachRowDragEvents(li);
-        list.appendChild(li);
-      });
+        return li;
+      }
+
+      function renderEmptySeatRow() {
+        const li = document.createElement('li');
+        li.className = 'guest-row-empty';
+        li.textContent = t(currentLang, 'emptySeatPlaceholder');
+        return li;
+      }
+
+      if (table) {
+        const seatCount = table.seats != null ? table.seats : DEFAULT_SEATS;
+        const slots = assignSeats(guests, seatCount);
+        slots.forEach((guest) => {
+          list.appendChild(guest ? renderGuestRow(guest) : renderEmptySeatRow());
+        });
+      } else if (guests.length === 0) {
+        const emptyLi = document.createElement('li');
+        emptyLi.className = 'table-guest-list-empty';
+        emptyLi.textContent = t(currentLang, 'tableGuestsEmpty');
+        list.appendChild(emptyLi);
+      } else {
+        guests.forEach((g) => list.appendChild(renderGuestRow(g)));
+      }
 
       attachListDropEvents(list);
       groupEl.appendChild(list);
@@ -482,7 +499,7 @@ function parseSheetRows(rows) {
         const affected = wedding.guests.filter((g) => g.table === table.label).length;
         if (!confirm(t(currentLang, 'confirmDeleteTable', affected))) return;
         const tables = wedding.tables.filter((tb) => tb.id !== table.id);
-        const guests = wedding.guests.map((g) => (g.table === table.label ? { ...g, table: '' } : g));
+        const guests = wedding.guests.map((g) => (g.table === table.label ? { ...g, table: '', seat: null } : g));
         await Storage.setBoard(weddingId, { guests, tables });
         await renderGuests();
       }

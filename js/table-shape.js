@@ -46,22 +46,47 @@ export function getRectShapeSize(seatCount, rotated) {
   return rotated ? { width: short, height: long } : { width: long, height: short };
 }
 
+// Builds the slot -> guest mapping for a table. A guest with a valid `.seat`
+// (an index into the geometric chair list) is "pinned" to that exact chair;
+// everyone else auto-fills the remaining slots in array order, preserving the
+// original contiguous-fill behavior for tables with no pinned guests at all.
+export function assignSeats(guests, seatCount) {
+  const slots = new Array(seatCount).fill(null);
+  const pinnedIds = new Set();
+  guests.forEach((g) => {
+    if (g.seat != null && g.seat >= 0 && g.seat < seatCount && !slots[g.seat]) {
+      slots[g.seat] = g;
+      pinnedIds.add(g.id);
+    }
+  });
+  const unpinned = guests.filter((g) => !pinnedIds.has(g.id));
+  let nextIdx = 0;
+  for (let i = 0; i < seatCount && nextIdx < unpinned.length; i += 1) {
+    if (slots[i]) continue;
+    slots[i] = unpinned[nextIdx];
+    nextIdx += 1;
+  }
+  return slots;
+}
+
 export function buildChairs(unitEl, shape, seatCount, guests, highlightGuestId, rotated) {
-  const guestCount = guests.length;
+  const slots = assignSeats(guests, seatCount);
   if (shape === 'round') {
     for (let i = 0; i < seatCount; i += 1) {
       const angle = (360 / seatCount) * i;
-      const occupied = i < guestCount;
-      const isYou = occupied && highlightGuestId != null && guests[i].id === highlightGuestId;
+      const guest = slots[i];
+      const occupied = !!guest;
+      const isYou = occupied && highlightGuestId != null && guest.id === highlightGuestId;
       const chairEl = document.createElement('div');
       chairEl.className = `chair${occupied ? ' occupied' : ''}${isYou ? ' chair-you' : ''}`;
+      chairEl.dataset.slot = i;
       if (occupied) {
-        chairEl.dataset.name = guests[i].name;
-        chairEl.dataset.guestId = guests[i].id;
+        chairEl.dataset.name = guest.name;
+        chairEl.dataset.guestId = guest.id;
         const initialsEl = document.createElement('span');
         initialsEl.className = 'chair-initials';
         initialsEl.style.setProperty('--chair-counter-angle', `-${angle}deg`);
-        initialsEl.textContent = getInitials(guests[i].name);
+        initialsEl.textContent = getInitials(guest.name);
         chairEl.appendChild(initialsEl);
       }
       chairEl.style.setProperty('--chair-angle', `${angle}deg`);
@@ -91,16 +116,18 @@ export function buildChairs(unitEl, shape, seatCount, guests, highlightGuestId, 
   placeRow(bottomCount, RECT_Y_OFFSET);
 
   positions.forEach((pos, i) => {
-    const occupied = i < guestCount;
-    const isYou = occupied && highlightGuestId != null && guests[i].id === highlightGuestId;
+    const guest = slots[i];
+    const occupied = !!guest;
+    const isYou = occupied && highlightGuestId != null && guest.id === highlightGuestId;
     const chairEl = document.createElement('div');
     chairEl.className = `chair chair-fixed${occupied ? ' occupied' : ''}${isYou ? ' chair-you' : ''}`;
+    chairEl.dataset.slot = i;
     if (occupied) {
-      chairEl.dataset.name = guests[i].name;
-      chairEl.dataset.guestId = guests[i].id;
+      chairEl.dataset.name = guest.name;
+      chairEl.dataset.guestId = guest.id;
       const initialsEl = document.createElement('span');
       initialsEl.className = 'chair-initials';
-      initialsEl.textContent = getInitials(guests[i].name);
+      initialsEl.textContent = getInitials(guest.name);
       chairEl.appendChild(initialsEl);
     }
     chairEl.style.left = `${pos.x}px`;

@@ -863,6 +863,23 @@ body.modal-open {
   margin-bottom: 0;
 }
 
+.guest-row-empty {
+  display: flex;
+  align-items: center;
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  border-radius: var(--radius);
+  border: 1px dashed rgba(176, 141, 79, 0.35);
+  background: transparent;
+  color: #998c77;
+  font-size: 0.85rem;
+  font-style: italic;
+}
+
+.guest-row-empty:last-child {
+  margin-bottom: 0;
+}
+
 .guest-row:hover {
   background: var(--sage-light);
   box-shadow: 0 10px 22px rgba(138, 109, 60, 0.1);
@@ -1564,6 +1581,7 @@ select.mini-lang-select {
 
 #floor-canvas .chair.occupied {
   cursor: pointer;
+  touch-action: none;
 }
 
 #floor-canvas .chair.picked {
@@ -1581,6 +1599,36 @@ select.mini-lang-select {
 
 #floor-canvas .chair.just-dropped {
   animation: chair-drop-pop 0.6s ease;
+}
+
+#floor-canvas .chair.drop-target {
+  border-style: solid;
+  border-color: var(--gold-deep);
+  background: color-mix(in srgb, var(--gold) 35%, var(--paper));
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--gold) 30%, transparent);
+}
+
+.chair-drag-ghost {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 30px;
+  height: 30px;
+  margin: -15px;
+  border-radius: 50%;
+  background: var(--gold);
+  border: 2px solid var(--gold-deep);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Inter', sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  pointer-events: none;
+  z-index: 50;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.3);
 }
 
 @keyframes chair-pick-pulse {
@@ -2413,6 +2461,10 @@ body.admin-theme .guest-row.dragging {
   box-shadow: 0 6px 14px rgba(15, 23, 42, 0.15);
 }
 
+body.admin-theme .guest-row-empty {
+  border-color: rgba(100, 116, 139, 0.3);
+}
+
 body.admin-theme .wedding-item:hover {
   background: #e8eaed;
 }
@@ -2436,6 +2488,7 @@ body.admin-theme .lang-switcher-menu {
 body.admin-theme .muted,
 body.admin-theme .table-group-count,
 body.admin-theme .table-guest-list-empty,
+body.admin-theme .guest-row-empty,
 body.admin-theme .empty-state {
   color: #64748b;
 }

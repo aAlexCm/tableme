@@ -146,7 +146,7 @@ export function createTableModal({ weddingId, getLang, onChange }) {
   }
 
   async function setGuestTable(guestId, tableLabel) {
-    const guests = wedding.guests.map((g) => (g.id === guestId ? { ...g, table: tableLabel } : g));
+    const guests = wedding.guests.map((g) => (g.id === guestId ? { ...g, table: tableLabel, seat: null } : g));
     await Storage.setGuests(weddingId, guests);
     await notifyChange();
   }
@@ -227,7 +227,7 @@ export function createTableModal({ weddingId, getLang, onChange }) {
     const affected = wedding.guests.filter((g) => g.table === table.label).length;
     if (!confirm(t(lang, 'confirmDeleteTable', affected))) return;
     const tables = wedding.tables.filter((tb) => tb.id !== table.id);
-    const guests = wedding.guests.map((g) => (g.table === table.label ? { ...g, table: '' } : g));
+    const guests = wedding.guests.map((g) => (g.table === table.label ? { ...g, table: '', seat: null } : g));
     await Storage.setBoard(weddingId, { guests, tables });
     close();
     if (onChange) await onChange();
