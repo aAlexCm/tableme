@@ -11,7 +11,7 @@ const WAYFINDING_OBSTACLE_HALF_W = 8;
 const WAYFINDING_OBSTACLE_HALF_H = 6;
 const WAYFINDING_GRID_COLS = 50;
 const WAYFINDING_GRID_ROWS = 30;
-const WAYFINDING_START_RETREAT = 3;
+const WAYFINDING_START_RETREAT = 4;
 const WAYFINDING_END_RETREAT = 4.5;
 const WAYFINDING_MAP_INSET_PCT = 13;
 
@@ -134,6 +134,31 @@ function computeWayfindingPath(a, b, obstacles) {
   return buildRouteFromCells(simplified, a, b, cellW, cellH);
 }
 
+function segmentClearsObstacles(p1, p2, obstacles) {
+  const steps = 24;
+  for (let i = 0; i <= steps; i += 1) {
+    const ratio = i / steps;
+    const x = p1.x + (p2.x - p1.x) * ratio;
+    const y = p1.y + (p2.y - p1.y) * ratio;
+    if (obstacles.some((o) => x >= o.x0 && x <= o.x1 && y >= o.y0 && y <= o.y1)) return false;
+  }
+  return true;
+}
+
+function simplifyRouteBySight(points, obstacles) {
+  if (points.length <= 2) return points;
+  const result = [points[0]];
+  let anchor = 0;
+  for (let i = 1; i < points.length - 1; i += 1) {
+    if (!segmentClearsObstacles(points[anchor], points[i + 1], obstacles)) {
+      result.push(points[i]);
+      anchor = i;
+    }
+  }
+  result.push(points[points.length - 1]);
+  return result;
+}
+
 function trimRouteEnds(points, startRetreat, endRetreat) {
   if (points.length < 2) return points;
   const trim = (p0, p1, retreat) => {
@@ -168,7 +193,6 @@ function trimRouteEnds(points, startRetreat, endRetreat) {
   let currentLang = localStorage.getItem(LANG_KEY) || 'fr';
   let currentWedding = null;
   let outsideClickHandler = null;
-  let wayfindingArrowSeq = 0;
 
   applyTranslations(currentLang);
 
@@ -422,7 +446,8 @@ function trimRouteEnds(points, startRetreat, endRetreat) {
             };
           });
         const rawRoutePoints = computeWayfindingPath(a, b, obstacles);
-        const routePoints = trimRouteEnds(rawRoutePoints, WAYFINDING_START_RETREAT, WAYFINDING_END_RETREAT);
+        const sightRoutePoints = simplifyRouteBySight(rawRoutePoints, obstacles);
+        const routePoints = trimRouteEnds(sightRoutePoints, WAYFINDING_START_RETREAT, WAYFINDING_END_RETREAT);
 
         const svgNs = 'http://www.w3.org/2000/svg';
         const svg = document.createElementNS(svgNs, 'svg');
@@ -430,30 +455,16 @@ function trimRouteEnds(points, startRetreat, endRetreat) {
         svg.setAttribute('viewBox', `0 0 ${WAYFINDING_VIEWBOX_W} ${WAYFINDING_VIEWBOX_H}`);
         svg.setAttribute('preserveAspectRatio', 'none');
 
-        wayfindingArrowSeq += 1;
-        const arrowId = `wayfinding-arrowhead-${wayfindingArrowSeq}`;
+        const pointsAttr = routePoints.map((p) => `${p.x},${p.y}`).join(' ');
 
-        const defs = document.createElementNS(svgNs, 'defs');
-        const markerEl = document.createElementNS(svgNs, 'marker');
-        markerEl.setAttribute('id', arrowId);
-        markerEl.setAttribute('viewBox', '0 0 10 10');
-        markerEl.setAttribute('refX', '7');
-        markerEl.setAttribute('refY', '5');
-        markerEl.setAttribute('markerWidth', '4');
-        markerEl.setAttribute('markerHeight', '4');
-        markerEl.setAttribute('orient', 'auto-start-reverse');
-        const arrowPath = document.createElementNS(svgNs, 'path');
-        arrowPath.setAttribute('d', 'M0,0 L10,5 L0,10 z');
-        const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--guest-accent').trim();
-        arrowPath.setAttribute('fill', accentColor || '#8a6d3c');
-        markerEl.appendChild(arrowPath);
-        defs.appendChild(markerEl);
-        svg.appendChild(defs);
+        const halo = document.createElementNS(svgNs, 'polyline');
+        halo.setAttribute('points', pointsAttr);
+        halo.setAttribute('class', 'wayfinding-arrow-halo');
+        svg.appendChild(halo);
 
         const polyline = document.createElementNS(svgNs, 'polyline');
-        polyline.setAttribute('points', routePoints.map((p) => `${p.x},${p.y}`).join(' '));
+        polyline.setAttribute('points', pointsAttr);
         polyline.setAttribute('class', 'wayfinding-arrow-line');
-        polyline.setAttribute('marker-end', `url(#${arrowId})`);
         svg.appendChild(polyline);
 
         mapWrap.appendChild(svg);
