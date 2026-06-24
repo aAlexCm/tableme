@@ -1533,7 +1533,7 @@ select.mini-lang-select {
   font-size: 8px;
   font-weight: 700;
   line-height: 1;
-  color: var(--charcoal);
+  color: #fff;
   text-transform: uppercase;
   user-select: none;
   transform: rotate(var(--chair-counter-angle, 0deg));
@@ -2348,6 +2348,63 @@ body.admin-theme .table-group-count,
 body.admin-theme .table-guest-list-empty,
 body.admin-theme .empty-state {
   color: #64748b;
+}
+
+/* Floor-plan canvas: the --gold/--sage variables above already neutralize most of this,
+   but a few shadows/borders use hardcoded warm-tinted rgba() values. */
+body.admin-theme .landmark-picker {
+  border-color: rgba(100, 116, 139, 0.3);
+  box-shadow: 0 12px 26px rgba(15, 23, 42, 0.18);
+}
+
+body.admin-theme .landmark-shape.dragging-landmark {
+  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.2);
+}
+
+body.admin-theme .zoom-controls {
+  border-color: rgba(100, 116, 139, 0.3);
+}
+
+body.admin-theme .floor-plan-card.fullscreen-active .floor-plan-toolbar {
+  background: rgba(248, 250, 252, 0.94);
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.14);
+}
+
+body.admin-theme .floor-canvas-viewport {
+  border-color: rgba(100, 116, 139, 0.25);
+}
+
+body.admin-theme .floor-canvas {
+  background-image: radial-gradient(circle, rgba(100, 116, 139, 0.18) 1px, transparent 1px);
+}
+
+body.admin-theme .chair.chair-you {
+  box-shadow: 0 0 0 3px rgba(71, 85, 105, 0.4);
+}
+
+body.admin-theme .table-shape {
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.1);
+}
+
+body.admin-theme .table-shape:hover {
+  box-shadow: 0 12px 26px rgba(15, 23, 42, 0.16);
+}
+
+body.admin-theme .table-shape.dragging-table {
+  box-shadow: 0 16px 32px rgba(15, 23, 42, 0.22);
+}
+
+body.admin-theme .unassigned-row {
+  border-color: rgba(100, 116, 139, 0.18);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+}
+
+body.admin-theme .table-modal-divider {
+  background: rgba(100, 116, 139, 0.2);
+}
+
+body.admin-theme .shape-option {
+  border-color: rgba(100, 116, 139, 0.25);
 }
 
 /* Guest theme: index.html reads colors from the --guest-* variables (set above, and
