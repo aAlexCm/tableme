@@ -12,6 +12,7 @@ const ICONS = {
   pencil: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z"/></svg>',
   chevronUp: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15l-6-6-6 6"/></svg>',
   chevronDown: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>',
+  palette: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 0 20c1.1 0 2-.9 2-2 0-.5-.2-1-.5-1.4-.3-.4-.5-.9-.5-1.4 0-1.1.9-2 2-2h2.4a3.6 3.6 0 0 0 3.6-3.6C21 6.8 17 2 12 2z"/><circle cx="7.5" cy="10.5" r="1.2" fill="currentColor"/><circle cx="11" cy="6.8" r="1.2" fill="currentColor"/><circle cx="15.5" cy="7.5" r="1.2" fill="currentColor"/><circle cx="17.5" cy="11.8" r="1.2" fill="currentColor"/></svg>',
 };
 
 const THEME_COLOR_LABEL_KEYS = {
@@ -86,6 +87,9 @@ function parseSheetRows(rows) {
   const guestListEl = document.getElementById('guest-list');
   const guestEmptyEl = document.getElementById('guest-empty');
 
+  const themeSettingsBtn = document.getElementById('theme-settings-btn');
+  const themeModal = document.getElementById('theme-modal');
+  const themeModalClose = document.getElementById('theme-modal-close');
   const themePresetGridEl = document.getElementById('theme-preset-grid');
   const themeCustomToggleBtn = document.getElementById('theme-custom-toggle');
   const themeCustomGridEl = document.getElementById('theme-custom-grid');
@@ -127,6 +131,12 @@ function parseSheetRows(rows) {
     document.title = `TableMe · ${t(currentLang, 'weddingAdminPageTitle')}`;
   }
 
+  function updateThemeButtonLabel() {
+    const label = t(currentLang, 'themeSettingsBtn');
+    themeSettingsBtn.title = label;
+    themeSettingsBtn.setAttribute('aria-label', label);
+  }
+
   function setLang(lang) {
     currentLang = lang;
     localStorage.setItem(LANG_KEY, lang);
@@ -134,6 +144,7 @@ function parseSheetRows(rows) {
     shareControls.updateLabels();
     tableModalApi.updateLabels();
     updatePageTitle();
+    updateThemeButtonLabel();
     renderGuests();
     renderThemeSettings();
   }
@@ -589,6 +600,23 @@ function parseSheetRows(rows) {
     themePresetGridEl.querySelectorAll('.theme-preset-option').forEach((b) => b.classList.remove('active'));
   });
 
+  function openThemeModal() {
+    themeModal.hidden = false;
+  }
+
+  function closeThemeModal() {
+    themeModal.hidden = true;
+  }
+
+  themeSettingsBtn.addEventListener('click', openThemeModal);
+  themeModalClose.addEventListener('click', closeThemeModal);
+  themeModal.addEventListener('click', (e) => {
+    if (e.target === themeModal) closeThemeModal();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !themeModal.hidden) closeThemeModal();
+  });
+
   if (!weddingId) {
     notFoundEl.hidden = false;
     applyTranslations(currentLang);
@@ -612,6 +640,8 @@ function parseSheetRows(rows) {
   weddingNameEl.textContent = wedding.name;
   floorPlanTabLink.href = `floor-plan.html?id=${weddingId}`;
   shareControls.init(weddingId);
+  themeSettingsBtn.innerHTML = ICONS.palette;
+  updateThemeButtonLabel();
   updatePageTitle();
 
   langMount.appendChild(buildLangSwitcher(currentLang, setLang));

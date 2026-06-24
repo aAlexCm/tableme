@@ -23,6 +23,7 @@
       <nav class="admin-nav">
         <strong id="wedding-admin-name"></strong>
         <div class="admin-nav-actions">
+          <button type="button" class="icon-btn" id="theme-settings-btn"></button>
           <button type="button" class="icon-btn" id="qr-code-btn"></button>
           <button type="button" class="icon-btn" id="copy-link"></button>
           <a href="index.html" id="guest-page-link" data-i18n="adminNavGuestLink">Voir la page invité &rarr;</a>
@@ -82,7 +83,13 @@
         <p class="empty-state" id="guest-empty" data-i18n="guestsEmpty" hidden>Aucun invité ajouté pour le moment.</p>
       </div>
 
-      <div class="card">
+    </div>
+  </div>
+
+  <div id="theme-modal" class="modal-overlay" hidden>
+    <div class="modal-panel modal-panel-wide">
+      <button type="button" class="modal-close" id="theme-modal-close" aria-label="Close">&times;</button>
+      <div class="modal-scroll">
         <h2 data-i18n="themeSectionTitle">Personnaliser la page invité</h2>
         <p class="muted small" data-i18n="themeSectionHint">Choisissez un thème prédéfini, ou personnalisez chaque couleur vous-même.</p>
 
