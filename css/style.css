@@ -1837,14 +1837,6 @@ select.mini-lang-select {
   pointer-events: none;
 }
 
-.wayfinding-arrow-halo {
-  fill: none;
-  stroke: var(--paper);
-  stroke-width: 4.4;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
 .wayfinding-arrow-line {
   fill: none;
   stroke: #8a6d3c;
@@ -2630,10 +2622,6 @@ body.guest-theme .mode-btn.active {
 
 .wayfinding-marker.active-to .wayfinding-marker-icon {
   color: var(--guest-accent);
-}
-
-.wayfinding-arrow-halo {
-  stroke: var(--guest-card-bg);
 }
 
 .wayfinding-arrow-line {

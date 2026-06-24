@@ -145,12 +145,18 @@ function segmentClearsObstacles(p1, p2, obstacles) {
   return true;
 }
 
+function canShortcut(p1, p2, obstacles) {
+  const aligned = Math.abs(p1.x - p2.x) < 0.001 || Math.abs(p1.y - p2.y) < 0.001;
+  if (!aligned) return false;
+  return segmentClearsObstacles(p1, p2, obstacles);
+}
+
 function simplifyRouteBySight(points, obstacles) {
   if (points.length <= 2) return points;
   const result = [points[0]];
   let anchor = 0;
   for (let i = 1; i < points.length - 1; i += 1) {
-    if (!segmentClearsObstacles(points[anchor], points[i + 1], obstacles)) {
+    if (!canShortcut(points[anchor], points[i + 1], obstacles)) {
       result.push(points[i]);
       anchor = i;
     }
@@ -456,11 +462,6 @@ function trimRouteEnds(points, startRetreat, endRetreat) {
         svg.setAttribute('preserveAspectRatio', 'none');
 
         const pointsAttr = routePoints.map((p) => `${p.x},${p.y}`).join(' ');
-
-        const halo = document.createElementNS(svgNs, 'polyline');
-        halo.setAttribute('points', pointsAttr);
-        halo.setAttribute('class', 'wayfinding-arrow-halo');
-        svg.appendChild(halo);
 
         const polyline = document.createElementNS(svgNs, 'polyline');
         polyline.setAttribute('points', pointsAttr);
