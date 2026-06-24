@@ -13,6 +13,19 @@
   --radius: 20px;
   --radius-sm: 14px;
   --radius-pill: 999px;
+
+  /* Guest page theme — customizable per-wedding via the admin "Personnaliser" panel. */
+  --guest-bg: #f9f9f7;
+  --guest-card-bg: #fffdf9;
+  --guest-text: #38362f;
+  --guest-title: #5f6b53;
+  --guest-accent: #b08d4f;
+  --guest-input-bg: #e6ebe0;
+  --guest-input-text: #38362f;
+  --guest-input-border: #e6d6ae;
+  --guest-table-color: #b08d4f;
+  --guest-chair-color: #5f6b53;
+  --guest-canvas-bg: #e6ebe0;
 }
 
 * {
@@ -884,6 +897,9 @@ a.view-switch-tab:hover {
   align-items: center;
   gap: 6px;
   flex: 0 0 auto;
+  max-width: 0;
+  overflow: hidden;
+  transition: max-width 0.18s ease;
 }
 
 .guest-table-edit {
@@ -915,6 +931,12 @@ a.view-switch-tab:hover {
 .guest-row.revealed .icon-btn {
   opacity: 1;
   pointer-events: auto;
+}
+
+.guest-row:hover .guest-row-actions,
+.guest-row:focus-within .guest-row-actions,
+.guest-row.revealed .guest-row-actions {
+  max-width: 220px;
 }
 
 .actions {
@@ -2112,4 +2134,333 @@ select.mini-lang-select {
     flex-direction: column;
     gap: 10px;
   }
+}
+
+/* Admin theme: a neutral, tool-like palette for admin.html and wedding-admin.html,
+   scoped via body.admin-theme so the guest-facing pages keep their wedding styling. */
+body.admin-theme {
+  --gold: #64748b;
+  --gold-deep: #334155;
+  --gold-light: #e2e8f0;
+  --sage: #94a3b8;
+  --sage-deep: #475569;
+  --sage-light: #f1f5f9;
+  --ink: #1e293b;
+  --charcoal: #0f172a;
+  --cream: #f8fafc;
+  --paper: #ffffff;
+}
+
+body.admin-theme header.hero::before,
+body.admin-theme header.hero::after {
+  display: none;
+}
+
+body.admin-theme header.hero p:not(.eyebrow) {
+  color: #64748b;
+}
+
+body.admin-theme .divider span::after {
+  content: '';
+}
+
+body.admin-theme .card {
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+}
+
+body.admin-theme .card::before {
+  display: none;
+}
+
+body.admin-theme input,
+body.admin-theme select {
+  border-color: rgba(100, 116, 139, 0.35);
+}
+
+body.admin-theme input:focus,
+body.admin-theme select:focus {
+  box-shadow: 0 0 0 4px rgba(71, 85, 105, 0.15);
+}
+
+body.admin-theme button:not([class]) {
+  background: #475569;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.15);
+}
+
+body.admin-theme button:not([class]):hover {
+  background: #334155;
+  box-shadow: 0 2px 5px rgba(15, 23, 42, 0.2);
+  filter: none;
+}
+
+body.admin-theme button.secondary,
+body.admin-theme a.secondary {
+  text-decoration-color: rgba(71, 85, 105, 0.5);
+}
+
+body.admin-theme .mode-btn.active,
+body.admin-theme .view-switch-tab.active {
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.12);
+}
+
+body.admin-theme .file-dropzone {
+  border-color: rgba(100, 116, 139, 0.35);
+}
+
+body.admin-theme .table-guest-list {
+  background: rgba(100, 116, 139, 0.07);
+}
+
+body.admin-theme .guest-row {
+  border-color: rgba(100, 116, 139, 0.18);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+}
+
+body.admin-theme .guest-row:hover {
+  box-shadow: 0 3px 8px rgba(15, 23, 42, 0.08);
+}
+
+body.admin-theme .guest-row.dragging {
+  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.15);
+}
+
+body.admin-theme .wedding-item:hover {
+  background: #e8eaed;
+}
+
+body.admin-theme .modal-overlay {
+  background: rgba(15, 23, 42, 0.5);
+}
+
+body.admin-theme .modal-panel {
+  box-shadow: 0 14px 40px rgba(15, 23, 42, 0.25);
+}
+
+body.admin-theme .lang-switcher-trigger {
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08);
+}
+
+body.admin-theme .lang-switcher-menu {
+  box-shadow: 0 10px 26px rgba(15, 23, 42, 0.15);
+}
+
+body.admin-theme .muted,
+body.admin-theme .table-group-count,
+body.admin-theme .table-guest-list-empty,
+body.admin-theme .empty-state {
+  color: #64748b;
+}
+
+/* Guest theme: index.html reads colors from the --guest-* variables (set above, and
+   overridden per-wedding at runtime by js/guest.js) instead of the shared --gold/--sage scheme. */
+body.guest-theme {
+  background: var(--guest-bg);
+  background-image: radial-gradient(circle at 50% 0%, #ffffff 0%, var(--guest-bg) 60%);
+  color: var(--guest-text);
+}
+
+body.guest-theme .muted,
+body.guest-theme .empty-state {
+  color: var(--guest-text);
+  opacity: 0.75;
+}
+
+body.guest-theme .card {
+  background: var(--guest-card-bg);
+  border-color: var(--guest-input-border);
+  box-shadow: 0 20px 44px rgba(0, 0, 0, 0.06);
+}
+
+body.guest-theme .card::before {
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
+body.guest-theme input,
+body.guest-theme select {
+  background: var(--guest-input-bg);
+  color: var(--guest-input-text);
+  border-color: var(--guest-input-border);
+}
+
+body.guest-theme input::placeholder {
+  color: var(--guest-input-text);
+  opacity: 0.6;
+}
+
+body.guest-theme input:focus,
+body.guest-theme select:focus {
+  border-color: var(--guest-accent);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--guest-accent) 16%, transparent);
+}
+
+body.guest-theme .search-field .search-icon {
+  color: var(--guest-accent);
+}
+
+body.guest-theme .icon-btn.search-clear-btn {
+  background: var(--guest-card-bg);
+  color: var(--guest-accent);
+  border-color: var(--guest-input-border);
+}
+
+body.guest-theme .mode-switch {
+  background: var(--guest-input-bg);
+}
+
+body.guest-theme .mode-btn {
+  color: var(--guest-text);
+}
+
+body.guest-theme .mode-btn.active {
+  background: var(--guest-card-bg);
+  color: var(--guest-title);
+}
+
+.script-word {
+  color: var(--guest-title);
+}
+
+.title-heart {
+  color: var(--guest-accent);
+}
+
+.result .table-number {
+  border-color: var(--guest-input-border);
+  background: var(--guest-input-bg);
+}
+
+.result .guest-name {
+  color: var(--guest-text);
+}
+
+.result .table-sep {
+  background: var(--guest-input-border);
+}
+
+.result .table-label {
+  color: var(--guest-text);
+  opacity: 0.7;
+}
+
+.result .table-value {
+  color: var(--guest-accent);
+}
+
+.guest-match {
+  background: var(--guest-card-bg);
+  border-color: var(--guest-input-border);
+}
+
+.guest-match .match-table {
+  color: var(--guest-accent);
+}
+
+.guest-match:hover {
+  background: var(--guest-input-bg);
+}
+
+.error-msg {
+  color: var(--guest-text);
+}
+
+.table-preview {
+  border-top-color: color-mix(in srgb, var(--guest-text) 15%, transparent);
+}
+
+.table-preview-title {
+  color: var(--guest-text);
+}
+
+.table-preview-canvas {
+  background: var(--guest-canvas-bg);
+  border-radius: var(--radius-sm);
+}
+
+.table-preview-canvas .table-shape {
+  background: var(--guest-card-bg);
+  border-color: var(--guest-table-color);
+}
+
+.table-preview-canvas .table-shape-label,
+.table-preview-canvas .table-shape-count {
+  color: var(--guest-text);
+}
+
+.table-preview-canvas .chair {
+  background: var(--guest-card-bg);
+  border-color: var(--guest-chair-color);
+}
+
+.table-preview-canvas .chair.occupied {
+  background: var(--guest-accent);
+  border-color: var(--guest-accent);
+}
+
+.table-preview-canvas .chair.chair-you {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--guest-accent) 45%, transparent);
+}
+
+.table-preview-canvas .chair-initials {
+  color: var(--guest-card-bg);
+}
+
+.table-preview-switch.mode-switch {
+  background: var(--guest-input-bg);
+}
+
+.table-preview-name {
+  background: var(--guest-card-bg);
+  border-color: var(--guest-input-border);
+  color: var(--guest-text);
+}
+
+.table-preview-name.you {
+  background: var(--guest-input-bg);
+  border-color: var(--guest-accent);
+  color: var(--guest-text);
+}
+
+.chair-tooltip {
+  background: var(--guest-text);
+  color: var(--guest-card-bg);
+}
+
+.wayfinding-field label {
+  color: var(--guest-text);
+  opacity: 0.75;
+}
+
+.wayfinding-map {
+  background: var(--guest-canvas-bg);
+}
+
+.wayfinding-marker-shape {
+  background: var(--guest-card-bg);
+  border-color: var(--guest-chair-color);
+}
+
+.wayfinding-marker-icon {
+  color: var(--guest-chair-color);
+}
+
+.wayfinding-marker-label {
+  color: var(--guest-text);
+}
+
+.wayfinding-marker.active-from .wayfinding-marker-shape,
+.wayfinding-marker.active-from .wayfinding-marker-icon {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--guest-table-color) 35%, transparent);
+}
+
+.wayfinding-marker.active-to .wayfinding-marker-shape {
+  background: var(--guest-accent);
+  border-color: var(--guest-accent);
+}
+
+.wayfinding-marker.active-to .wayfinding-marker-icon {
+  color: var(--guest-accent);
+}
+
+.wayfinding-arrow-line {
+  stroke: var(--guest-accent);
 }
