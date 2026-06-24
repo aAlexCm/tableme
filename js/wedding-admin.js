@@ -2,6 +2,7 @@ import { Storage } from './storage.js';
 import { applyTranslations, buildLangSwitcher, t } from './i18n.js';
 import { createTableModal } from './table-modal.js';
 import { createShareControls } from './share-controls.js';
+import { GUEST_THEME_PRESETS, GUEST_THEME_COLOR_KEYS, getDefaultTheme } from './guest-themes.js';
 
 const LANG_KEY = 'tableme_wedding_admin_lang';
 const DEFAULT_SEATS = 8;
@@ -11,6 +12,20 @@ const ICONS = {
   pencil: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z"/></svg>',
   chevronUp: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15l-6-6-6 6"/></svg>',
   chevronDown: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>',
+};
+
+const THEME_COLOR_LABEL_KEYS = {
+  bg: 'themeColorBg',
+  cardBg: 'themeColorCardBg',
+  text: 'themeColorText',
+  title: 'themeColorTitle',
+  accent: 'themeColorAccent',
+  inputBg: 'themeColorInputBg',
+  inputText: 'themeColorInputText',
+  inputBorder: 'themeColorInputBorder',
+  tableColor: 'themeColorTableColor',
+  chairColor: 'themeColorChairColor',
+  canvasBg: 'themeColorCanvasBg',
 };
 
 function parseBulkGuests(text) {
@@ -71,6 +86,10 @@ function parseSheetRows(rows) {
   const guestListEl = document.getElementById('guest-list');
   const guestEmptyEl = document.getElementById('guest-empty');
 
+  const themePresetGridEl = document.getElementById('theme-preset-grid');
+  const themeCustomToggleBtn = document.getElementById('theme-custom-toggle');
+  const themeCustomGridEl = document.getElementById('theme-custom-grid');
+
   const modeSwitchEl = document.getElementById('add-mode-switch');
   const bulkAddPanel = document.getElementById('bulk-add-panel');
   const bulkAddTextarea = document.getElementById('bulk-add-textarea');
@@ -116,6 +135,33 @@ function parseSheetRows(rows) {
     tableModalApi.updateLabels();
     updatePageTitle();
     renderGuests();
+    renderThemeSettings();
+  }
+
+  async function renderThemeSettings() {
+    const wedding = await Storage.getWedding(weddingId);
+    if (!wedding) return;
+    const theme = wedding.theme || getDefaultTheme();
+
+    themePresetGridEl.innerHTML = GUEST_THEME_PRESETS.map((preset) => {
+      const isActive = theme.preset === preset.id;
+      const swatches = ['bg', 'accent', 'title', 'inputBg']
+        .map((key) => `<span class="theme-preset-swatch" style="background:${preset.colors[key]}"></span>`)
+        .join('');
+      return `
+        <button type="button" class="theme-preset-option${isActive ? ' active' : ''}" data-preset="${preset.id}">
+          <span>${escapeHtml(t(currentLang, preset.labelKey))}</span>
+          <span class="theme-preset-swatches">${swatches}</span>
+        </button>
+      `;
+    }).join('');
+
+    themeCustomGridEl.innerHTML = GUEST_THEME_COLOR_KEYS.map((key) => `
+      <div class="theme-color-field">
+        <label for="theme-color-${key}">${escapeHtml(t(currentLang, THEME_COLOR_LABEL_KEYS[key]))}</label>
+        <input type="color" id="theme-color-${key}" data-key="${key}" value="${theme.colors[key]}" />
+      </div>
+    `).join('');
   }
 
   function groupGuestsByTable(guests, tableLabels) {
@@ -519,6 +565,30 @@ function parseSheetRows(rows) {
     }
   });
 
+  themePresetGridEl.addEventListener('click', async (e) => {
+    const btn = e.target.closest('.theme-preset-option');
+    if (!btn) return;
+    const preset = GUEST_THEME_PRESETS.find((p) => p.id === btn.dataset.preset);
+    if (!preset) return;
+    await Storage.setTheme(weddingId, { preset: preset.id, colors: { ...preset.colors } });
+    await renderThemeSettings();
+  });
+
+  themeCustomToggleBtn.addEventListener('click', () => {
+    themeCustomGridEl.hidden = !themeCustomGridEl.hidden;
+  });
+
+  themeCustomGridEl.addEventListener('change', async (e) => {
+    const input = e.target.closest('input[type="color"]');
+    if (!input) return;
+    const wedding = await Storage.getWedding(weddingId);
+    if (!wedding) return;
+    const theme = wedding.theme || getDefaultTheme();
+    const colors = { ...theme.colors, [input.dataset.key]: input.value };
+    await Storage.setTheme(weddingId, { preset: 'custom', colors });
+    themePresetGridEl.querySelectorAll('.theme-preset-option').forEach((b) => b.classList.remove('active'));
+  });
+
   if (!weddingId) {
     notFoundEl.hidden = false;
     applyTranslations(currentLang);
@@ -547,4 +617,5 @@ function parseSheetRows(rows) {
   langMount.appendChild(buildLangSwitcher(currentLang, setLang));
   applyTranslations(currentLang);
   await renderGuests();
+  await renderThemeSettings();
 })();

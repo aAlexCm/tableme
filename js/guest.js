@@ -2,6 +2,7 @@ import { Storage, normalize } from './storage.js';
 import { applyTranslations, buildLangSwitcher, t } from './i18n.js';
 import { DEFAULT_SEATS, getRectShapeSize, buildChairs } from './table-shape.js';
 import { getLandmarkType } from './landmarks.js';
+import { applyGuestTheme, getDefaultTheme } from './guest-themes.js';
 
 const LANG_KEY = 'tableme_lang';
 const WAYFINDING_VIEWBOX_W = 100;
@@ -442,7 +443,8 @@ function trimRouteEnds(points, startRetreat, endRetreat) {
         markerEl.setAttribute('orient', 'auto-start-reverse');
         const arrowPath = document.createElementNS(svgNs, 'path');
         arrowPath.setAttribute('d', 'M0,0 L10,5 L0,10 z');
-        arrowPath.setAttribute('fill', '#8a6d3c');
+        const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--guest-accent').trim();
+        arrowPath.setAttribute('fill', accentColor || '#8a6d3c');
         markerEl.appendChild(arrowPath);
         defs.appendChild(markerEl);
         svg.appendChild(defs);
@@ -595,6 +597,7 @@ function trimRouteEnds(points, startRetreat, endRetreat) {
   if (!localStorage.getItem(LANG_KEY)) {
     currentLang = wedding.lang || 'fr';
   }
+  applyGuestTheme((wedding.theme && wedding.theme.colors) || getDefaultTheme().colors);
   langMount.appendChild(buildLangSwitcher(currentLang, setLang));
   applyTranslations(currentLang);
 

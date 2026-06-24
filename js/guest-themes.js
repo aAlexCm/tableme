@@ -83,10 +83,30 @@ export const GUEST_THEME_PRESETS = [
   },
 ];
 
+export const GUEST_THEME_CSS_VARS = {
+  bg: '--guest-bg',
+  cardBg: '--guest-card-bg',
+  text: '--guest-text',
+  title: '--guest-title',
+  accent: '--guest-accent',
+  inputBg: '--guest-input-bg',
+  inputText: '--guest-input-text',
+  inputBorder: '--guest-input-border',
+  tableColor: '--guest-table-color',
+  chairColor: '--guest-chair-color',
+  canvasBg: '--guest-canvas-bg',
+};
+
 export function getPreset(id) {
   return GUEST_THEME_PRESETS.find((p) => p.id === id) || GUEST_THEME_PRESETS[0];
 }
 
 export function getDefaultTheme() {
   return { preset: 'classic', colors: { ...GUEST_THEME_PRESETS[0].colors } };
+}
+
+export function applyGuestTheme(colors, target = document.documentElement) {
+  GUEST_THEME_COLOR_KEYS.forEach((key) => {
+    if (colors[key]) target.style.setProperty(GUEST_THEME_CSS_VARS[key], colors[key]);
+  });
 }
