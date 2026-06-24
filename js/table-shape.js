@@ -57,6 +57,7 @@ export function buildChairs(unitEl, shape, seatCount, guests, highlightGuestId, 
       chairEl.className = `chair${occupied ? ' occupied' : ''}${isYou ? ' chair-you' : ''}`;
       if (occupied) {
         chairEl.dataset.name = guests[i].name;
+        chairEl.dataset.guestId = guests[i].id;
         const initialsEl = document.createElement('span');
         initialsEl.className = 'chair-initials';
         initialsEl.style.setProperty('--chair-counter-angle', `-${angle}deg`);
@@ -96,6 +97,7 @@ export function buildChairs(unitEl, shape, seatCount, guests, highlightGuestId, 
     chairEl.className = `chair chair-fixed${occupied ? ' occupied' : ''}${isYou ? ' chair-you' : ''}`;
     if (occupied) {
       chairEl.dataset.name = guests[i].name;
+      chairEl.dataset.guestId = guests[i].id;
       const initialsEl = document.createElement('span');
       initialsEl.className = 'chair-initials';
       initialsEl.textContent = getInitials(guests[i].name);

@@ -286,6 +286,8 @@ function reconcileTables(wedding) {
 
     shapeEl.addEventListener('pointerdown', (e) => {
       if (e.target.closest('.table-rotate-overlay-btn')) return;
+      clearPick();
+      hideChairTooltip();
       pointerId = e.pointerId;
       startClientX = e.clientX;
       startClientY = e.clientY;
@@ -298,6 +300,8 @@ function reconcileTables(wedding) {
       shapeEl.addEventListener('pointerup', onPointerUp);
     });
   }
+
+  let pickedGuestId = null;
 
   function showChairTooltip(chairEl) {
     const name = chairEl.dataset.name;
@@ -314,6 +318,50 @@ function reconcileTables(wedding) {
     chairTooltipEl.hidden = true;
   }
 
+  function clearPick() {
+    pickedGuestId = null;
+    floorCanvasEl.classList.remove('picking-mode');
+    floorCanvasEl.querySelectorAll('.chair.picked').forEach((el) => el.classList.remove('picked'));
+  }
+
+  function flashDroppedGuest(guestId) {
+    const chairEl = floorCanvasEl.querySelector(`.chair[data-guest-id="${guestId}"]`);
+    if (!chairEl) return;
+    chairEl.classList.add('just-dropped');
+    chairEl.addEventListener('animationend', () => chairEl.classList.remove('just-dropped'), { once: true });
+  }
+
+  function pickGuestFromChair(chairEl) {
+    const guestId = chairEl.dataset.guestId;
+    if (!guestId) return;
+    if (pickedGuestId === guestId) {
+      clearPick();
+      hideChairTooltip();
+      return;
+    }
+    clearPick();
+    pickedGuestId = guestId;
+    chairEl.classList.add('picked');
+    floorCanvasEl.classList.add('picking-mode');
+    showChairTooltip(chairEl);
+  }
+
+  async function dropGuestOnChair(chairEl) {
+    const guestId = pickedGuestId;
+    const tableUnitEl = chairEl.closest('.table-unit');
+    const targetTable = (wedding.tables || []).find((tb) => tb.id === (tableUnitEl && tableUnitEl.dataset.id));
+    clearPick();
+    hideChairTooltip();
+    if (!targetTable) return;
+    const movedGuest = wedding.guests.find((g) => g.id === guestId);
+    if (!movedGuest) return;
+    const remaining = wedding.guests.filter((g) => g.id !== guestId);
+    const newGuests = [...remaining, { ...movedGuest, table: targetTable.label }];
+    await Storage.setGuests(weddingId, newGuests);
+    await refreshAll();
+    flashDroppedGuest(guestId);
+  }
+
   floorCanvasEl.addEventListener('mouseover', (e) => {
     const chairEl = e.target.closest('.chair.occupied');
     if (chairEl) showChairTooltip(chairEl);
@@ -322,18 +370,32 @@ function reconcileTables(wedding) {
     if (e.target.closest('.chair.occupied')) hideChairTooltip();
   });
   floorCanvasEl.addEventListener('click', (e) => {
-    const chairEl = e.target.closest('.chair.occupied');
+    const chairEl = e.target.closest('.chair');
     if (!chairEl) return;
     e.stopPropagation();
-    showChairTooltip(chairEl);
+    if (chairEl.classList.contains('occupied')) {
+      pickGuestFromChair(chairEl);
+    } else if (pickedGuestId) {
+      dropGuestOnChair(chairEl);
+    }
   });
   floorCanvasViewportEl.addEventListener('scroll', hideChairTooltip);
   document.addEventListener('click', (e) => {
-    if (!floorCanvasEl.contains(e.target)) hideChairTooltip();
+    if (!floorCanvasEl.contains(e.target)) {
+      hideChairTooltip();
+      clearPick();
+    }
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && pickedGuestId) {
+      clearPick();
+      hideChairTooltip();
+    }
   });
 
   function renderCanvas() {
     hideChairTooltip();
+    clearPick();
     floorCanvasEl.innerHTML = '';
     (wedding.tables || []).forEach((table) => {
       const tableGuests = wedding.guests.filter((g) => g.table === table.label);
