@@ -1519,6 +1519,11 @@ select.mini-lang-select {
   border-color: var(--gold-deep);
 }
 
+#floor-canvas .chair.occupied {
+  pointer-events: auto;
+  cursor: pointer;
+}
+
 .chair.chair-you {
   box-shadow: 0 0 0 3px rgba(176, 141, 79, 0.45);
 }

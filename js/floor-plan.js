@@ -80,6 +80,11 @@ function reconcileTables(wedding) {
   const zoomOutBtn = document.getElementById('zoom-out-btn');
   const zoomResetBtn = document.getElementById('zoom-reset-btn');
 
+  const chairTooltipEl = document.createElement('div');
+  chairTooltipEl.className = 'chair-tooltip';
+  chairTooltipEl.hidden = true;
+  floorCanvasViewportEl.appendChild(chairTooltipEl);
+
   const EXPAND_ICON = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M21 16v3a2 2 0 0 1-2 2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/></svg>';
   fullscreenBtn.innerHTML = EXPAND_ICON;
 
@@ -294,7 +299,41 @@ function reconcileTables(wedding) {
     });
   }
 
+  function showChairTooltip(chairEl) {
+    const name = chairEl.dataset.name;
+    if (!name) return;
+    const viewportRect = floorCanvasViewportEl.getBoundingClientRect();
+    const chairRect = chairEl.getBoundingClientRect();
+    chairTooltipEl.textContent = name;
+    chairTooltipEl.style.left = `${chairRect.left + chairRect.width / 2 - viewportRect.left + floorCanvasViewportEl.scrollLeft}px`;
+    chairTooltipEl.style.top = `${chairRect.top - viewportRect.top + floorCanvasViewportEl.scrollTop}px`;
+    chairTooltipEl.hidden = false;
+  }
+
+  function hideChairTooltip() {
+    chairTooltipEl.hidden = true;
+  }
+
+  floorCanvasEl.addEventListener('mouseover', (e) => {
+    const chairEl = e.target.closest('.chair.occupied');
+    if (chairEl) showChairTooltip(chairEl);
+  });
+  floorCanvasEl.addEventListener('mouseout', (e) => {
+    if (e.target.closest('.chair.occupied')) hideChairTooltip();
+  });
+  floorCanvasEl.addEventListener('click', (e) => {
+    const chairEl = e.target.closest('.chair.occupied');
+    if (!chairEl) return;
+    e.stopPropagation();
+    showChairTooltip(chairEl);
+  });
+  floorCanvasViewportEl.addEventListener('scroll', hideChairTooltip);
+  document.addEventListener('click', (e) => {
+    if (!floorCanvasEl.contains(e.target)) hideChairTooltip();
+  });
+
   function renderCanvas() {
+    hideChairTooltip();
     floorCanvasEl.innerHTML = '';
     (wedding.tables || []).forEach((table) => {
       const tableGuests = wedding.guests.filter((g) => g.table === table.label);
@@ -539,7 +578,7 @@ function reconcileTables(wedding) {
   }
 
   floorCanvasViewportEl.addEventListener('pointerdown', (e) => {
-    if (e.target.closest('.table-shape') || e.target.closest('.landmark-shape')) return;
+    if (e.target.closest('.table-shape') || e.target.closest('.landmark-shape') || e.target.closest('.chair')) return;
     activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
     floorCanvasViewportEl.setPointerCapture(e.pointerId);
 
