@@ -355,7 +355,9 @@ function parseSheetRows(rows) {
 
       if (table) {
         const seatCount = table.seats != null ? table.seats : DEFAULT_SEATS;
-        const slots = assignSeats(guests, seatCount);
+        // Never hide guests beyond the seat count (e.g. a table with more guests
+        // than seats) — only expand to show extra rows, never drop anyone.
+        const slots = assignSeats(guests, Math.max(seatCount, guests.length));
         slots.forEach((guest) => {
           list.appendChild(guest ? renderGuestRow(guest) : renderEmptySeatRow());
         });
