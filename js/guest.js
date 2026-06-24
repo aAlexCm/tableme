@@ -2,7 +2,7 @@ import { Storage, normalize } from './storage.js';
 import { applyTranslations, buildLangSwitcher, t } from './i18n.js';
 import { DEFAULT_SEATS, getRectShapeSize, buildChairs } from './table-shape.js';
 import { getLandmarkType } from './landmarks.js';
-import { applyGuestTheme, getDefaultTheme } from './guest-themes.js';
+import { applyGuestTheme, applyGuestFonts, getDefaultTheme } from './guest-themes.js';
 
 const LANG_KEY = 'tableme_lang';
 const WAYFINDING_VIEWBOX_W = 100;
@@ -611,6 +611,7 @@ function trimRouteEnds(points, startRetreat, endRetreat) {
     currentLang = wedding.lang || 'fr';
   }
   applyGuestTheme((wedding.theme && wedding.theme.colors) || getDefaultTheme().colors);
+  applyGuestFonts((wedding.theme && wedding.theme.fonts) || getDefaultTheme().fonts);
   langMount.appendChild(buildLangSwitcher(currentLang, setLang));
   applyTranslations(currentLang);
 

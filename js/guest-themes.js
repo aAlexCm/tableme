@@ -97,16 +97,43 @@ export const GUEST_THEME_CSS_VARS = {
   canvasBg: '--guest-canvas-bg',
 };
 
+export const GUEST_FONT_TITLE_OPTIONS = [
+  { id: 'playfair', labelKey: 'fontTitlePlayfair', family: "'Playfair Display', serif" },
+  { id: 'cormorant', labelKey: 'fontTitleCormorant', family: "'Cormorant Garamond', serif" },
+  { id: 'garamond', labelKey: 'fontTitleGaramond', family: "'EB Garamond', serif" },
+];
+
+export const GUEST_FONT_BODY_OPTIONS = [
+  { id: 'inter', labelKey: 'fontBodyInter', family: "'Inter', sans-serif" },
+  { id: 'work', labelKey: 'fontBodyWork', family: "'Work Sans', sans-serif" },
+  { id: 'source', labelKey: 'fontBodySource', family: "'Source Sans 3', sans-serif" },
+];
+
 export function getPreset(id) {
   return GUEST_THEME_PRESETS.find((p) => p.id === id) || GUEST_THEME_PRESETS[0];
 }
 
+export function getFontOption(list, id) {
+  return list.find((f) => f.id === id) || list[0];
+}
+
 export function getDefaultTheme() {
-  return { preset: 'classic', colors: { ...GUEST_THEME_PRESETS[0].colors } };
+  return {
+    preset: 'classic',
+    colors: { ...GUEST_THEME_PRESETS[0].colors },
+    fonts: { title: 'playfair', body: 'inter' },
+  };
 }
 
 export function applyGuestTheme(colors, target = document.documentElement) {
   GUEST_THEME_COLOR_KEYS.forEach((key) => {
     if (colors[key]) target.style.setProperty(GUEST_THEME_CSS_VARS[key], colors[key]);
   });
+}
+
+export function applyGuestFonts(fonts, target = document.documentElement) {
+  const titleFamily = getFontOption(GUEST_FONT_TITLE_OPTIONS, fonts && fonts.title).family;
+  const bodyFamily = getFontOption(GUEST_FONT_BODY_OPTIONS, fonts && fonts.body).family;
+  target.style.setProperty('--guest-font-title', titleFamily);
+  target.style.setProperty('--guest-font-body', bodyFamily);
 }
