@@ -34,7 +34,7 @@
 
 body {
   margin: 0;
-  font-family: 'Lato', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-weight: 400;
   background: var(--cream);
   background-image: radial-gradient(circle at 50% 0%, #ffffff 0%, var(--cream) 60%);
@@ -139,7 +139,7 @@ header.hero.invite-hero::after {
   font-size: 0.78rem;
   font-weight: 500;
   font-style: normal !important;
-  font-family: 'Lato', sans-serif !important;
+  font-family: 'Inter', sans-serif !important;
   color: #8a7e6e;
   margin: 16px 0 0 !important;
 }
@@ -225,7 +225,7 @@ header.hero p:not(.eyebrow) {
 }
 
 input, select {
-  font-family: 'Lato', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 16px;
   padding: 0 14px;
   height: 42px;
@@ -288,7 +288,7 @@ button, a.secondary {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-family: 'Lato', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 0.88rem;
   letter-spacing: 0.2px;
   font-weight: 600;
@@ -587,7 +587,7 @@ a.view-switch-tab:hover {
   width: 100%;
   min-height: 120px;
   padding: 12px 14px;
-  font-family: 'Lato', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 16px;
   line-height: 1.5;
   color: var(--charcoal);
@@ -803,7 +803,7 @@ body.modal-open {
 }
 
 .table-group-count {
-  font-family: 'Lato', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-weight: 400;
   font-size: 0.85rem;
   color: #998c77;
@@ -1058,7 +1058,7 @@ h2 {
   display: flex;
   align-items: center;
   gap: 7px;
-  font-family: 'Lato', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 0.72rem;
   letter-spacing: 0.4px;
   font-weight: 600;
@@ -1106,7 +1106,7 @@ h2 {
   gap: 8px;
   padding: 9px 10px;
   border-radius: calc(var(--radius-sm) - 5px);
-  font-family: 'Lato', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 0.85rem;
   color: var(--ink);
   cursor: pointer;
@@ -1168,7 +1168,7 @@ select.mini-lang-select {
   white-space: normal;
   cursor: pointer;
   text-align: center;
-  font-family: 'Lato', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 0.85rem;
   font-weight: 600;
   color: var(--charcoal);
@@ -1282,7 +1282,7 @@ select.mini-lang-select {
   border: none;
   box-shadow: none;
   color: var(--charcoal);
-  font-family: 'Lato', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 0.82rem;
   text-align: left;
   cursor: pointer;
@@ -1339,7 +1339,7 @@ select.mini-lang-select {
 }
 
 .landmark-label {
-  font-family: 'Lato', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 0.68rem;
   font-weight: 700;
   color: var(--charcoal);
@@ -1387,7 +1387,7 @@ select.mini-lang-select {
 .zoom-reset-btn {
   min-width: 44px;
   text-align: center;
-  font-family: 'Lato', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 0.74rem;
   color: var(--sage-deep);
   background: none;
@@ -1529,7 +1529,7 @@ select.mini-lang-select {
 
 .chair-initials {
   display: block;
-  font-family: 'Lato', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 8px;
   font-weight: 700;
   line-height: 1;
@@ -1667,7 +1667,7 @@ select.mini-lang-select {
   white-space: nowrap;
   background: var(--charcoal);
   color: var(--paper);
-  font-family: 'Lato', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 0.74rem;
   font-weight: 600;
   padding: 5px 10px;
@@ -1800,7 +1800,7 @@ select.mini-lang-select {
 }
 
 .wayfinding-marker-label {
-  font-family: 'Lato', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 0.64rem;
   font-weight: 700;
   color: var(--charcoal);

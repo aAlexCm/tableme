@@ -7,7 +7,7 @@
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Lato:wght@300;400;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body class="admin-theme">
@@ -23,6 +23,7 @@
       <nav class="admin-nav">
         <strong id="floor-plan-wedding-name"></strong>
         <div class="admin-nav-actions">
+          <button type="button" class="icon-btn" id="theme-settings-btn"></button>
           <button type="button" class="icon-btn" id="qr-code-btn"></button>
           <button type="button" class="icon-btn" id="copy-link"></button>
           <a href="index.html" id="guest-page-link" data-i18n="adminNavGuestLink">Voir la page invité &rarr;</a>
@@ -65,6 +66,22 @@
         <h2 data-i18n="unassignedGuestsTitle">Invités non assignés</h2>
         <ul class="unassigned-list" id="unassigned-list"></ul>
         <p class="empty-state" id="unassigned-empty" data-i18n="unassignedEmpty" hidden>Tous les invités sont placés.</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="theme-modal" class="modal-overlay" hidden>
+    <div class="modal-panel modal-panel-wide">
+      <button type="button" class="modal-close" id="theme-modal-close" aria-label="Close">&times;</button>
+      <div class="modal-scroll">
+        <h2 data-i18n="themeSectionTitle">Personnaliser la page invité</h2>
+        <p class="muted small" data-i18n="themeSectionHint">Choisissez un thème prédéfini, ou personnalisez chaque couleur vous-même.</p>
+
+        <div class="theme-preset-grid" id="theme-preset-grid"></div>
+
+        <button type="button" class="secondary theme-custom-toggle" id="theme-custom-toggle" data-i18n="themeCustomToggle">Personnaliser les couleurs</button>
+
+        <div class="theme-custom-grid" id="theme-custom-grid" hidden></div>
       </div>
     </div>
   </div>

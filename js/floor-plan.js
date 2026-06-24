@@ -2,6 +2,7 @@ import { Storage, generateId } from './storage.js';
 import { applyTranslations, buildLangSwitcher, t } from './i18n.js';
 import { createTableModal, ICONS } from './table-modal.js';
 import { createShareControls } from './share-controls.js';
+import { createThemeSettings } from './theme-settings.js';
 import { DEFAULT_SEATS, getRectShapeSize, getTableReach, buildChairs } from './table-shape.js';
 import { LANDMARK_TYPES, getLandmarkType } from './landmarks.js';
 
@@ -112,6 +113,11 @@ function reconcileTables(wedding) {
     weddingNameEl,
   });
 
+  const themeSettings = createThemeSettings({
+    weddingId,
+    getLang: () => currentLang,
+  });
+
   function escapeHtml(value) {
     return String(value).replace(/[&<>"']/g, (c) => ({
       '&': '&amp;',
@@ -175,6 +181,8 @@ function reconcileTables(wedding) {
     applyTranslations(lang);
     tableModalApi.updateLabels();
     shareControls.updateLabels();
+    themeSettings.updateLabels();
+    themeSettings.render();
     updateFullscreenLabel();
     updatePageTitle();
     renderLandmarkPicker();
@@ -608,6 +616,7 @@ function reconcileTables(wedding) {
   weddingNameEl.textContent = wedding.name;
   listTabLink.href = `wedding-admin.html?id=${weddingId}`;
   shareControls.init(weddingId);
+  themeSettings.init();
 
   langMount.appendChild(buildLangSwitcher(currentLang, setLang));
   applyTranslations(currentLang);
