@@ -1784,6 +1784,11 @@ select.mini-lang-select {
   border-radius: 3px;
 }
 
+.wayfinding-marker-table.rectangle.rotated .wayfinding-marker-shape {
+  width: 13px;
+  height: 22px;
+}
+
 .wayfinding-marker-icon {
   display: flex;
   color: var(--sage-deep);

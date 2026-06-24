@@ -316,6 +316,7 @@ function trimRouteEnds(points, startRetreat, endRetreat) {
       id: `table:${tb.id}`,
       kind: 'table',
       shape: tb.shape === 'rectangle' ? 'rectangle' : 'round',
+      rotated: !!tb.rotated,
       x: tb.x,
       y: tb.y,
       label: `${t(currentLang, 'tableLabel')} ${tb.label}`,
@@ -392,7 +393,7 @@ function trimRouteEnds(points, startRetreat, endRetreat) {
 
       points.forEach((p) => {
         const marker = document.createElement('div');
-        marker.className = `wayfinding-marker wayfinding-marker-${p.kind}${p.kind === 'table' ? ` ${p.shape}` : ''}`;
+        marker.className = `wayfinding-marker wayfinding-marker-${p.kind}${p.kind === 'table' ? ` ${p.shape}${p.rotated ? ' rotated' : ''}` : ''}`;
         marker.style.left = `${toWayfindingMapPct(p.x)}%`;
         marker.style.top = `${toWayfindingMapPct(p.y)}%`;
         marker.classList.toggle('active-from', p.id === currentFrom);
