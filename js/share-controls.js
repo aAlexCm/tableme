@@ -58,10 +58,12 @@ export function createShareControls({ getLang, weddingNameEl }) {
     });
     qrShareBtn.hidden = !navigator.share;
     qrModal.hidden = false;
+    document.body.classList.add('modal-open');
   }
 
   function closeQrModal() {
     qrModal.hidden = true;
+    document.body.classList.remove('modal-open');
   }
 
   qrCodeBtn.addEventListener('click', openQrModal);

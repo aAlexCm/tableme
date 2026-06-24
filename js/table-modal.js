@@ -136,11 +136,13 @@ export function createTableModal({ weddingId, getLang, onChange }) {
     await refreshWedding();
     renderModalContent();
     tableModal.hidden = false;
+    document.body.classList.add('modal-open');
   }
 
   function close() {
     tableModal.hidden = true;
     activeTableId = null;
+    document.body.classList.remove('modal-open');
   }
 
   async function setGuestTable(guestId, tableLabel) {

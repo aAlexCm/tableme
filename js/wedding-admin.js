@@ -602,10 +602,12 @@ function parseSheetRows(rows) {
 
   function openThemeModal() {
     themeModal.hidden = false;
+    document.body.classList.add('modal-open');
   }
 
   function closeThemeModal() {
     themeModal.hidden = true;
+    document.body.classList.remove('modal-open');
   }
 
   themeSettingsBtn.addEventListener('click', openThemeModal);

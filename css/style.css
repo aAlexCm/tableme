@@ -681,6 +681,11 @@ a.view-switch-tab:hover {
   min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
+  overscroll-behavior: contain;
+}
+
+body.modal-open {
+  overflow: hidden;
 }
 
 .modal-panel h3 {
