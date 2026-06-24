@@ -1154,10 +1154,13 @@ select.mini-lang-select {
   align-items: center;
   justify-content: center;
   gap: 12px;
+  height: auto;
   padding: 18px 16px;
   border-radius: var(--radius-sm);
   border: 2px solid transparent;
   background: var(--sage-light);
+  box-shadow: none;
+  white-space: normal;
   cursor: pointer;
   text-align: center;
   font-family: 'Lato', sans-serif;
