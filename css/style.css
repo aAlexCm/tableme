@@ -636,8 +636,9 @@ nav.admin-nav.admin-nav-stacked {
 
 .poster-text-drag-handle {
   position: absolute;
-  top: -22px;
-  left: -6px;
+  top: 50%;
+  left: -28px;
+  transform: translateY(-50%);
   display: none;
   align-items: center;
   justify-content: center;
@@ -664,13 +665,16 @@ nav.admin-nav.admin-nav-stacked {
 .poster-text-toolbar {
   position: fixed;
   z-index: 60;
-  display: flex;
   align-items: center;
   gap: 6px;
   padding: 6px 8px;
   border-radius: var(--radius-sm);
   background: var(--paper);
   box-shadow: 0 10px 26px rgba(15, 23, 42, 0.25);
+}
+
+.poster-text-toolbar:not([hidden]) {
+  display: flex;
 }
 
 .poster-text-toolbar select {
