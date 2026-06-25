@@ -518,6 +518,64 @@ nav.admin-nav.admin-nav-stacked {
   gap: 8px;
 }
 
+.wedding-countdown {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.wedding-countdown-units {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+}
+
+.wedding-countdown-unit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 64px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--gold-light) 55%, transparent);
+}
+
+.wedding-countdown-value {
+  font-size: 1.7rem;
+  font-weight: 800;
+  line-height: 1.1;
+  color: var(--charcoal);
+  font-variant-numeric: tabular-nums;
+}
+
+.wedding-countdown-label {
+  margin-top: 2px;
+  font-size: 0.65rem;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+.wedding-countdown-past {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--charcoal);
+}
+
+@media (max-width: 480px) {
+  .wedding-countdown-units {
+    gap: 8px;
+  }
+
+  .wedding-countdown-unit {
+    min-width: 52px;
+    padding: 8px 10px;
+  }
+
+  .wedding-countdown-value {
+    font-size: 1.3rem;
+  }
+}
+
 .admin-tools {
   margin-bottom: 28px;
 }
