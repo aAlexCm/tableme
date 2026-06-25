@@ -651,6 +651,16 @@ nav.admin-nav.admin-nav-stacked {
   white-space: normal;
   text-align: center;
   border-radius: var(--radius-sm);
+  background: none;
+  box-shadow: none;
+  border: 1.5px solid var(--ink);
+  color: var(--ink);
+}
+
+.poster-tool-btn:hover {
+  background: rgba(15, 23, 42, 0.04);
+  box-shadow: none;
+  transform: none;
 }
 
 .poster-canvas-area {
