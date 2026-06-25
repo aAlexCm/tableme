@@ -27,7 +27,7 @@
 
     <div class="card">
       <h2 id="partner-form-title" data-i18n="newPartnerTitle">Nouveau partenaire</h2>
-      <form id="partner-form" class="field-grid">
+      <form id="partner-form" class="field-grid field-grid-single">
         <div class="field">
           <label for="partner-name" data-i18n="partnerNameLabel">Nom du partenaire</label>
           <input type="text" id="partner-name" required />
@@ -83,6 +83,7 @@
       <h2 data-i18n="partnersListTitle">Partenaires</h2>
       <ul class="wedding-list" id="partner-list"></ul>
       <p class="empty-state" id="partner-list-empty" data-i18n="partnersListEmpty" hidden>Aucun partenaire créé pour le moment.</p>
+      <button type="button" class="secondary" id="seed-examples-btn" data-i18n="seedExamplesBtn" hidden>Charger 3 exemples</button>
     </div>
   </div>
 

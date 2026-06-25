@@ -247,7 +247,7 @@ header.hero p:not(.eyebrow) {
   pointer-events: none;
 }
 
-input, select {
+input, select, textarea {
   font-family: 'Inter', sans-serif;
   font-size: 16px;
   padding: 0 14px;
@@ -257,15 +257,24 @@ input, select {
   background: var(--sage-light);
   color: var(--ink);
   width: 100%;
+  min-width: 0;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-input::placeholder {
+textarea {
+  height: auto;
+  min-height: 90px;
+  padding: 10px 14px;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+input::placeholder, textarea::placeholder {
   color: var(--sage-deep);
   opacity: 0.75;
 }
 
-input:focus, select:focus {
+input:focus, select:focus, textarea:focus {
   outline: none;
   border-color: var(--gold);
   box-shadow: 0 0 0 4px rgba(176, 141, 79, 0.14);
@@ -657,6 +666,7 @@ nav.admin-nav a:hover {
   grid-template-columns: repeat(auto-fit, minmax(44px, 1fr));
   gap: 8px;
   max-width: 420px;
+  min-width: 0;
 }
 
 .partner-icon-option {
@@ -691,6 +701,14 @@ nav.admin-nav a:hover {
   gap: 14px;
 }
 
+/* Longer forms (e.g. the partner form, with a textarea/icon-grid/multiple
+   sections) opt out of the 640px+ multi-column layout below, which was
+   designed for the compact 3-field "new wedding" form and otherwise squashes
+   wider field types into narrow columns. */
+.field-grid.field-grid-single {
+  grid-template-columns: 1fr;
+}
+
 .field-grid[hidden] {
   display: none;
 }
@@ -699,6 +717,7 @@ nav.admin-nav a:hover {
   display: flex;
   flex-direction: column;
   gap: 6px;
+  min-width: 0;
 }
 
 .field label {

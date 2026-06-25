@@ -35,6 +35,34 @@ const ICONS = {
 
   const listEl = document.getElementById('partner-list');
   const listEmptyEl = document.getElementById('partner-list-empty');
+  const seedExamplesBtn = document.getElementById('seed-examples-btn');
+
+  const EXAMPLE_PARTNERS = [
+    {
+      name: 'Prestige Wedding Cars',
+      category: 'transport',
+      icon: 'car',
+      description: 'Location de voitures de luxe avec chauffeur pour le jour J.',
+      link: 'https://example.com',
+      geo: { country: 'France', region: '', city: '' },
+    },
+    {
+      name: "Les Copains d'Abord",
+      category: 'animation',
+      icon: 'music',
+      description: 'Animations, jeux et photobooth pour dynamiser votre soirée.',
+      link: 'https://example.com',
+      geo: { country: 'France', region: '', city: '' },
+    },
+    {
+      name: 'Fleurs & Cie',
+      category: 'decoration',
+      icon: 'flower',
+      description: 'Décoration florale sur-mesure pour votre cérémonie et votre salle.',
+      link: 'https://example.com',
+      geo: { country: 'France', region: '', city: '' },
+    },
+  ];
 
   function escapeHtml(value) {
     return String(value).replace(/[&<>"']/g, (c) => ({
@@ -160,6 +188,7 @@ const ICONS = {
   async function renderPartnerList() {
     const partners = await Storage.getPartners();
     listEmptyEl.hidden = partners.length > 0;
+    seedExamplesBtn.hidden = partners.length > 0;
     listEl.innerHTML = partners.map((p) => {
       const icon = PARTNER_ICONS.find((i) => i.key === p.icon);
       const categoryLabel = PARTNER_CATEGORIES[p.category] ? t(currentLang, PARTNER_CATEGORIES[p.category].labelKey) : '';
@@ -197,6 +226,13 @@ const ICONS = {
         await renderPartnerList();
       }
     }
+  });
+
+  seedExamplesBtn.addEventListener('click', async () => {
+    for (const example of EXAMPLE_PARTNERS) {
+      await Storage.addPartner(example);
+    }
+    await renderPartnerList();
   });
 
   form.addEventListener('submit', async (e) => {
