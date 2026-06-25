@@ -10,6 +10,7 @@ const LANG_KEY = 'tableme_wedding_admin_lang';
 // or PDF fidelity, only how big the editor looks on screen.
 const SHEET_WIDTH = 396;
 const SHEET_HEIGHT = 560;
+const SNAP_THRESHOLD = 6;
 
 const FONT_OPTIONS = [
   { key: 'greatvibes', label: 'Great Vibes', family: "'Great Vibes', cursive", group: 'heading' },
@@ -117,6 +118,17 @@ function fontFamilyFor(fontKey) {
   const sheetEl = document.getElementById('poster-sheet');
   const sheetContentEl = document.getElementById('poster-sheet-content');
   const bgSwatchFillEl = document.getElementById('poster-bg-swatch-fill');
+
+  const guideV = document.createElement('div');
+  guideV.className = 'poster-guide poster-guide-v';
+  guideV.style.left = `${SHEET_WIDTH / 2}px`;
+  guideV.hidden = true;
+  const guideH = document.createElement('div');
+  guideH.className = 'poster-guide poster-guide-h';
+  guideH.style.top = `${SHEET_HEIGHT / 2}px`;
+  guideH.hidden = true;
+  sheetContentEl.appendChild(guideV);
+  sheetContentEl.appendChild(guideH);
   const addTextBtn = document.getElementById('poster-add-text-btn');
   const addQrBtn = document.getElementById('poster-add-qr-btn');
   const addDividerBtn = document.getElementById('poster-add-divider-btn');
@@ -351,8 +363,22 @@ function fontFamilyFor(fontKey) {
       function onMove(ev) {
         const dx = ev.clientX - startX;
         const dy = ev.clientY - startY;
-        el.x = Math.max(0, startLeft + dx);
-        el.y = Math.max(0, startTop + dy);
+        let nextX = Math.max(0, startLeft + dx);
+        let nextY = Math.max(0, startTop + dy);
+
+        const width = node.offsetWidth;
+        const height = node.offsetHeight;
+        const centerX = nextX + width / 2;
+        const centerY = nextY + height / 2;
+        const snapV = Math.abs(centerX - SHEET_WIDTH / 2) < SNAP_THRESHOLD;
+        const snapH = Math.abs(centerY - SHEET_HEIGHT / 2) < SNAP_THRESHOLD;
+        if (snapV) nextX = SHEET_WIDTH / 2 - width / 2;
+        if (snapH) nextY = SHEET_HEIGHT / 2 - height / 2;
+        guideV.hidden = !snapV;
+        guideH.hidden = !snapH;
+
+        el.x = nextX;
+        el.y = nextY;
         node.style.left = `${el.x}px`;
         node.style.top = `${el.y}px`;
         positionToolbar(node);
@@ -360,6 +386,8 @@ function fontFamilyFor(fontKey) {
       function onUp() {
         document.removeEventListener('mousemove', onMove);
         document.removeEventListener('mouseup', onUp);
+        guideV.hidden = true;
+        guideH.hidden = true;
         scheduleSave();
       }
       document.addEventListener('mousemove', onMove);

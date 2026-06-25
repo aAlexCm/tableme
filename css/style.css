@@ -701,6 +701,29 @@ nav.admin-nav.admin-nav-stacked {
   height: 100%;
 }
 
+.poster-guide {
+  position: absolute;
+  background: #ef476f;
+  pointer-events: none;
+  z-index: 50;
+}
+
+.poster-guide:not([hidden]) {
+  display: block;
+}
+
+.poster-guide-v {
+  top: 0;
+  bottom: 0;
+  width: 1px;
+}
+
+.poster-guide-h {
+  left: 0;
+  right: 0;
+  height: 1px;
+}
+
 .poster-text-el {
   position: absolute;
   min-width: 24px;
