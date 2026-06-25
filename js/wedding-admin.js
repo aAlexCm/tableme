@@ -12,6 +12,7 @@ const ICONS = {
   pencil: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z"/></svg>',
   chevronUp: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15l-6-6-6 6"/></svg>',
   chevronDown: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>',
+  plus: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>',
 };
 
 function parseBulkGuests(text) {
@@ -452,6 +453,13 @@ function parseSheetRows(rows) {
         for (let i = guests.length; i < seatCount; i += 1) {
           list.appendChild(renderEmptySeatRow());
         }
+        const addSeatLabel = escapeHtml(t(currentLang, 'addSeatBtn'));
+        const addSeatLi = document.createElement('li');
+        addSeatLi.className = 'guest-row-add-seat';
+        addSeatLi.innerHTML = `
+          <button type="button" class="icon-btn" data-action="add-seat" data-table-id="${table.id}" title="${addSeatLabel}" aria-label="${addSeatLabel}">${ICONS.plus}</button>
+        `;
+        list.appendChild(addSeatLi);
       } else if (guests.length === 0) {
         const emptyLi = document.createElement('li');
         emptyLi.className = 'table-guest-list-empty';
@@ -598,6 +606,22 @@ function parseSheetRows(rows) {
         await Storage.setBoard(weddingId, { guests, tables });
         await renderGuests();
       }
+      return;
+    }
+
+    const addSeatBtn = e.target.closest('button[data-action="add-seat"]');
+    if (addSeatBtn) {
+      const { tableId } = addSeatBtn.dataset;
+      const wedding = cachedWedding || (await Storage.getWedding(weddingId));
+      if (!wedding) return;
+      const table = (wedding.tables || []).find((tb) => tb.id === tableId);
+      if (!table) return;
+      const currentSeats = table.seats != null ? table.seats : DEFAULT_SEATS;
+      const tables = wedding.tables.map((tb) => (
+        tb.id === tableId ? { ...tb, seats: currentSeats + 1 } : tb
+      ));
+      await renderGuests({ ...wedding, tables });
+      await Storage.setTables(weddingId, tables);
       return;
     }
 

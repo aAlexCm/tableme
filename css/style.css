@@ -902,6 +902,38 @@ body.modal-open {
   pointer-events: auto;
 }
 
+.guest-row-add-seat {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 0;
+}
+
+.guest-row-add-seat .icon-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px dashed rgba(176, 141, 79, 0.4);
+  color: #998c77;
+  background: transparent;
+}
+
+.guest-row-add-seat .icon-btn:hover {
+  border-style: solid;
+  border-color: var(--gold-deep);
+  color: var(--gold-deep);
+  background: color-mix(in srgb, var(--gold) 12%, transparent);
+}
+
+body.admin-theme .guest-row-add-seat .icon-btn {
+  border-color: rgba(100, 116, 139, 0.4);
+}
+
+body.admin-theme .guest-row-add-seat .icon-btn:hover {
+  border-color: #64748b;
+  color: #64748b;
+  background: rgba(100, 116, 139, 0.12);
+}
+
 .guest-row:hover {
   background: var(--sage-light);
   box-shadow: 0 10px 22px rgba(138, 109, 60, 0.1);
