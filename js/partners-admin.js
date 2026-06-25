@@ -1,6 +1,7 @@
 import { Storage } from './storage.js';
 import { applyTranslations, buildLangSwitcher, t } from './i18n.js';
 import { PARTNER_CATEGORIES, PARTNER_ICONS, CONTACT_CHANNELS } from './partners.js';
+import { getCountries, getRegions, getCities } from './geo.js';
 
 const ADMIN_LANG_KEY = 'tableme_admin_lang';
 const MAX_PHOTO_DIMENSION = 640;
@@ -39,7 +40,7 @@ function readAndResizeImage(file) {
   let currentLang = localStorage.getItem(ADMIN_LANG_KEY) || 'fr';
   let editingPartnerId = null;
   let editingPartnerOrder = null;
-  let weddingLocations = [];
+  let currentRegions = [];
   let partnersCache = [];
   let selectedIcon = PARTNER_ICONS[0].key;
 
@@ -58,12 +59,9 @@ function readAndResizeImage(file) {
   const photoFileInput = document.getElementById('partner-photo-file-input');
   const photoUploadBtn = document.getElementById('partner-photo-upload-btn');
   const photoUrlInput = document.getElementById('partner-photo-url-input');
-  const countryInput = document.getElementById('partner-country');
-  const regionInput = document.getElementById('partner-region');
-  const cityInput = document.getElementById('partner-city');
-  const countryOptionsEl = document.getElementById('partner-country-options');
-  const regionOptionsEl = document.getElementById('partner-region-options');
-  const cityOptionsEl = document.getElementById('partner-city-options');
+  const countrySelect = document.getElementById('partner-country');
+  const regionSelect = document.getElementById('partner-region');
+  const citySelect = document.getElementById('partner-city');
   const submitBtn = document.getElementById('partner-form-submit');
   const cancelBtn = document.getElementById('partner-form-cancel');
 
@@ -115,7 +113,7 @@ function readAndResizeImage(file) {
     document.title = `TableMe · ${t(currentLang, 'partnersAdminTitle')}`;
   }
 
-  function setLang(lang) {
+  async function setLang(lang) {
     currentLang = lang;
     localStorage.setItem(ADMIN_LANG_KEY, lang);
     applyTranslations(lang);
@@ -123,7 +121,13 @@ function readAndResizeImage(file) {
     renderCategoryOptions();
     renderIconGrid();
     renderContactsFields();
-    renderPartnerList();
+    const { value: country } = countrySelect;
+    const { value: region } = regionSelect;
+    const { value: city } = citySelect;
+    await loadCountryOptions(country);
+    if (country) await loadRegionOptions(country, region);
+    if (country && region) await loadCityOptions(country, region, city);
+    await renderPartnerList();
   }
 
   function renderCategoryOptions() {
@@ -183,38 +187,62 @@ function readAndResizeImage(file) {
     });
   }
 
-  function distinctValues(values) {
-    const seen = new Map();
-    values.forEach((v) => {
-      const trimmed = (v || '').trim();
-      if (trimmed && !seen.has(trimmed.toLowerCase())) seen.set(trimmed.toLowerCase(), trimmed);
-    });
-    return [...seen.values()];
+  function populateGeoSelect(select, items, selectedName, placeholderText) {
+    const options = [`<option value="">${escapeHtml(placeholderText)}</option>`].concat(
+      items.map((item) => `<option value="${escapeHtml(item.name)}">${escapeHtml(item.name)}</option>`)
+    );
+    if (selectedName && !items.some((item) => item.name === selectedName)) {
+      options.push(`<option value="${escapeHtml(selectedName)}">${escapeHtml(selectedName)}</option>`);
+    }
+    select.innerHTML = options.join('');
+    select.value = selectedName || '';
   }
 
-  function refreshGeoOptions() {
-    const countryTyped = countryInput.value.trim().toLowerCase();
-    const regionTyped = regionInput.value.trim().toLowerCase();
-
-    countryOptionsEl.innerHTML = distinctValues(weddingLocations.map((l) => l.country))
-      .map((v) => `<option value="${escapeHtml(v)}"></option>`).join('');
-
-    const regionsForCountry = weddingLocations
-      .filter((l) => !countryTyped || (l.country || '').trim().toLowerCase() === countryTyped)
-      .map((l) => l.region);
-    regionOptionsEl.innerHTML = distinctValues(regionsForCountry)
-      .map((v) => `<option value="${escapeHtml(v)}"></option>`).join('');
-
-    const citiesForCountryRegion = weddingLocations
-      .filter((l) => !countryTyped || (l.country || '').trim().toLowerCase() === countryTyped)
-      .filter((l) => !regionTyped || (l.region || '').trim().toLowerCase() === regionTyped)
-      .map((l) => l.city);
-    cityOptionsEl.innerHTML = distinctValues(citiesForCountryRegion)
-      .map((v) => `<option value="${escapeHtml(v)}"></option>`).join('');
+  function resetGeoSelect(select, placeholderText) {
+    select.innerHTML = `<option value="">${escapeHtml(placeholderText)}</option>`;
+    select.value = '';
+    select.disabled = true;
   }
 
-  countryInput.addEventListener('input', refreshGeoOptions);
-  regionInput.addEventListener('input', refreshGeoOptions);
+  async function loadCountryOptions(selectedCountry) {
+    countrySelect.disabled = true;
+    const countries = await getCountries();
+    populateGeoSelect(countrySelect, countries, selectedCountry, t(currentLang, 'locationChoosePlaceholder'));
+    countrySelect.disabled = false;
+  }
+
+  async function loadRegionOptions(country, selectedRegion) {
+    resetGeoSelect(citySelect, t(currentLang, 'partnerGeoAnyCity'));
+    if (!country) {
+      resetGeoSelect(regionSelect, t(currentLang, 'partnerGeoAnyRegion'));
+      currentRegions = [];
+      return;
+    }
+    regionSelect.disabled = true;
+    currentRegions = await getRegions(country);
+    populateGeoSelect(regionSelect, currentRegions, selectedRegion, t(currentLang, 'partnerGeoAnyRegion'));
+    regionSelect.disabled = false;
+  }
+
+  async function loadCityOptions(country, regionName, selectedCity) {
+    if (!regionName) {
+      resetGeoSelect(citySelect, t(currentLang, 'partnerGeoAnyCity'));
+      return;
+    }
+    citySelect.disabled = true;
+    const region = currentRegions.find((r) => r.name === regionName) || { name: regionName };
+    const cities = await getCities(country, region);
+    populateGeoSelect(citySelect, cities, selectedCity, t(currentLang, 'partnerGeoAnyCity'));
+    citySelect.disabled = false;
+  }
+
+  countrySelect.addEventListener('change', () => {
+    loadRegionOptions(countrySelect.value, '');
+  });
+
+  regionSelect.addEventListener('change', () => {
+    loadCityOptions(countrySelect.value, regionSelect.value, '');
+  });
 
   function renderPhotoPreview() {
     const url = photoUrlInput.value.trim();
@@ -251,14 +279,16 @@ function readAndResizeImage(file) {
     renderIconGrid();
     renderCategoryOptions();
     setContactsInForm({});
-    refreshGeoOptions();
+    loadCountryOptions('');
+    resetGeoSelect(regionSelect, t(currentLang, 'partnerGeoAnyRegion'));
+    resetGeoSelect(citySelect, t(currentLang, 'partnerGeoAnyCity'));
     renderPhotoPreview();
     formTitleEl.textContent = t(currentLang, 'newPartnerTitle');
     submitBtn.textContent = t(currentLang, 'createBtn');
     cancelBtn.hidden = true;
   }
 
-  function startEdit(partner) {
+  async function startEdit(partner) {
     editingPartnerId = partner.id;
     editingPartnerOrder = typeof partner.order === 'number' ? partner.order : 0;
     nameInput.value = partner.name || '';
@@ -270,10 +300,13 @@ function readAndResizeImage(file) {
     photoUrlInput.value = partner.photo || '';
     renderPhotoPreview();
     const geo = partner.geo || {};
-    countryInput.value = geo.country || '';
-    regionInput.value = geo.region || '';
-    cityInput.value = geo.city || '';
-    refreshGeoOptions();
+    await loadCountryOptions(geo.country || '');
+    if (geo.country) {
+      await loadRegionOptions(geo.country, geo.region || '');
+      if (geo.region) {
+        await loadCityOptions(geo.country, geo.region, geo.city || '');
+      }
+    }
     formTitleEl.textContent = t(currentLang, 'editPartnerTitle');
     submitBtn.textContent = t(currentLang, 'saveBtn');
     cancelBtn.hidden = false;
@@ -366,9 +399,9 @@ function readAndResizeImage(file) {
       contacts,
       photo: photoUrlInput.value.trim(),
       geo: {
-        country: countryInput.value.trim(),
-        region: regionInput.value.trim(),
-        city: cityInput.value.trim(),
+        country: countrySelect.value,
+        region: regionSelect.value,
+        city: citySelect.value,
       },
     };
     const hasContact = Object.values(contacts).some(Boolean);
@@ -388,16 +421,15 @@ function readAndResizeImage(file) {
 
   (async function init() {
     photoRemoveBtn.innerHTML = ICONS.trash;
-    const weddings = await Storage.getWeddings();
-    weddingLocations = weddings.map((w) => w.location).filter(Boolean);
-
     langMount.appendChild(buildLangSwitcher(currentLang, setLang));
     applyTranslations(currentLang);
     updatePageTitle();
     renderCategoryOptions();
     renderIconGrid();
     renderContactsFields();
-    refreshGeoOptions();
+    await loadCountryOptions('');
+    resetGeoSelect(regionSelect, t(currentLang, 'partnerGeoAnyRegion'));
+    resetGeoSelect(citySelect, t(currentLang, 'partnerGeoAnyCity'));
     await renderPartnerList();
   })();
 })();

@@ -65,24 +65,21 @@
         </div>
 
         <h3 class="theme-font-heading" data-i18n="partnerGeoSectionTitle">Zone géographique</h3>
-        <p class="muted small" data-i18n="partnerGeoHint">Basé sur les pays/régions/villes déjà renseignés pour vos mariages. Laissez vide pour cibler plus large.</p>
+        <p class="muted small" data-i18n="partnerGeoHint">Choisissez le pays, puis affinez avec une région et une ville pour cibler plus précisément. Laissez la région/ville sur "Toutes" pour cibler plus large.</p>
 
         <div class="field">
           <label for="partner-country" data-i18n="partnerCountryLabel">Pays</label>
-          <input type="text" id="partner-country" list="partner-country-options" required />
-          <datalist id="partner-country-options"></datalist>
+          <select id="partner-country" required></select>
         </div>
 
         <div class="field">
           <label for="partner-region" data-i18n="partnerRegionLabel">Région / Département (optionnel)</label>
-          <input type="text" id="partner-region" list="partner-region-options" />
-          <datalist id="partner-region-options"></datalist>
+          <select id="partner-region" disabled></select>
         </div>
 
         <div class="field">
           <label for="partner-city" data-i18n="partnerCityLabel">Ville (optionnel)</label>
-          <input type="text" id="partner-city" list="partner-city-options" />
-          <datalist id="partner-city-options"></datalist>
+          <select id="partner-city" disabled></select>
         </div>
 
         <button type="submit" id="partner-form-submit" data-i18n="createBtn">Créer</button>
