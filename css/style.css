@@ -523,62 +523,67 @@ nav.admin-nav a:hover {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 6px;
-  height: auto;
-  padding: 20px;
-  border-radius: var(--radius-sm);
-  border: 2px solid transparent;
-  background: var(--sage-light);
-  box-shadow: none;
+  justify-content: flex-start;
+  gap: 4px;
+  height: 132px;
+  padding: 18px;
+  border-radius: 18px;
+  border: none;
+  background: linear-gradient(135deg, var(--gold), var(--gold-deep));
+  box-shadow: 0 10px 22px rgba(91, 75, 196, 0.25);
   white-space: normal;
   text-align: left;
   text-decoration: none;
-  color: inherit;
+  color: #fff;
   cursor: pointer;
-  transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+  overflow: hidden;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .admin-tool-tile:hover {
-  background: var(--paper);
-  box-shadow: 0 12px 28px rgba(138, 109, 60, 0.1);
+  transform: translateY(-3px);
+  box-shadow: 0 16px 30px rgba(91, 75, 196, 0.32);
 }
 
 .admin-tool-tile-icon {
+  position: absolute;
+  bottom: -8px;
+  right: -6px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: var(--paper);
-  color: var(--gold-deep);
-  margin-bottom: 4px;
+  width: 64px;
+  height: 64px;
+  color: rgba(255, 255, 255, 0.4);
 }
 
-.admin-tool-tile:hover .admin-tool-tile-icon {
-  background: var(--gold-light);
+.admin-tool-tile-icon svg {
+  width: 56px;
+  height: 56px;
 }
 
 .admin-tool-tile-label {
+  position: relative;
   font-family: 'Inter', sans-serif;
   font-size: 0.95rem;
   font-weight: 700;
-  color: var(--charcoal);
+  color: #fff;
 }
 
 .admin-tool-tile-desc {
+  position: relative;
   font-size: 0.78rem;
-  color: var(--sage-deep);
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .admin-tool-tile.is-disabled {
   cursor: default;
-  opacity: 0.65;
+  opacity: 0.55;
 }
 
 .admin-tool-tile.is-disabled:hover {
-  background: var(--sage-light);
-  box-shadow: none;
+  transform: none;
+  box-shadow: 0 10px 22px rgba(91, 75, 196, 0.25);
 }
 
 .admin-tool-tile-badge {
@@ -590,21 +595,27 @@ nav.admin-nav a:hover {
   font-weight: 700;
   letter-spacing: 0.4px;
   text-transform: uppercase;
-  color: var(--gold-deep);
-  background: var(--gold-light);
+  color: var(--charcoal);
+  background: rgba(255, 255, 255, 0.85);
   border-radius: var(--radius-pill);
 }
 
-.admin-tool-tile.tile-accent-blue .admin-tool-tile-icon,
-.admin-tool-tile.tile-accent-blue:hover .admin-tool-tile-icon {
-  background: var(--sage-light);
-  color: var(--sage-deep);
+.admin-tool-tile.tile-accent-blue {
+  background: linear-gradient(135deg, var(--sage), var(--sage-deep));
+  box-shadow: 0 10px 22px rgba(47, 156, 128, 0.25);
 }
 
-.admin-tool-tile.tile-accent-teal .admin-tool-tile-icon,
-.admin-tool-tile.tile-accent-teal:hover .admin-tool-tile-icon {
-  background: var(--accent-teal-light);
-  color: var(--accent-teal-deep);
+.admin-tool-tile.tile-accent-blue:hover {
+  box-shadow: 0 16px 30px rgba(47, 156, 128, 0.32);
+}
+
+.admin-tool-tile.tile-accent-teal {
+  background: linear-gradient(135deg, var(--accent-teal), var(--accent-teal-deep));
+  box-shadow: 0 10px 22px rgba(217, 123, 63, 0.25);
+}
+
+.admin-tool-tile.tile-accent-teal:hover {
+  box-shadow: 0 16px 30px rgba(217, 123, 63, 0.32);
 }
 
 .partners-grid {
@@ -3037,19 +3048,19 @@ body.admin-theme .theme-decoration-position-arrow {
    sky-blue (secondary) accent duo for admin.html/wedding-admin.html/etc., scoped
    via body.admin-theme so the guest-facing pages keep their wedding styling. */
 body.admin-theme {
-  --gold: #6366f1;
-  --gold-deep: #4f46e5;
-  --gold-light: #e6e4fb;
-  --sage: #38a6e0;
-  --sage-deep: #1f7fb8;
-  --sage-light: #e2f1fa;
-  --ink: #28253f;
-  --charcoal: #1b1830;
+  --gold: #8e7cf0;
+  --gold-deep: #5b4bc4;
+  --gold-light: #ece8fb;
+  --sage: #4fc3a1;
+  --sage-deep: #2f9c80;
+  --sage-light: #e3f7f0;
+  --ink: #2b2740;
+  --charcoal: #1d1a30;
   --cream: #f8f7fd;
   --paper: #ffffff;
-  --accent-teal: #14b8a6;
-  --accent-teal-deep: #0d9488;
-  --accent-teal-light: #d8f7f1;
+  --accent-teal: #f4a261;
+  --accent-teal-deep: #d97b3f;
+  --accent-teal-light: #fdecd8;
 }
 
 body.admin-theme header.hero::before,
@@ -3084,13 +3095,13 @@ body.admin-theme select:focus {
 }
 
 body.admin-theme button:not([class]) {
-  background: var(--gold);
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.15);
+  background: linear-gradient(135deg, var(--gold), var(--gold-deep));
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--gold-deep) 35%, transparent);
 }
 
 body.admin-theme button:not([class]):hover {
-  background: var(--gold-deep);
-  box-shadow: 0 2px 5px rgba(15, 23, 42, 0.2);
+  background: linear-gradient(135deg, var(--gold-deep), color-mix(in srgb, var(--gold-deep) 75%, black));
+  box-shadow: 0 6px 16px color-mix(in srgb, var(--gold-deep) 45%, transparent);
   filter: none;
 }
 
