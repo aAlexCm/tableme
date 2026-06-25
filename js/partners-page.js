@@ -70,6 +70,7 @@ function escapeHtml(value) {
     partnersGridEl.innerHTML = matchingPartners.map((partner) => {
       const category = PARTNER_CATEGORIES[partner.category];
       const categoryLabel = category ? t(currentLang, category.labelKey) : '';
+      const categoryColorClass = category && category.color ? ` cat-${category.color}` : '';
       const icon = PARTNER_ICONS.find((i) => i.key === partner.icon);
       const photo = partner.photo
         ? `<button type="button" class="partner-card-photo" data-photo="${escapeHtml(partner.photo)}"><img src="${escapeHtml(partner.photo)}" alt="" /></button>`
@@ -86,13 +87,13 @@ function escapeHtml(value) {
         .join('');
       return `
         <div class="partner-card">
-          ${photo}
-          <div class="partner-card-body">
-            <span class="partner-card-category">${icon ? icon.svg : ''}${escapeHtml(categoryLabel)}</span>
-            <h3 class="partner-card-name">${escapeHtml(partner.name)}</h3>
+          <span class="partner-card-category${categoryColorClass}">${icon ? icon.svg : ''}${escapeHtml(categoryLabel)}</span>
+          <h3 class="partner-card-name">${escapeHtml(partner.name)}</h3>
+          <div class="partner-card-media-row">
+            ${photo}
             <p class="partner-card-desc">${escapeHtml(partner.description)}</p>
-            <div class="partner-card-actions">${contactButtons}</div>
           </div>
+          <div class="partner-card-actions">${contactButtons}</div>
         </div>
       `;
     }).join('');

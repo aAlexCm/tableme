@@ -595,6 +595,18 @@ nav.admin-nav a:hover {
   border-radius: var(--radius-pill);
 }
 
+.admin-tool-tile.tile-accent-blue .admin-tool-tile-icon,
+.admin-tool-tile.tile-accent-blue:hover .admin-tool-tile-icon {
+  background: var(--sage-light);
+  color: var(--sage-deep);
+}
+
+.admin-tool-tile.tile-accent-teal .admin-tool-tile-icon,
+.admin-tool-tile.tile-accent-teal:hover .admin-tool-tile-icon {
+  background: var(--accent-teal-light);
+  color: var(--accent-teal-deep);
+}
+
 .partners-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -604,9 +616,8 @@ nav.admin-nav a:hover {
 
 .partner-card {
   display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  gap: 12px;
+  flex-direction: column;
+  gap: 8px;
   padding: 14px;
   background: var(--paper);
   border: 1px solid var(--gold-light);
@@ -614,12 +625,10 @@ nav.admin-nav a:hover {
   box-shadow: 0 16px 32px rgba(138, 109, 60, 0.1);
 }
 
-.partner-card-body {
+.partner-card-media-row {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
-  flex: 1;
-  min-width: 0;
+  align-items: center;
+  gap: 12px;
 }
 
 .partner-card-photo {
@@ -659,14 +668,24 @@ nav.admin-nav a:hover {
   font-weight: 600;
   letter-spacing: 0.3px;
   text-transform: uppercase;
-  color: var(--sage-deep);
-  background: var(--sage-light);
+  color: var(--gold-deep);
+  background: var(--gold-light);
   border-radius: var(--radius-pill);
 }
 
 .partner-card-category svg {
   width: 13px;
   height: 13px;
+}
+
+.partner-card-category.cat-blue {
+  color: var(--sage-deep);
+  background: var(--sage-light);
+}
+
+.partner-card-category.cat-teal {
+  color: var(--accent-teal-deep);
+  background: var(--accent-teal-light);
 }
 
 .partner-card-name {
@@ -680,6 +699,7 @@ nav.admin-nav a:hover {
   font-size: 0.84rem;
   color: var(--ink);
   flex: 1;
+  min-width: 0;
   white-space: pre-line;
 }
 
@@ -1173,7 +1193,7 @@ body.modal-open {
 }
 
 body.admin-theme .toggle-switch input:checked + .toggle-switch-track {
-  background: #64748b;
+  background: var(--gold);
 }
 
 .toggle-switch input:checked + .toggle-switch-track::before {
@@ -1329,13 +1349,13 @@ body.admin-theme .toggle-switch input:checked + .toggle-switch-track {
 }
 
 body.admin-theme .guest-row-add-seat .icon-btn {
-  border-color: rgba(100, 116, 139, 0.4);
+  border-color: color-mix(in srgb, var(--gold) 40%, transparent);
 }
 
 body.admin-theme .guest-row-add-seat .icon-btn:hover {
-  border-color: #64748b;
-  color: #64748b;
-  background: rgba(100, 116, 139, 0.12);
+  border-color: var(--gold);
+  color: var(--gold);
+  background: color-mix(in srgb, var(--gold) 12%, transparent);
 }
 
 .guest-row:hover {
@@ -1378,9 +1398,9 @@ body.admin-theme.dragging-guest-row .guest-row:not(.dragging):hover {
 }
 
 body.admin-theme .guest-row-drop-target {
-  border-color: #64748b !important;
-  background: color-mix(in srgb, #64748b 14%, var(--paper)) !important;
-  box-shadow: 0 0 0 3px color-mix(in srgb, #64748b 35%, transparent) !important;
+  border-color: var(--gold) !important;
+  background: color-mix(in srgb, var(--gold) 14%, var(--paper)) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--gold) 35%, transparent) !important;
 }
 
 .guest-row-drag-ghost {
@@ -1856,7 +1876,7 @@ select.mini-lang-select {
 }
 
 body.admin-theme .theme-decoration-preview-box {
-  color: #64748b;
+  color: var(--gold);
 }
 
 .theme-decoration-upload {
@@ -1930,7 +1950,7 @@ body.admin-theme .theme-decoration-preview-box {
 }
 
 body.admin-theme .theme-decoration-position-arrow {
-  color: #64748b;
+  color: var(--gold);
 }
 
 .theme-decoration-position-option:hover {
@@ -3013,19 +3033,23 @@ body.admin-theme .theme-decoration-position-arrow {
   }
 }
 
-/* Admin theme: a neutral, tool-like palette for admin.html and wedding-admin.html,
-   scoped via body.admin-theme so the guest-facing pages keep their wedding styling. */
+/* Admin theme: repurposes the shared --gold/--sage slots as a violet (primary) +
+   sky-blue (secondary) accent duo for admin.html/wedding-admin.html/etc., scoped
+   via body.admin-theme so the guest-facing pages keep their wedding styling. */
 body.admin-theme {
-  --gold: #64748b;
-  --gold-deep: #334155;
-  --gold-light: #e2e8f0;
-  --sage: #94a3b8;
-  --sage-deep: #475569;
-  --sage-light: #f1f5f9;
-  --ink: #1e293b;
-  --charcoal: #0f172a;
-  --cream: #f8fafc;
+  --gold: #6366f1;
+  --gold-deep: #4f46e5;
+  --gold-light: #e6e4fb;
+  --sage: #38a6e0;
+  --sage-deep: #1f7fb8;
+  --sage-light: #e2f1fa;
+  --ink: #28253f;
+  --charcoal: #1b1830;
+  --cream: #f8f7fd;
   --paper: #ffffff;
+  --accent-teal: #14b8a6;
+  --accent-teal-deep: #0d9488;
+  --accent-teal-light: #d8f7f1;
 }
 
 body.admin-theme header.hero::before,
@@ -3034,7 +3058,7 @@ body.admin-theme header.hero::after {
 }
 
 body.admin-theme header.hero p:not(.eyebrow) {
-  color: #64748b;
+  color: var(--gold);
 }
 
 body.admin-theme .divider span::after {
@@ -3051,28 +3075,28 @@ body.admin-theme .card::before {
 
 body.admin-theme input,
 body.admin-theme select {
-  border-color: rgba(100, 116, 139, 0.35);
+  border-color: color-mix(in srgb, var(--gold) 35%, transparent);
 }
 
 body.admin-theme input:focus,
 body.admin-theme select:focus {
-  box-shadow: 0 0 0 4px rgba(71, 85, 105, 0.15);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--gold-deep) 15%, transparent);
 }
 
 body.admin-theme button:not([class]) {
-  background: #475569;
+  background: var(--gold);
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.15);
 }
 
 body.admin-theme button:not([class]):hover {
-  background: #334155;
+  background: var(--gold-deep);
   box-shadow: 0 2px 5px rgba(15, 23, 42, 0.2);
   filter: none;
 }
 
 body.admin-theme button.secondary,
 body.admin-theme a.secondary {
-  text-decoration-color: rgba(71, 85, 105, 0.5);
+  text-decoration-color: color-mix(in srgb, var(--gold-deep) 50%, transparent);
 }
 
 body.admin-theme .mode-btn.active,
@@ -3081,15 +3105,15 @@ body.admin-theme .view-switch-tab.active {
 }
 
 body.admin-theme .file-dropzone {
-  border-color: rgba(100, 116, 139, 0.35);
+  border-color: color-mix(in srgb, var(--gold) 35%, transparent);
 }
 
 body.admin-theme .table-guest-list {
-  background: rgba(100, 116, 139, 0.07);
+  background: color-mix(in srgb, var(--gold) 7%, transparent);
 }
 
 body.admin-theme .guest-row {
-  border-color: rgba(100, 116, 139, 0.18);
+  border-color: color-mix(in srgb, var(--gold) 18%, transparent);
   box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
 }
 
@@ -3102,11 +3126,11 @@ body.admin-theme .guest-row.dragging {
 }
 
 body.admin-theme .guest-row-empty {
-  border-color: rgba(100, 116, 139, 0.3);
+  border-color: color-mix(in srgb, var(--gold) 30%, transparent);
 }
 
 body.admin-theme .wedding-item:hover {
-  background: #e8eaed;
+  background: color-mix(in srgb, var(--gold) 8%, var(--paper));
 }
 
 body.admin-theme .modal-overlay {
@@ -3130,13 +3154,13 @@ body.admin-theme .table-group-count,
 body.admin-theme .table-guest-list-empty,
 body.admin-theme .guest-row-empty,
 body.admin-theme .empty-state {
-  color: #64748b;
+  color: var(--sage-deep);
 }
 
 /* Floor-plan canvas: the --gold/--sage variables above already neutralize most of this,
    but a few shadows/borders use hardcoded warm-tinted rgba() values. */
 body.admin-theme .landmark-picker {
-  border-color: rgba(100, 116, 139, 0.3);
+  border-color: color-mix(in srgb, var(--gold) 30%, transparent);
   box-shadow: 0 12px 26px rgba(15, 23, 42, 0.18);
 }
 
@@ -3145,7 +3169,7 @@ body.admin-theme .landmark-shape.dragging-landmark {
 }
 
 body.admin-theme .zoom-controls {
-  border-color: rgba(100, 116, 139, 0.3);
+  border-color: color-mix(in srgb, var(--gold) 30%, transparent);
 }
 
 body.admin-theme .floor-plan-card.fullscreen-active .floor-plan-toolbar {
@@ -3154,15 +3178,15 @@ body.admin-theme .floor-plan-card.fullscreen-active .floor-plan-toolbar {
 }
 
 body.admin-theme .floor-canvas-viewport {
-  border-color: rgba(100, 116, 139, 0.25);
+  border-color: color-mix(in srgb, var(--gold) 25%, transparent);
 }
 
 body.admin-theme .floor-canvas {
-  background-image: radial-gradient(circle, rgba(100, 116, 139, 0.18) 1px, transparent 1px);
+  background-image: radial-gradient(circle, color-mix(in srgb, var(--gold) 18%, transparent) 1px, transparent 1px);
 }
 
 body.admin-theme .chair.chair-you {
-  box-shadow: 0 0 0 3px rgba(71, 85, 105, 0.4);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--gold-deep) 40%, transparent);
 }
 
 body.admin-theme .table-shape {
@@ -3178,16 +3202,16 @@ body.admin-theme .table-shape.dragging-table {
 }
 
 body.admin-theme .unassigned-row {
-  border-color: rgba(100, 116, 139, 0.18);
+  border-color: color-mix(in srgb, var(--gold) 18%, transparent);
   box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
 }
 
 body.admin-theme .table-modal-divider {
-  background: rgba(100, 116, 139, 0.2);
+  background: color-mix(in srgb, var(--gold) 20%, transparent);
 }
 
 body.admin-theme .shape-option {
-  border-color: rgba(100, 116, 139, 0.25);
+  border-color: color-mix(in srgb, var(--gold) 25%, transparent);
 }
 
 /* Guest theme: index.html reads colors from the --guest-* variables (set above, and

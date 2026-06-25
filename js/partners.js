@@ -5,14 +5,14 @@ import { normalize } from './storage.js';
 // holds the fixed lists of categories/icons an admin can pick from, plus the
 // geo-matching rule shared by the admin page and the couple-facing page.
 export const PARTNER_CATEGORIES = {
-  transport: { labelKey: 'partnerCategoryTransport' },
-  animation: { labelKey: 'partnerCategoryAnimation' },
-  decoration: { labelKey: 'partnerCategoryDecoration' },
-  catering: { labelKey: 'partnerCategoryCatering' },
-  photography: { labelKey: 'partnerCategoryPhotography' },
-  music: { labelKey: 'partnerCategoryMusic' },
-  beauty: { labelKey: 'partnerCategoryBeauty' },
-  other: { labelKey: 'partnerCategoryOther' },
+  transport: { labelKey: 'partnerCategoryTransport', color: 'violet' },
+  animation: { labelKey: 'partnerCategoryAnimation', color: 'blue' },
+  decoration: { labelKey: 'partnerCategoryDecoration', color: 'teal' },
+  catering: { labelKey: 'partnerCategoryCatering', color: 'violet' },
+  photography: { labelKey: 'partnerCategoryPhotography', color: 'blue' },
+  music: { labelKey: 'partnerCategoryMusic', color: 'teal' },
+  beauty: { labelKey: 'partnerCategoryBeauty', color: 'violet' },
+  other: { labelKey: 'partnerCategoryOther', color: null },
 };
 
 export const PARTNER_ICONS = [
