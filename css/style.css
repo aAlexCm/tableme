@@ -3098,12 +3098,17 @@ body.admin-theme .card::before {
 }
 
 body.admin-theme input,
-body.admin-theme select {
-  border-color: color-mix(in srgb, var(--gold) 35%, transparent);
+body.admin-theme select,
+body.admin-theme textarea {
+  background: var(--paper);
+  border-color: transparent;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
 }
 
 body.admin-theme input:focus,
-body.admin-theme select:focus {
+body.admin-theme select:focus,
+body.admin-theme textarea:focus {
+  border-color: transparent;
   box-shadow: 0 0 0 4px color-mix(in srgb, var(--gold-deep) 15%, transparent);
 }
 
