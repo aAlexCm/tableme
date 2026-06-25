@@ -68,6 +68,49 @@ function parseSheetRows(rows) {
   const contentEl = document.getElementById('wedding-admin-content');
   const weddingNameEl = document.getElementById('wedding-admin-name');
   const floorPlanTabLink = document.getElementById('view-tab-floorplan');
+  const countdownEl = document.getElementById('wedding-countdown');
+  const countdownUnitsEl = document.getElementById('wedding-countdown-units');
+  const countdownPastEl = document.getElementById('wedding-countdown-past');
+  const countdownDaysEl = document.getElementById('countdown-days');
+  const countdownHoursEl = document.getElementById('countdown-hours');
+  const countdownMinutesEl = document.getElementById('countdown-minutes');
+  const countdownSecondsEl = document.getElementById('countdown-seconds');
+
+  // `intervalId` is declared with `let` (not `const`) and assigned AFTER
+  // `tick` is defined but BEFORE the first `tick()` call below — this
+  // matters because `tick` reads `intervalId` to clear itself once the
+  // countdown reaches zero. A previous version declared it with `const`
+  // initialized by the `setInterval(...)` call itself, so the very first
+  // synchronous `tick()` call (for a wedding date already in the past)
+  // hit `clearInterval(intervalId)` while still in `intervalId`'s temporal
+  // dead zone, throwing and aborting the rest of this file's startup
+  // (guest list, translations, lang switcher, theme settings — everything).
+  function initCountdown(dateStr) {
+    if (!countdownEl || !dateStr) return;
+    const target = new Date(`${dateStr}T00:00:00`).getTime();
+    if (Number.isNaN(target)) return;
+
+    let intervalId = null;
+
+    function tick() {
+      const diff = target - Date.now();
+      if (diff <= 0) {
+        countdownUnitsEl.hidden = true;
+        countdownPastEl.hidden = false;
+        if (intervalId) clearInterval(intervalId);
+        return;
+      }
+      const totalSeconds = Math.floor(diff / 1000);
+      countdownDaysEl.textContent = Math.floor(totalSeconds / 86400);
+      countdownHoursEl.textContent = String(Math.floor((totalSeconds % 86400) / 3600)).padStart(2, '0');
+      countdownMinutesEl.textContent = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
+      countdownSecondsEl.textContent = String(totalSeconds % 60).padStart(2, '0');
+    }
+
+    countdownEl.hidden = false;
+    tick();
+    intervalId = setInterval(tick, 1000);
+  }
 
   const guestsTitle = document.getElementById('guests-title');
   const guestForm = document.getElementById('guest-form');
@@ -735,6 +778,11 @@ function parseSheetRows(rows) {
 
   contentEl.hidden = false;
   weddingNameEl.textContent = wedding.name;
+  try {
+    initCountdown(wedding.date);
+  } catch (err) {
+    console.warn('countdown init failed', err);
+  }
   floorPlanTabLink.href = `floor-plan.html?id=${weddingId}`;
   const partnersTile = document.getElementById('partners-tile');
   if (partnersTile) partnersTile.href = `partenaires.html?id=${weddingId}`;
