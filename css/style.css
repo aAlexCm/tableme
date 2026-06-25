@@ -729,7 +729,7 @@ nav.admin-nav.admin-nav-stacked {
 .poster-qr-el,
 .poster-icon-el {
   position: absolute;
-  cursor: default;
+  cursor: move;
 }
 
 .poster-qr-canvas {
@@ -782,7 +782,7 @@ nav.admin-nav.admin-nav-stacked {
   display: flex;
   align-items: center;
   height: 24px;
-  cursor: default;
+  cursor: move;
 }
 
 .poster-divider-line {

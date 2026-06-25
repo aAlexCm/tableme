@@ -409,7 +409,7 @@ function fontFamilyFor(fontKey) {
     resizeHandle.className = 'poster-resize-handle';
     node.appendChild(resizeHandle);
 
-    node.addEventListener('mousedown', () => selectElement(el.id));
+    wireDrag(node, node, el);
     wireDrag(handle, node, el);
     wireResize(resizeHandle, node, el, {
       get: (e) => e.size,
@@ -450,7 +450,7 @@ function fontFamilyFor(fontKey) {
     resizeHandle.className = 'poster-divider-resize-handle';
     node.appendChild(resizeHandle);
 
-    node.addEventListener('mousedown', () => selectElement(el.id));
+    wireDrag(node, node, el);
     wireDrag(handle, node, el);
     wireResize(resizeHandle, node, el, {
       get: (e) => e.width,
@@ -482,7 +482,7 @@ function fontFamilyFor(fontKey) {
     resizeHandle.className = 'poster-resize-handle';
     node.appendChild(resizeHandle);
 
-    node.addEventListener('mousedown', () => selectElement(el.id));
+    wireDrag(node, node, el);
     wireDrag(handle, node, el);
     wireResize(resizeHandle, node, el, {
       get: (e) => e.size,
