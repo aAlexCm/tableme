@@ -959,6 +959,19 @@ body.modal-open {
   flex: 1;
 }
 
+.wedding-item-location {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 2px;
+}
+
+.wedding-item-location svg {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+}
+
 .wedding-item .info strong {
   display: block;
   font-family: 'Playfair Display', serif;

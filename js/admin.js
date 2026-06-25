@@ -10,6 +10,7 @@ const ICONS = {
   trash: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>',
   check: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
   settings: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>',
+  pin: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>',
 };
 
 (function () {
@@ -29,6 +30,14 @@ const ICONS = {
   const featureToggleListEl = document.getElementById('feature-toggle-list');
   let activeFeaturesWeddingId = null;
 
+  const locationModal = document.getElementById('location-modal');
+  const locationModalClose = document.getElementById('location-modal-close');
+  const locationForm = document.getElementById('location-form');
+  const locationCityInput = document.getElementById('location-city');
+  const locationRegionInput = document.getElementById('location-region');
+  const locationCountryInput = document.getElementById('location-country');
+  let activeLocationWeddingId = null;
+
   function escapeHtml(value) {
     return String(value).replace(/[&<>"']/g, (c) => ({
       '&': '&amp;',
@@ -41,6 +50,11 @@ const ICONS = {
 
   function weddingAdminUrl(id) {
     return `${window.location.origin}${window.location.pathname.replace('admin.html', '')}wedding-admin.html?id=${id}`;
+  }
+
+  function formatLocation(location) {
+    if (!location) return '';
+    return [location.city, location.region, location.country].filter(Boolean).join(', ');
   }
 
   function populateWeddingLangSelect() {
@@ -82,15 +96,19 @@ const ICONS = {
       const copyLabel = escapeHtml(t(currentLang, 'copyAdminLinkBtn'));
       const deleteLabel = escapeHtml(t(currentLang, 'deleteBtn'));
       const featuresLabel = escapeHtml(t(currentLang, 'manageFeaturesBtn'));
+      const locationLabel = escapeHtml(t(currentLang, 'manageLocationBtn'));
+      const locationText = formatLocation(w.location);
       li.innerHTML = `
         <div class="info">
           <strong>${escapeHtml(w.name)}</strong>
           <span class="muted">${escapeHtml(dateLabel)} &middot; ${w.guests.filter((g) => !g.empty).length} ${escapeHtml(t(currentLang, 'guestCountSuffix'))}</span>
+          ${locationText ? `<span class="muted wedding-item-location">${ICONS.pin}${escapeHtml(locationText)}</span>` : ''}
         </div>
         <div class="actions">
           <select class="mini-lang-select" data-id="${w.id}">${langOptions}</select>
           <a class="icon-btn" href="wedding-admin.html?id=${w.id}" title="${manageLabel}" aria-label="${manageLabel}">${ICONS.edit}</a>
           <button type="button" class="icon-btn" data-action="copy-admin-link" data-id="${w.id}" title="${copyLabel}" aria-label="${copyLabel}">${ICONS.link}</button>
+          <button type="button" class="icon-btn" data-action="manage-location" data-id="${w.id}" title="${locationLabel}" aria-label="${locationLabel}">${ICONS.pin}</button>
           <button type="button" class="icon-btn" data-action="manage-features" data-id="${w.id}" title="${featuresLabel}" aria-label="${featuresLabel}">${ICONS.settings}</button>
           <button type="button" class="icon-btn icon-btn-danger" data-action="delete" data-id="${w.id}" title="${deleteLabel}" aria-label="${deleteLabel}">${ICONS.trash}</button>
         </div>
@@ -139,6 +157,8 @@ const ICONS = {
       setTimeout(() => (btn.innerHTML = original), 1200);
     } else if (action === 'manage-features') {
       await openFeaturesModal(id);
+    } else if (action === 'manage-location') {
+      await openLocationModal(id);
     }
   });
 
@@ -195,6 +215,45 @@ const ICONS = {
     if (!wedding) return;
     const features = { ...(wedding.features || {}), [checkbox.dataset.featureKey]: checkbox.checked };
     await Storage.setFeatures(activeFeaturesWeddingId, features);
+  });
+
+  async function openLocationModal(weddingId) {
+    const wedding = await Storage.getWedding(weddingId);
+    if (!wedding) return;
+    activeLocationWeddingId = weddingId;
+    const location = wedding.location || {};
+    locationCityInput.value = location.city || '';
+    locationRegionInput.value = location.region || '';
+    locationCountryInput.value = location.country || '';
+    locationModal.hidden = false;
+    document.body.classList.add('modal-open');
+  }
+
+  function closeLocationModal() {
+    locationModal.hidden = true;
+    activeLocationWeddingId = null;
+    document.body.classList.remove('modal-open');
+  }
+
+  locationModalClose.addEventListener('click', closeLocationModal);
+  locationModal.addEventListener('click', (e) => {
+    if (e.target === locationModal) closeLocationModal();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !locationModal.hidden) closeLocationModal();
+  });
+
+  locationForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!activeLocationWeddingId) return;
+    const location = {
+      city: locationCityInput.value.trim(),
+      region: locationRegionInput.value.trim(),
+      country: locationCountryInput.value.trim(),
+    };
+    await Storage.setLocation(activeLocationWeddingId, location);
+    closeLocationModal();
+    await renderWeddings();
   });
 
   document.addEventListener('click', (e) => {

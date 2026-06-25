@@ -60,6 +60,31 @@
     </div>
   </div>
 
+  <div id="location-modal" class="modal-overlay" hidden>
+    <div class="modal-panel">
+      <button type="button" class="modal-close" id="location-modal-close" aria-label="Close">&times;</button>
+      <div class="modal-scroll">
+        <h3 data-i18n="locationModalTitle">Lieu du mariage</h3>
+        <p class="muted small" data-i18n="locationModalHint">Pour savoir où se déroule ce mariage.</p>
+        <form id="location-form" class="field-grid">
+          <div class="field">
+            <label for="location-city" data-i18n="locationCityLabel">Ville</label>
+            <input type="text" id="location-city" data-i18n-placeholder="locationCityPlaceholder" placeholder="ex: Cluj-Napoca" />
+          </div>
+          <div class="field">
+            <label for="location-region" data-i18n="locationRegionLabel">Région / Département</label>
+            <input type="text" id="location-region" data-i18n-placeholder="locationRegionPlaceholder" placeholder="ex: Cluj" />
+          </div>
+          <div class="field">
+            <label for="location-country" data-i18n="locationCountryLabel">Pays</label>
+            <input type="text" id="location-country" data-i18n-placeholder="locationCountryPlaceholder" placeholder="ex: Roumanie" />
+          </div>
+          <button type="submit" data-i18n="saveBtn">Enregistrer</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <script type="module" src="js/admin.js"></script>
 </body>
 </html>
