@@ -474,7 +474,7 @@ function reconcileTables(wedding) {
     floorCanvasEl.innerHTML = '';
     (wedding.tables || []).forEach((table) => {
       const tableGuests = wedding.guests.filter((g) => g.table === table.label);
-      const guestCount = tableGuests.length;
+      const guestCount = tableGuests.filter((g) => !g.empty).length;
       const shape = table.shape === 'rectangle' ? 'rectangle' : 'round';
       const seatCount = table.seats != null ? table.seats : DEFAULT_SEATS;
 
@@ -793,9 +793,7 @@ function reconcileTables(wedding) {
   applyTranslations(currentLang);
 
   if (!isFeatureEnabled(wedding, 'floorPlan')) {
-    notFoundEl.querySelector('h2').textContent = wedding.name;
-    notFoundEl.querySelector('p').textContent = t(currentLang, 'featureDisabledMessage');
-    notFoundEl.hidden = false;
+    window.location.replace(`wedding-admin.html?id=${weddingId}`);
     return;
   }
 
