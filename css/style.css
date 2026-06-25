@@ -3054,13 +3054,21 @@ body.admin-theme {
   --sage: #4fc3a1;
   --sage-deep: #2f9c80;
   --sage-light: #e3f7f0;
-  --ink: #2b2740;
-  --charcoal: #1d1a30;
-  --cream: #f8f7fd;
+  --ink: #4b5563;
+  --charcoal: #1f2937;
+  --cream: #f9fafb;
   --paper: #ffffff;
   --accent-teal: #f4a261;
   --accent-teal-deep: #d97b3f;
   --accent-teal-light: #fdecd8;
+}
+
+/* Admin theme uses Lato instead of the guest theme's wedding-style Playfair
+   Display serif — !important since Playfair is hardcoded on many unscoped
+   selectors (h1/h3/.modal-panel h3/etc.) throughout this file. */
+body.admin-theme,
+body.admin-theme * {
+  font-family: 'Lato', sans-serif !important;
 }
 
 body.admin-theme header.hero::before,
