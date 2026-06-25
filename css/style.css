@@ -3197,8 +3197,17 @@ body.admin-theme .empty-state {
 body.admin-theme nav.admin-nav a,
 body.admin-theme .admin-tools-label,
 body.admin-theme .field label,
-body.admin-theme .mode-btn {
+body.admin-theme .mode-btn,
+body.admin-theme .icon-btn:not(.icon-btn-danger),
+body.admin-theme .lang-switcher-trigger {
   color: var(--charcoal);
+}
+
+body.admin-theme button.secondary,
+body.admin-theme a.secondary {
+  color: var(--charcoal);
+  border-color: var(--charcoal);
+  text-decoration-color: color-mix(in srgb, var(--charcoal) 50%, transparent);
 }
 
 body.admin-theme input::placeholder,
