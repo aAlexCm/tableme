@@ -569,12 +569,12 @@ nav.admin-nav.admin-nav-stacked {
 }
 
 .poster-toolbox {
-  flex: 0 0 200px;
+  flex: 0 0 auto;
   margin-top: 36px;
   display: flex;
   flex-direction: column;
   gap: 16px;
-  padding: 18px;
+  padding: 16px;
   border-radius: var(--radius);
   background: var(--paper);
   border: 1px solid rgba(15, 23, 42, 0.08);
@@ -591,16 +591,20 @@ nav.admin-nav.admin-nav-stacked {
 }
 
 .poster-bg-field {
+  position: absolute;
+  top: 2px;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 14px;
-  padding: 8px 14px;
+  padding: 6px 14px;
   border-radius: var(--radius-pill);
   background: rgba(245, 248, 249, 0.92);
   box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
   font-size: 0.78rem;
   color: var(--ink);
+  white-space: nowrap;
 }
 
 .poster-bg-field input[type='color'] {
@@ -611,8 +615,8 @@ nav.admin-nav.admin-nav-stacked {
 
 .poster-toolbox-tools {
   display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
+  flex-direction: column;
+  gap: 10px;
 }
 
 #poster-add-qr-btn {
@@ -647,17 +651,18 @@ nav.admin-nav.admin-nav-stacked {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  width: 76px;
-  height: 76px;
-  padding: 8px;
-  font-size: 0.72rem;
+  gap: 4px;
+  width: 62px;
+  height: 62px;
+  padding: 6px;
+  font-size: 0.62rem;
   white-space: normal;
   text-align: center;
   border-radius: var(--radius-sm);
 }
 
 .poster-canvas-area {
+  position: relative;
   flex: 1;
   display: flex;
   flex-direction: column;
