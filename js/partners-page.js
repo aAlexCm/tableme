@@ -59,10 +59,12 @@ function escapeHtml(value) {
       return `
         <div class="partner-card">
           ${photo}
-          <span class="partner-card-category">${icon ? icon.svg : ''}${escapeHtml(categoryLabel)}</span>
-          <h3 class="partner-card-name">${escapeHtml(partner.name)}</h3>
-          <p class="partner-card-desc">${escapeHtml(partner.description)}</p>
-          <div class="partner-card-actions">${contactButtons}</div>
+          <div class="partner-card-body">
+            <span class="partner-card-category">${icon ? icon.svg : ''}${escapeHtml(categoryLabel)}</span>
+            <h3 class="partner-card-name">${escapeHtml(partner.name)}</h3>
+            <p class="partner-card-desc">${escapeHtml(partner.description)}</p>
+            <div class="partner-card-actions">${contactButtons}</div>
+          </div>
         </div>
       `;
     }).join('');
