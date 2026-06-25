@@ -3060,8 +3060,8 @@ body.admin-theme {
   --sage-deep: #e07b39;
   --sage-light: #fdeedd;
   --ink: #6b7280;
-  --charcoal: #1b1f3b;
-  --cream: #eafbfa;
+  --charcoal: #2c4363;
+  --cream: #f0f4f6;
   --paper: #ffffff;
   --accent-teal: #2e3a59;
   --accent-teal-deep: #1b2440;
@@ -3090,6 +3090,8 @@ body.admin-theme .divider span::after {
 }
 
 body.admin-theme .card {
+  background: rgba(245, 248, 249, 0.92);
+  border-color: transparent;
   box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
 }
 
@@ -3166,7 +3168,9 @@ body.admin-theme .modal-overlay {
   background: rgba(15, 23, 42, 0.5);
 }
 
-body.admin-theme .modal-panel {
+body.admin-theme .modal-panel:not(.photo-lightbox-panel) {
+  background: rgba(245, 248, 249, 0.92);
+  border-color: transparent;
   box-shadow: 0 14px 40px rgba(15, 23, 42, 0.25);
 }
 
