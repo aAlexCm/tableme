@@ -112,7 +112,7 @@ const ICONS = {
         <div class="info">
           <strong>${escapeHtml(w.name)}</strong>
           <span class="muted">${escapeHtml(dateLabel)} &middot; ${w.guests.filter((g) => !g.empty).length} ${escapeHtml(t(currentLang, 'guestCountSuffix'))}</span>
-          ${locationText ? `<span class="muted wedding-item-location">${ICONS.pin}${escapeHtml(locationText)}</span>` : ''}
+          ${locationText ? `<span class="muted wedding-item-location">${ICONS.pin}<span class="wedding-item-location-text">${escapeHtml(locationText)}</span></span>` : ''}
         </div>
         <div class="actions">
           <select class="mini-lang-select" data-id="${w.id}">${langOptions}</select>
