@@ -1,3 +1,5 @@
+import { getDefaultDecoration } from './guest-decorations.js';
+
 export const GUEST_THEME_COLOR_KEYS = [
   'bg',
   'cardBg',
@@ -122,6 +124,7 @@ export function getDefaultTheme() {
     preset: 'classic',
     colors: { ...GUEST_THEME_PRESETS[0].colors },
     fonts: { title: 'playfair', body: 'inter' },
+    decoration: getDefaultDecoration(),
   };
 }
 

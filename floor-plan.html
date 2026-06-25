@@ -85,6 +85,25 @@
         <h3 class="theme-font-heading" data-i18n="fontBodyLabel">Police du texte</h3>
         <div class="theme-font-grid" id="theme-font-body-grid"></div>
 
+        <h3 class="theme-font-heading" data-i18n="decorationSectionTitle">Décoration</h3>
+        <p class="muted small" data-i18n="decorationSectionHint">Une illustration discrète dans un coin de la page invités.</p>
+        <div class="theme-decoration-grid" id="theme-decoration-grid"></div>
+
+        <div class="theme-decoration-upload" id="theme-decoration-upload" hidden>
+          <p class="muted small" data-i18n="decorationUploadHint">Utilisez une image avec un fond transparent (PNG) pour qu'elle s'intègre bien.</p>
+          <input type="file" id="theme-decoration-file-input" accept="image/png,image/webp,image/svg+xml,image/jpeg" hidden />
+          <button type="button" class="secondary" id="theme-decoration-upload-btn" data-i18n="decorationUploadBtn">Choisir une image</button>
+          <div class="theme-decoration-preview" id="theme-decoration-preview" hidden>
+            <img id="theme-decoration-preview-img" alt="" />
+            <button type="button" class="icon-btn icon-btn-danger" id="theme-decoration-remove-btn"></button>
+          </div>
+        </div>
+
+        <div class="theme-decoration-position-field" id="theme-decoration-position-field" hidden>
+          <label for="theme-decoration-position" data-i18n="decorationPositionLabel">Position</label>
+          <select id="theme-decoration-position"></select>
+        </div>
+
         <button type="button" class="secondary theme-custom-toggle" id="theme-custom-toggle" data-i18n="themeCustomToggle">Personnaliser les couleurs</button>
 
         <div class="theme-custom-grid" id="theme-custom-grid" hidden></div>
