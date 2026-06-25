@@ -104,7 +104,7 @@ export function createShareControls({ getLang, weddingNameEl }) {
     guestPageLink.href = `index.html?id=${weddingId}`;
     guestLinkInput.value = `${window.location.origin}${window.location.pathname.replace(/[^/]+$/, '')}index.html?id=${weddingId}`;
     copyLinkBtn.innerHTML = ICONS.link;
-    qrCodeBtn.innerHTML = ICONS.qrcode;
+    document.getElementById('qr-code-icon').innerHTML = ICONS.qrcode;
     updateLabels();
   }
 

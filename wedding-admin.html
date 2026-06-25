@@ -23,13 +23,45 @@
       <nav class="admin-nav">
         <strong id="wedding-admin-name"></strong>
         <div class="admin-nav-actions">
-          <button type="button" class="icon-btn" id="theme-settings-btn"></button>
-          <button type="button" class="icon-btn" id="qr-code-btn"></button>
-          <button type="button" class="icon-btn" id="copy-link"></button>
           <a href="index.html" id="guest-page-link" data-i18n="adminNavGuestLink">Voir la page invité &rarr;</a>
           <input type="text" id="guest-link" hidden />
         </div>
       </nav>
+
+      <section class="admin-tools">
+        <p class="admin-tools-label" data-i18n="adminToolsLabel">Vos outils</p>
+        <div class="admin-tools-grid">
+          <button type="button" class="admin-tool-tile" id="theme-settings-btn">
+            <span class="admin-tool-tile-icon" id="theme-settings-icon"></span>
+            <span class="admin-tool-tile-label" data-i18n="themeSectionTitle">Personnaliser la page invité</span>
+            <span class="admin-tool-tile-desc" data-i18n="themeToolDesc">Couleurs, polices et décoration</span>
+          </button>
+
+          <button type="button" class="admin-tool-tile" id="qr-code-btn">
+            <span class="admin-tool-tile-icon" id="qr-code-icon"></span>
+            <span class="admin-tool-tile-label" data-i18n="shareToolTitle">Partager</span>
+            <span class="admin-tool-tile-desc" data-i18n="shareToolDesc">QR code et lien à partager</span>
+          </button>
+
+          <div class="admin-tool-tile is-disabled" aria-disabled="true">
+            <span class="admin-tool-tile-badge" data-i18n="comingSoonBadge">Bientôt disponible</span>
+            <span class="admin-tool-tile-icon">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="16" rx="1"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8" rx="1"/></svg>
+            </span>
+            <span class="admin-tool-tile-label" data-i18n="posterToolTitle">Affiche à imprimer</span>
+            <span class="admin-tool-tile-desc" data-i18n="posterToolDesc">Une affiche avec QR code pour vos tables ou votre entrée</span>
+          </div>
+
+          <div class="admin-tool-tile is-disabled" aria-disabled="true">
+            <span class="admin-tool-tile-badge" data-i18n="comingSoonBadge">Bientôt disponible</span>
+            <span class="admin-tool-tile-icon">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-9.18 5.5a2 2 0 0 1-2.04 0L2 7"/></svg>
+            </span>
+            <span class="admin-tool-tile-label" data-i18n="invitationToolTitle">Invitation numérique</span>
+            <span class="admin-tool-tile-desc" data-i18n="invitationToolDesc">Une invitation à envoyer directement à vos invités</span>
+          </div>
+        </div>
+      </section>
 
       <div class="view-switch">
         <span class="view-switch-tab active" data-i18n="viewTabList">Liste des invités</span>
@@ -137,6 +169,7 @@
           <div id="qr-canvas-container"></div>
         </div>
         <div class="qr-modal-actions">
+          <button type="button" class="icon-btn icon-btn-large" id="copy-link"></button>
           <button type="button" class="icon-btn icon-btn-large" id="qr-download-btn"></button>
           <button type="button" class="icon-btn icon-btn-large" id="qr-share-btn" hidden></button>
         </div>

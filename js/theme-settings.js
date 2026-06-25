@@ -298,7 +298,7 @@ export function createThemeSettings({ weddingId, getLang }) {
   });
 
   function init() {
-    themeSettingsBtn.innerHTML = PALETTE_ICON;
+    document.getElementById('theme-settings-icon').innerHTML = PALETTE_ICON;
     updateLabels();
     render();
   }
