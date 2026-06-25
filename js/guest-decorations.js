@@ -139,11 +139,11 @@ export const DECORATION_POSITIONS = [
 // sits inside the title header, and these offsets let the artwork bleed
 // slightly past its edges (like the old hardcoded branches used to).
 const POSITION_LAYOUT = {
-  'top-left': { top: '-36px', left: '-14px', mirrorX: false, mirrorY: true },
-  'top-center': { top: '-36px', left: '50%', centerX: true, mirrorX: false, mirrorY: true },
-  'top-right': { top: '-36px', right: '-14px', mirrorX: true, mirrorY: true },
-  'bottom-left': { bottom: '-36px', left: '-14px', mirrorX: false, mirrorY: false },
-  'bottom-right': { bottom: '-36px', right: '-14px', mirrorX: true, mirrorY: false },
+  'top-left': { top: '-36px', left: '-14px', mirrorX: false, mirrorY: true, rotate: -7 },
+  'top-center': { top: '-36px', left: '50%', centerX: true, mirrorX: false, mirrorY: true, rotate: 4 },
+  'top-right': { top: '-36px', right: '-14px', mirrorX: true, mirrorY: true, rotate: 9 },
+  'bottom-left': { bottom: '-36px', left: '-14px', mirrorX: false, mirrorY: false, rotate: 6 },
+  'bottom-right': { bottom: '-36px', right: '-14px', mirrorX: true, mirrorY: false, rotate: -8 },
 };
 
 export function getDecorationElement(key) {
@@ -197,6 +197,9 @@ export function applyGuestDecoration(decoration, mountEl) {
     if (!isCustom) {
       if (layout.mirrorX) transforms.push('scaleX(-1)');
       if (layout.mirrorY && !(preset && preset.noMirrorY)) transforms.push('scaleY(-1)');
+      // A small per-corner rotation so mirrored copies of the same artwork
+      // don't read as an exact, repeated copy-paste across corners.
+      if (layout.rotate) transforms.push(`rotate(${layout.rotate}deg)`);
     }
     item.style.transform = transforms.join(' ');
 
