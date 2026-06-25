@@ -588,14 +588,25 @@ nav.admin-nav.admin-nav-stacked {
   color: var(--ink);
 }
 
+.poster-toolbox-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
 .poster-tool-btn {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 8px;
-  width: 100%;
-  padding: 10px 12px;
-  font-size: 0.88rem;
-  justify-content: flex-start;
+  justify-content: center;
+  gap: 6px;
+  width: 76px;
+  height: 76px;
+  padding: 8px;
+  font-size: 0.72rem;
+  white-space: normal;
+  text-align: center;
+  border-radius: var(--radius-sm);
 }
 
 .poster-canvas-area {
@@ -653,6 +664,47 @@ nav.admin-nav.admin-nav-stacked {
 
 .poster-text-el.selected .poster-text-drag-handle {
   display: flex;
+}
+
+.poster-qr-el {
+  position: absolute;
+  cursor: default;
+}
+
+.poster-qr-el.selected {
+  outline: 1.5px dashed var(--gold-deep);
+}
+
+.poster-qr-el.selected .poster-text-drag-handle {
+  display: flex;
+}
+
+.poster-qr-canvas {
+  width: 100%;
+  height: 100%;
+}
+
+.poster-qr-canvas canvas,
+.poster-qr-canvas img {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.poster-qr-resize-handle {
+  position: absolute;
+  right: -6px;
+  bottom: -6px;
+  display: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  background: var(--gold-deep);
+  cursor: nwse-resize;
+}
+
+.poster-qr-el.selected .poster-qr-resize-handle {
+  display: block;
 }
 
 .poster-actions {
@@ -724,8 +776,14 @@ nav.admin-nav.admin-nav-stacked {
     box-shadow: none;
   }
 
-  .poster-text-drag-handle {
+  .poster-text-drag-handle,
+  .poster-qr-resize-handle {
     display: none !important;
+  }
+
+  .poster-text-el.selected,
+  .poster-qr-el.selected {
+    outline: none !important;
   }
 }
 
@@ -736,9 +794,6 @@ nav.admin-nav.admin-nav-stacked {
 
   .poster-toolbox {
     flex: 0 0 auto;
-    flex-direction: row;
-    align-items: center;
-    flex-wrap: wrap;
   }
 
   .poster-canvas-area {

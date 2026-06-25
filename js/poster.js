@@ -21,26 +21,38 @@ const FONT_OPTIONS = [
 const TRASH_ICON = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>';
 const DRAG_ICON = '<svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><circle cx="8" cy="6" r="1.5"/><circle cx="16" cy="6" r="1.5"/><circle cx="8" cy="12" r="1.5"/><circle cx="16" cy="12" r="1.5"/><circle cx="8" cy="18" r="1.5"/><circle cx="16" cy="18" r="1.5"/></svg>';
 
+const QR_RENDER_SIZE = 256;
+
 function getDefaultPoster() {
   return { elements: [] };
+}
+
+function normalizeElement(el) {
+  const type = el.type === 'qr' ? 'qr' : 'text';
+  const base = {
+    id: el.id || generateId(),
+    type,
+    x: typeof el.x === 'number' ? el.x : 80,
+    y: typeof el.y === 'number' ? el.y : 80,
+  };
+  if (type === 'qr') {
+    return { ...base, size: typeof el.size === 'number' ? el.size : 140 };
+  }
+  return {
+    ...base,
+    text: typeof el.text === 'string' ? el.text : '',
+    fontKey: FONT_OPTIONS.some((f) => f.key === el.fontKey) ? el.fontKey : FONT_OPTIONS[0].key,
+    fontSize: typeof el.fontSize === 'number' ? el.fontSize : 28,
+    bold: !!el.bold,
+    italic: !!el.italic,
+    color: el.color || '#2c2420',
+  };
 }
 
 function normalizePoster(poster) {
   if (!poster) return getDefaultPoster();
   return {
-    elements: Array.isArray(poster.elements)
-      ? poster.elements.map((el) => ({
-        id: el.id || generateId(),
-        text: typeof el.text === 'string' ? el.text : '',
-        x: typeof el.x === 'number' ? el.x : 80,
-        y: typeof el.y === 'number' ? el.y : 80,
-        fontKey: FONT_OPTIONS.some((f) => f.key === el.fontKey) ? el.fontKey : FONT_OPTIONS[0].key,
-        fontSize: typeof el.fontSize === 'number' ? el.fontSize : 28,
-        bold: !!el.bold,
-        italic: !!el.italic,
-        color: el.color || '#2c2420',
-      }))
-      : [],
+    elements: Array.isArray(poster.elements) ? poster.elements.map(normalizeElement) : [],
   };
 }
 
@@ -63,6 +75,7 @@ function fontFamilyFor(fontKey) {
   const sheetEl = document.getElementById('poster-sheet');
   const sheetContentEl = document.getElementById('poster-sheet-content');
   const addTextBtn = document.getElementById('poster-add-text-btn');
+  const addQrBtn = document.getElementById('poster-add-qr-btn');
   const downloadBtn = document.getElementById('poster-download-btn');
   const printBtn = document.getElementById('poster-print-btn');
 
@@ -77,6 +90,7 @@ function fontFamilyFor(fontKey) {
   let poster = getDefaultPoster();
   let selectedId = null;
   let saveTimer = null;
+  let guestUrl = '';
 
   function scheduleSave() {
     clearTimeout(saveTimer);
@@ -109,6 +123,18 @@ function fontFamilyFor(fontKey) {
     node.style.color = el.color;
   }
 
+  function applyQrStyle(node, el) {
+    node.style.left = `${el.x}px`;
+    node.style.top = `${el.y}px`;
+    node.style.width = `${el.size}px`;
+    node.style.height = `${el.size}px`;
+  }
+
+  function applyElementStyle(node, el) {
+    if (el.type === 'qr') applyQrStyle(node, el);
+    else applyTextStyle(node, el);
+  }
+
   function positionToolbar(node) {
     const rect = node.getBoundingClientRect();
     toolbarEl.style.left = `${Math.max(8, rect.left)}px`;
@@ -117,7 +143,7 @@ function fontFamilyFor(fontKey) {
 
   function deselect() {
     selectedId = null;
-    sheetContentEl.querySelectorAll('.poster-text-el').forEach((n) => n.classList.remove('selected'));
+    sheetContentEl.querySelectorAll('.poster-el').forEach((n) => n.classList.remove('selected'));
     toolbarEl.hidden = true;
   }
 
@@ -128,14 +154,27 @@ function fontFamilyFor(fontKey) {
       deselect();
       return;
     }
-    sheetContentEl.querySelectorAll('.poster-text-el').forEach((n) => {
+    sheetContentEl.querySelectorAll('.poster-el').forEach((n) => {
       n.classList.toggle('selected', n.dataset.id === id);
     });
-    boldBtn.classList.toggle('active', el.bold);
-    italicBtn.classList.toggle('active', el.italic);
-    fontSelect.value = el.fontKey;
-    sizeInput.value = el.fontSize;
-    colorInput.value = el.color;
+    const isText = el.type !== 'qr';
+    boldBtn.hidden = !isText;
+    italicBtn.hidden = !isText;
+    fontSelect.hidden = !isText;
+    colorInput.hidden = !isText;
+    if (isText) {
+      boldBtn.classList.toggle('active', el.bold);
+      italicBtn.classList.toggle('active', el.italic);
+      fontSelect.value = el.fontKey;
+      colorInput.value = el.color;
+      sizeInput.min = '8';
+      sizeInput.max = '200';
+      sizeInput.value = el.fontSize;
+    } else {
+      sizeInput.min = '60';
+      sizeInput.max = '320';
+      sizeInput.value = el.size;
+    }
     toolbarEl.hidden = false;
     const node = sheetContentEl.querySelector(`[data-id="${id}"]`);
     if (node) positionToolbar(node);
@@ -146,9 +185,11 @@ function fontFamilyFor(fontKey) {
     if (!el) return;
     mutator(el);
     const node = sheetContentEl.querySelector(`[data-id="${selectedId}"]`);
-    if (node) applyTextStyle(node, el);
-    boldBtn.classList.toggle('active', el.bold);
-    italicBtn.classList.toggle('active', el.italic);
+    if (node) applyElementStyle(node, el);
+    if (el.type !== 'qr') {
+      boldBtn.classList.toggle('active', el.bold);
+      italicBtn.classList.toggle('active', el.italic);
+    }
     scheduleSave();
   }
 
@@ -181,9 +222,68 @@ function fontFamilyFor(fontKey) {
     });
   }
 
+  function wireResize(handle, node, el) {
+    handle.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      selectElement(el.id);
+      const startX = e.clientX;
+      const startSize = el.size;
+
+      function onMove(ev) {
+        const dx = ev.clientX - startX;
+        el.size = Math.min(320, Math.max(60, startSize + dx));
+        node.style.width = `${el.size}px`;
+        node.style.height = `${el.size}px`;
+        positionToolbar(node);
+        if (selectedId === el.id) sizeInput.value = el.size;
+      }
+      function onUp() {
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onUp);
+        scheduleSave();
+      }
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
+    });
+  }
+
+  function createQrNode(el) {
+    const node = document.createElement('div');
+    node.className = 'poster-el poster-qr-el';
+    node.dataset.id = el.id;
+
+    const canvasWrap = document.createElement('div');
+    canvasWrap.className = 'poster-qr-canvas';
+    new window.QRCode(canvasWrap, {
+      text: guestUrl,
+      width: QR_RENDER_SIZE,
+      height: QR_RENDER_SIZE,
+      colorDark: '#2c2420',
+      colorLight: '#ffffff',
+    });
+    node.appendChild(canvasWrap);
+
+    const handle = document.createElement('span');
+    handle.className = 'poster-text-drag-handle';
+    handle.innerHTML = DRAG_ICON;
+    node.appendChild(handle);
+
+    const resizeHandle = document.createElement('span');
+    resizeHandle.className = 'poster-qr-resize-handle';
+    node.appendChild(resizeHandle);
+
+    node.addEventListener('mousedown', () => selectElement(el.id));
+    wireDrag(handle, node, el);
+    wireResize(resizeHandle, node, el);
+    applyQrStyle(node, el);
+    sheetContentEl.appendChild(node);
+    return node;
+  }
+
   function createTextNode(el) {
     const node = document.createElement('div');
-    node.className = 'poster-text-el';
+    node.className = 'poster-el poster-text-el';
     node.dataset.id = el.id;
     node.contentEditable = 'true';
     node.spellcheck = false;
@@ -212,13 +312,14 @@ function fontFamilyFor(fontKey) {
   }
 
   document.addEventListener('mousedown', (e) => {
-    if (e.target.closest('.poster-text-el') || e.target.closest('.poster-text-toolbar')) return;
+    if (e.target.closest('.poster-el') || e.target.closest('.poster-text-toolbar')) return;
     deselect();
   });
 
   addTextBtn.addEventListener('click', () => {
     const el = {
       id: generateId(),
+      type: 'text',
       text: t(currentLang, 'posterDefaultText'),
       x: 80 + (poster.elements.length % 5) * 14,
       y: 80 + (poster.elements.length % 5) * 28,
@@ -240,12 +341,28 @@ function fontFamilyFor(fontKey) {
     scheduleSave();
   });
 
+  addQrBtn.addEventListener('click', () => {
+    const el = {
+      id: generateId(),
+      type: 'qr',
+      x: 80 + (poster.elements.length % 5) * 14,
+      y: 80 + (poster.elements.length % 5) * 28,
+      size: 140,
+    };
+    poster.elements.push(el);
+    createQrNode(el);
+    selectElement(el.id);
+    scheduleSave();
+  });
+
   boldBtn.addEventListener('click', () => updateSelected((el) => { el.bold = !el.bold; }));
   italicBtn.addEventListener('click', () => updateSelected((el) => { el.italic = !el.italic; }));
   fontSelect.addEventListener('change', () => updateSelected((el) => { el.fontKey = fontSelect.value; }));
   sizeInput.addEventListener('input', () => updateSelected((el) => {
     const value = Number(sizeInput.value);
-    if (value > 0) el.fontSize = value;
+    if (!(value > 0)) return;
+    if (el.type === 'qr') el.size = value;
+    else el.fontSize = value;
   }));
   colorInput.addEventListener('input', () => updateSelected((el) => { el.color = colorInput.value; }));
 
@@ -317,9 +434,10 @@ function fontFamilyFor(fontKey) {
 
   deleteBtn.innerHTML = TRASH_ICON;
   populateFontSelect();
+  guestUrl = `${window.location.origin}${window.location.pathname.replace(/[^/]+$/, '')}index.html?id=${weddingId}`;
   poster = normalizePoster(wedding.poster);
   applySheetSize();
-  poster.elements.forEach((el) => createTextNode(el));
+  poster.elements.forEach((el) => (el.type === 'qr' ? createQrNode(el) : createTextNode(el)));
 
   langMount.appendChild(buildLangSwitcher(currentLang, setLang));
   applyTranslations(currentLang);
