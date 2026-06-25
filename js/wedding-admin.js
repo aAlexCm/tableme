@@ -162,7 +162,7 @@ function parseSheetRows(rows) {
     ).element;
   }
 
-  async function commitGuestOrder() {
+  async function commitGuestOrder(affectedTable) {
     const wedding = await Storage.getWedding(weddingId);
     if (!wedding) return;
     const guestMap = new Map(wedding.guests.map((g) => [g.id, g]));
@@ -171,7 +171,11 @@ function parseSheetRows(rows) {
       const guest = guestMap.get(row.dataset.id);
       if (!guest) return;
       const table = row.closest('.table-guest-list').dataset.table;
-      const seat = table === guest.table ? guest.seat : null;
+      // Reordering within a table must be able to override a previously pinned
+      // seat, otherwise the drag has no visible effect — so any guest in the
+      // table where the drag happened loses their pin and falls back to
+      // array-order auto-fill.
+      const seat = table === guest.table && table !== affectedTable ? guest.seat : null;
       newGuests.push({ ...guest, table, seat });
     });
     await Storage.setGuests(weddingId, newGuests);
