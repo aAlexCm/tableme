@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>TableMe · Partenaires</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="admin-theme">
+  <div class="page">
+    <div id="lang-switcher-mount" class="lang-switcher-mount"></div>
+
+    <div class="admin-quick-links">
+      <a class="secondary" href="admin.html" data-i18n="backToAdminLink">&larr; Retour</a>
+    </div>
+
+    <header class="hero">
+      <p class="eyebrow" data-i18n="adminEyebrow">Administration</p>
+      <h1 data-i18n="partnersAdminTitle">Gérer les partenaires</h1>
+      <div class="divider"><span></span></div>
+      <p data-i18n="partnersAdminSubtitle">Des offres ciblées par zone géographique, visibles par les mariés concernés.</p>
+    </header>
+
+    <div class="card">
+      <h2 id="partner-form-title" data-i18n="newPartnerTitle">Nouveau partenaire</h2>
+      <form id="partner-form" class="field-grid">
+        <div class="field">
+          <label for="partner-name" data-i18n="partnerNameLabel">Nom du partenaire</label>
+          <input type="text" id="partner-name" required />
+        </div>
+
+        <div class="field">
+          <label for="partner-category" data-i18n="partnerCategoryLabel">Type</label>
+          <select id="partner-category"></select>
+        </div>
+
+        <div class="field">
+          <label data-i18n="partnerIconLabel">Icône</label>
+          <div class="partner-icon-grid" id="partner-icon-grid"></div>
+        </div>
+
+        <div class="field">
+          <label for="partner-description" data-i18n="partnerDescriptionLabel">Description</label>
+          <textarea id="partner-description" rows="3"></textarea>
+        </div>
+
+        <div class="field">
+          <label for="partner-link" data-i18n="partnerLinkInputLabel">Lien (site, téléphone, etc.)</label>
+          <input type="text" id="partner-link" placeholder="https://..." required />
+        </div>
+
+        <h3 class="theme-font-heading" data-i18n="partnerGeoSectionTitle">Zone géographique</h3>
+        <p class="muted small" data-i18n="partnerGeoHint">Basé sur les pays/régions/villes déjà renseignés pour vos mariages. Laissez vide pour cibler plus large.</p>
+
+        <div class="field">
+          <label for="partner-country" data-i18n="partnerCountryLabel">Pays</label>
+          <input type="text" id="partner-country" list="partner-country-options" required />
+          <datalist id="partner-country-options"></datalist>
+        </div>
+
+        <div class="field">
+          <label for="partner-region" data-i18n="partnerRegionLabel">Région / Département (optionnel)</label>
+          <input type="text" id="partner-region" list="partner-region-options" />
+          <datalist id="partner-region-options"></datalist>
+        </div>
+
+        <div class="field">
+          <label for="partner-city" data-i18n="partnerCityLabel">Ville (optionnel)</label>
+          <input type="text" id="partner-city" list="partner-city-options" />
+          <datalist id="partner-city-options"></datalist>
+        </div>
+
+        <button type="submit" id="partner-form-submit" data-i18n="createBtn">Créer</button>
+        <button type="button" id="partner-form-cancel" class="secondary" data-i18n="cancelBtn" hidden>Annuler</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2 data-i18n="partnersListTitle">Partenaires</h2>
+      <ul class="wedding-list" id="partner-list"></ul>
+      <p class="empty-state" id="partner-list-empty" data-i18n="partnersListEmpty" hidden>Aucun partenaire créé pour le moment.</p>
+    </div>
+  </div>
+
+  <script type="module" src="js/partners-admin.js"></script>
+</body>
+</html>

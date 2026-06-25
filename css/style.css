@@ -648,6 +648,43 @@ nav.admin-nav a:hover {
   color: var(--charcoal);
 }
 
+.admin-quick-links {
+  margin-bottom: 18px;
+}
+
+.partner-icon-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(44px, 1fr));
+  gap: 8px;
+  max-width: 420px;
+}
+
+.partner-icon-option {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border-radius: var(--radius-sm);
+  border: 2px solid transparent;
+  background: var(--sage-light);
+  box-shadow: none;
+  color: var(--sage-deep);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.partner-icon-option:hover {
+  background: var(--paper);
+}
+
+.partner-icon-option.active {
+  border-color: var(--gold);
+  background: var(--paper);
+  color: var(--gold-deep);
+}
+
 .field-grid {
   display: grid;
   grid-template-columns: 1fr;

@@ -24,6 +24,7 @@ export function normalize(str) {
 }
 
 const weddingsCol = collection(db, 'weddings');
+const partnersCol = collection(db, 'partners');
 
 export const Storage = {
   async getWeddings() {
@@ -101,5 +102,23 @@ export const Storage = {
 
   async setBoard(weddingId, { guests, tables }) {
     await updateDoc(doc(db, 'weddings', weddingId), { guests, tables });
+  },
+
+  async getPartners() {
+    const snap = await getDocs(partnersCol);
+    return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  },
+
+  async addPartner(partner) {
+    const ref = await addDoc(partnersCol, partner);
+    return { id: ref.id, ...partner };
+  },
+
+  async updatePartner(partnerId, partner) {
+    await updateDoc(doc(db, 'partners', partnerId), partner);
+  },
+
+  async deletePartner(partnerId) {
+    await deleteDoc(doc(db, 'partners', partnerId));
   },
 };
