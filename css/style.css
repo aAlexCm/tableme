@@ -499,6 +499,13 @@ nav.admin-nav a:hover {
   gap: 12px;
 }
 
+nav.admin-nav.admin-nav-stacked {
+  justify-content: flex-start;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
 .admin-tools {
   margin-bottom: 28px;
 }
