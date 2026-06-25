@@ -3098,12 +3098,15 @@ body.admin-theme {
   --accent-teal-light: #e7e9f0;
 }
 
-/* Admin theme uses Lato instead of the guest theme's wedding-style Playfair
+/* Admin theme uses Inter instead of the guest theme's wedding-style Playfair
    Display serif — !important since Playfair is hardcoded on many unscoped
-   selectors (h1/h3/.modal-panel h3/etc.) throughout this file. */
+   selectors (h1/h3/.modal-panel h3/etc.) throughout this file. Inter (not
+   Lato) specifically because Lato's diacritic glyphs (ă, â, î, ș, ț) render
+   with a detached/misplaced breve mark — Inter is built for broad Unicode
+   coverage and renders Romanian diacritics correctly. */
 body.admin-theme,
 body.admin-theme * {
-  font-family: 'Lato', sans-serif !important;
+  font-family: 'Inter', sans-serif !important;
 }
 
 body.admin-theme header.hero::before,
@@ -3265,6 +3268,10 @@ body.admin-theme .landmark-shape.dragging-landmark {
 
 body.admin-theme .zoom-controls {
   border-color: color-mix(in srgb, var(--gold) 30%, transparent);
+}
+
+body.admin-theme .zoom-reset-btn {
+  color: var(--charcoal);
 }
 
 body.admin-theme .floor-plan-card.fullscreen-active .floor-plan-toolbar {
