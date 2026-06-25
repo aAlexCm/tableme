@@ -820,11 +820,17 @@ nav.admin-nav.admin-nav-stacked {
   align-items: center;
   flex-wrap: wrap;
   gap: 6px;
-  padding: 6px 8px;
+  padding: 6px 44px 6px 8px;
   max-width: calc(100vw - 16px);
   border-radius: var(--radius-sm);
   background: var(--paper);
   box-shadow: 0 10px 26px rgba(15, 23, 42, 0.25);
+}
+
+#poster-delete-text-btn {
+  position: absolute;
+  top: 6px;
+  right: 8px;
 }
 
 .poster-text-toolbar:not([hidden]) {
