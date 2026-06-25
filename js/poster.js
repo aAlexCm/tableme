@@ -190,13 +190,6 @@ function fontFamilyFor(fontKey) {
     toolboxEl.style.marginTop = `${Math.max(0, sheetTop - workspaceTop)}px`;
   }
 
-  function getTextWithoutHandle(node) {
-    const clone = node.cloneNode(true);
-    const handle = clone.querySelector('.poster-text-drag-handle');
-    if (handle) handle.remove();
-    return clone.textContent;
-  }
-
   function applyTextStyle(node, el) {
     node.style.left = `${el.x}px`;
     node.style.top = `${el.y}px`;
@@ -536,31 +529,37 @@ function fontFamilyFor(fontKey) {
   }
 
   function createTextNode(el) {
+    // The editable text lives in its own inner element, structurally
+    // separate from the drag/resize handles below — selecting all (Cmd+A)
+    // or typing inside the text can then never reach (and delete) the
+    // handles, since they live outside the contenteditable subtree entirely.
     const node = document.createElement('div');
     node.className = 'poster-el poster-text-el';
     node.dataset.id = el.id;
-    node.contentEditable = 'true';
-    node.spellcheck = false;
-    node.textContent = el.text;
+
+    const textContentEl = document.createElement('div');
+    textContentEl.className = 'poster-text-content';
+    textContentEl.contentEditable = 'true';
+    textContentEl.spellcheck = false;
+    textContentEl.textContent = el.text;
+    node.appendChild(textContentEl);
 
     const handle = document.createElement('span');
     handle.className = 'poster-text-drag-handle';
-    handle.contentEditable = 'false';
     handle.innerHTML = DRAG_ICON;
     node.appendChild(handle);
 
     const resizeHandle = document.createElement('span');
     resizeHandle.className = 'poster-resize-handle';
-    resizeHandle.contentEditable = 'false';
     node.appendChild(resizeHandle);
 
     node.addEventListener('mousedown', () => selectElement(el.id));
-    node.addEventListener('input', () => {
-      el.text = getTextWithoutHandle(node);
+    textContentEl.addEventListener('input', () => {
+      el.text = textContentEl.textContent;
       scheduleSave();
     });
-    node.addEventListener('blur', () => {
-      el.text = getTextWithoutHandle(node);
+    textContentEl.addEventListener('blur', () => {
+      el.text = textContentEl.textContent;
       scheduleSave();
     });
 
@@ -606,18 +605,13 @@ function fontFamilyFor(fontKey) {
     poster.elements.push(el);
     const node = createTextNode(el);
     selectElement(el.id);
-    node.focus();
-    // Select only the text node, not the drag/resize handles appended after
-    // it — selecting the whole element would let typing delete those handles
-    // along with the placeholder text.
-    const textNode = node.firstChild;
-    if (textNode) {
-      const range = document.createRange();
-      range.selectNodeContents(textNode);
-      const sel = window.getSelection();
-      sel.removeAllRanges();
-      sel.addRange(range);
-    }
+    const textContentEl = node.querySelector('.poster-text-content');
+    textContentEl.focus();
+    const range = document.createRange();
+    range.selectNodeContents(textContentEl);
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
     scheduleSave();
   });
 
