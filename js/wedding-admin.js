@@ -148,7 +148,10 @@ function parseSheetRows(rows) {
   }
 
   function getDragAfterElement(container, y) {
-    const rows = [...container.querySelectorAll('.guest-row:not(.dragging)')];
+    // Empty-seat placeholders must count as valid drop anchors too, otherwise
+    // a guest can never be dropped into an empty slot — the calculation would
+    // always land it after the placeholder instead of taking its place.
+    const rows = [...container.querySelectorAll('.guest-row:not(.dragging), .guest-row-empty')];
     return rows.reduce(
       (closest, row) => {
         const box = row.getBoundingClientRect();
@@ -221,9 +224,15 @@ function parseSheetRows(rows) {
       draggedRow = row;
       row.classList.add('dragging');
     });
-    row.addEventListener('dragend', () => {
+    row.addEventListener('dragend', async () => {
+      // 'dragend' always fires once a drag operation ends, unlike 'drop' which
+      // some embedded/webview browsers fail to dispatch reliably — committing
+      // here guarantees the reorder is actually persisted, not just visually
+      // reflected via the live DOM moves done during 'dragover'.
       row.classList.remove('dragging');
+      const affectedTable = row.closest('.table-guest-list')?.dataset.table;
       draggedRow = null;
+      await commitGuestOrder(affectedTable);
     });
 
     const handle = row.querySelector('.drag-handle');
@@ -278,10 +287,11 @@ function parseSheetRows(rows) {
       }
     });
 
-    list.addEventListener('drop', async (e) => {
+    list.addEventListener('drop', (e) => {
+      // Actual persistence happens in the row's 'dragend' handler, which is
+      // guaranteed to fire; this just stops the browser's default drop
+      // behavior (e.g. navigating to dropped text/links).
       e.preventDefault();
-      if (!draggedRow) return;
-      await commitGuestOrder(list.dataset.table);
     });
   }
 
