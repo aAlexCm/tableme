@@ -55,6 +55,10 @@ body {
   max-width: 1080px;
 }
 
+.page.poster-page {
+  padding-top: 24px;
+}
+
 header.hero {
   position: relative;
   text-align: center;
@@ -682,8 +686,12 @@ nav.admin-nav.admin-nav-stacked {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 36px 12px;
+  padding: 18px 12px;
   overflow: auto;
+}
+
+#poster-content nav.admin-nav {
+  margin-bottom: 16px;
 }
 
 .poster-sheet {
@@ -897,10 +905,6 @@ nav.admin-nav.admin-nav-stacked {
 }
 
 @media (max-width: 760px) {
-  #poster-content nav.admin-nav {
-    margin-bottom: 18px;
-  }
-
   .poster-workspace {
     flex-direction: column;
   }
@@ -917,7 +921,6 @@ nav.admin-nav.admin-nav-stacked {
 
   .poster-canvas-area {
     width: 100%;
-    padding-top: 20px;
   }
 }
 
