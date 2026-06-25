@@ -112,6 +112,14 @@ header.hero::after {
   object-fit: contain;
 }
 
+.guest-decoration-fireworks {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
 @media (max-width: 640px) {
   .guest-decoration-item {
     width: 88px;

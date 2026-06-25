@@ -157,7 +157,7 @@ export function createThemeSettings({ weddingId, getLang }) {
       decorationUploadBtn.hidden = false;
     }
 
-    decorationPositionFieldEl.hidden = decoration.element === 'none';
+    decorationPositionFieldEl.hidden = decoration.element === 'none' || decoration.element === 'fireworks';
     decorationPositionGridEl.innerHTML = DECORATION_POSITIONS.map((pos) => `
       <button type="button" class="theme-decoration-position-option${decoration.positions.includes(pos.key) ? ' active' : ''}" data-position="${pos.key}" style="grid-area:${pos.key}" title="${escapeHtml(t(lang, pos.labelKey))}">
         <span class="theme-decoration-position-arrow" style="transform:rotate(${pos.arrowAngle}deg)">${ARROW_ICON}</span>

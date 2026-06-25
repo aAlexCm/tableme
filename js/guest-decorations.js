@@ -1,3 +1,5 @@
+import { startFireworks } from './fireworks.js';
+
 // Decorative corner illustrations for the guest page. Each preset is a small
 // line-art SVG drawn in the bottom-left quadrant of its own viewBox, using
 // `currentColor` so it automatically matches whichever guest theme color is
@@ -120,6 +122,26 @@ export const DECORATION_ELEMENTS = [
       <circle cx="0" cy="160" r="4" fill="currentColor" opacity="0.6"/>
     </svg>`,
   },
+  {
+    key: 'fireworks',
+    labelKey: 'decorationFireworks',
+    animated: true,
+    svg: `<svg viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <g stroke="currentColor" stroke-width="3" stroke-linecap="round">
+        <path d="M80 80 L80 38"/>
+        <path d="M80 80 L114 56"/>
+        <path d="M80 80 L122 80"/>
+        <path d="M80 80 L114 104"/>
+        <path d="M80 80 L80 122"/>
+        <path d="M80 80 L46 104"/>
+        <path d="M80 80 L38 80"/>
+        <path d="M80 80 L46 56"/>
+      </g>
+      <circle cx="80" cy="80" r="6" fill="currentColor"/>
+      <circle cx="30" cy="36" r="3" fill="currentColor" opacity="0.55"/>
+      <circle cx="132" cy="128" r="2.5" fill="currentColor" opacity="0.45"/>
+    </svg>`,
+  },
 ];
 
 // `arrowAngle` rotates a single up-pointing arrow icon to face each corner,
@@ -172,10 +194,22 @@ export function normalizeDecoration(decoration) {
 
 export function applyGuestDecoration(decoration, mountEl) {
   if (!mountEl) return;
+  if (typeof mountEl._stopFireworks === 'function') {
+    mountEl._stopFireworks();
+    mountEl._stopFireworks = null;
+  }
   const deco = normalizeDecoration(decoration);
   mountEl.innerHTML = '';
 
   if (!deco.element || deco.element === 'none') return;
+
+  if (deco.element === 'fireworks') {
+    const canvas = document.createElement('canvas');
+    canvas.className = 'guest-decoration-fireworks';
+    mountEl.appendChild(canvas);
+    mountEl._stopFireworks = startFireworks(canvas);
+    return;
+  }
 
   const isCustom = deco.element === 'custom' && deco.customImage;
   if (!isCustom && deco.element !== 'custom' && !getDecorationElement(deco.element)) return;
