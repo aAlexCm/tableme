@@ -22,7 +22,7 @@ export function startFireworks(canvas) {
     const rect = parent.getBoundingClientRect();
     width = Math.max(1, rect.width);
     height = Math.max(1, rect.height);
-    scale = Math.max(0.6, Math.min(1.6, Math.min(width, height) / 320));
+    scale = Math.max(1, Math.min(2.4, Math.min(width, height) / 220));
     canvas.width = width * dpr;
     canvas.height = height * dpr;
     canvas.style.width = `${width}px`;
@@ -42,16 +42,16 @@ export function startFireworks(canvas) {
   }
 
   function explode(x, y, color) {
-    const count = Math.round((22 + Math.random() * 12) * scale);
+    const count = Math.round((30 + Math.random() * 16) * scale);
     for (let i = 0; i < count; i++) {
       const angle = (Math.PI * 2 * i) / count + Math.random() * 0.25;
-      const speed = (1.1 + Math.random() * 2.1) * scale;
+      const speed = (2.2 + Math.random() * 3.4) * scale;
       particles.push({
         x, y,
         vx: Math.cos(angle) * speed,
         vy: Math.sin(angle) * speed,
         life: 0,
-        maxLife: 650 + Math.random() * 450,
+        maxLife: 750 + Math.random() * 550,
         color,
       });
     }
@@ -77,9 +77,12 @@ export function startFireworks(canvas) {
       r.y = r.startY + (r.targetY - r.startY) * ease + arc;
       ctx.beginPath();
       ctx.fillStyle = r.color;
-      ctx.globalAlpha = 0.9;
-      ctx.arc(r.x, r.y, 2.2 * scale, 0, Math.PI * 2);
+      ctx.shadowColor = r.color;
+      ctx.shadowBlur = 10 * scale;
+      ctx.globalAlpha = 1;
+      ctx.arc(r.x, r.y, 3.6 * scale, 0, Math.PI * 2);
       ctx.fill();
+      ctx.shadowBlur = 0;
       if (p >= 1) {
         explode(r.targetX, r.targetY, r.color);
         return false;
@@ -96,12 +99,15 @@ export function startFireworks(canvas) {
       const fade = 1 - pt.life / pt.maxLife;
       ctx.beginPath();
       ctx.fillStyle = pt.color;
-      ctx.globalAlpha = Math.max(0, fade) * 0.85;
-      ctx.arc(pt.x, pt.y, 1.8 * scale, 0, Math.PI * 2);
+      ctx.shadowColor = pt.color;
+      ctx.shadowBlur = 6 * scale;
+      ctx.globalAlpha = Math.max(0, fade);
+      ctx.arc(pt.x, pt.y, 3 * scale, 0, Math.PI * 2);
       ctx.fill();
       return true;
     });
 
+    ctx.shadowBlur = 0;
     ctx.globalAlpha = 1;
     rafId = requestAnimationFrame(frame);
   }
