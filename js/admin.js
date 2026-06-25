@@ -77,7 +77,7 @@ const ICONS = {
       li.innerHTML = `
         <div class="info">
           <strong>${escapeHtml(w.name)}</strong>
-          <span class="muted">${escapeHtml(dateLabel)} &middot; ${w.guests.length} ${escapeHtml(t(currentLang, 'guestCountSuffix'))}</span>
+          <span class="muted">${escapeHtml(dateLabel)} &middot; ${w.guests.filter((g) => !g.empty).length} ${escapeHtml(t(currentLang, 'guestCountSuffix'))}</span>
         </div>
         <div class="actions">
           <select class="mini-lang-select" data-id="${w.id}">${langOptions}</select>

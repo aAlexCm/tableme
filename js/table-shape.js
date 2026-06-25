@@ -47,12 +47,14 @@ export function getRectShapeSize(seatCount, rotated) {
 }
 
 // Builds the slot -> guest mapping for a table: guests simply fill the slots
-// in array order. Per-seat pinning was tried and reverted — it made list
-// reordering and floor-plan moves fight over who "owns" the seat index.
+// in array order. An `empty: true` entry is an intentional gap the couple
+// left in the seating order (from the admin guest list) and renders as an
+// unoccupied chair at that exact position.
 export function assignSeats(guests, seatCount) {
   const slots = new Array(seatCount).fill(null);
   for (let i = 0; i < seatCount && i < guests.length; i += 1) {
-    slots[i] = guests[i];
+    const g = guests[i];
+    slots[i] = g && !g.empty ? g : null;
   }
   return slots;
 }

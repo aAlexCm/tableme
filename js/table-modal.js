@@ -99,7 +99,7 @@ export function createTableModal({ weddingId, getLang, onChange }) {
     const seatCount = table.seats != null ? table.seats : DEFAULT_SEATS;
     tableSeatsInput.value = seatCount;
 
-    const guests = wedding.guests.filter((g) => g.table === table.label);
+    const guests = wedding.guests.filter((g) => g.table === table.label && !g.empty);
     tableModalGuestCount.textContent = `${guests.length}/${seatCount}`;
     tableModalEmptyEl.hidden = guests.length > 0;
     tableModalGuestList.innerHTML = '';
@@ -224,10 +224,12 @@ export function createTableModal({ weddingId, getLang, onChange }) {
     const lang = getLang();
     const table = wedding.tables.find((tb) => tb.id === activeTableId);
     if (!table) return;
-    const affected = wedding.guests.filter((g) => g.table === table.label).length;
+    const affected = wedding.guests.filter((g) => g.table === table.label && !g.empty).length;
     if (!confirm(t(lang, 'confirmDeleteTable', affected))) return;
     const tables = wedding.tables.filter((tb) => tb.id !== table.id);
-    const guests = wedding.guests.map((g) => (g.table === table.label ? { ...g, table: '' } : g));
+    const guests = wedding.guests
+      .filter((g) => !(g.empty && g.table === table.label))
+      .map((g) => (g.table === table.label ? { ...g, table: '' } : g));
     await Storage.setBoard(weddingId, { guests, tables });
     close();
     if (onChange) await onChange();

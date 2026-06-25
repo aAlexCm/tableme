@@ -1,9 +1,8 @@
-import { Storage } from './storage.js';
+import { Storage, generateId } from './storage.js';
 import { applyTranslations, buildLangSwitcher, t } from './i18n.js';
 import { createTableModal } from './table-modal.js';
 import { createShareControls } from './share-controls.js';
 import { createThemeSettings } from './theme-settings.js';
-import { assignSeats } from './table-shape.js';
 
 const LANG_KEY = 'tableme_wedding_admin_lang';
 const DEFAULT_SEATS = 8;
@@ -169,13 +168,28 @@ function parseSheetRows(rows) {
     const wedding = await Storage.getWedding(weddingId);
     if (!wedding) return;
     const guestMap = new Map(wedding.guests.map((g) => [g.id, g]));
-    const newGuests = [];
-    guestListEl.querySelectorAll('.guest-row').forEach((row) => {
+    const entries = [];
+    guestListEl.querySelectorAll('.guest-row, .guest-row-empty').forEach((row) => {
+      const table = row.closest('.table-guest-list').dataset.table;
+      if (row.classList.contains('guest-row-empty')) {
+        entries.push({ id: row.dataset.id, table, empty: true });
+        return;
+      }
       const guest = guestMap.get(row.dataset.id);
       if (!guest) return;
-      const table = row.closest('.table-guest-list').dataset.table;
-      newGuests.push({ ...guest, table });
+      entries.push({ ...guest, table });
     });
+    // Empty rows are just rendering filler up to the seat count and get
+    // recomputed on every render — only keep the ones that sit *before*
+    // another guest of the same table, i.e. an intentional gap the couple
+    // dragged a guest below. Trailing ones carry no information.
+    const lastRealIndexByTable = new Map();
+    entries.forEach((entry, i) => {
+      if (!entry.empty) lastRealIndexByTable.set(entry.table, i);
+    });
+    const newGuests = entries.filter(
+      (entry, i) => !entry.empty || i < (lastRealIndexByTable.get(entry.table) ?? -1)
+    );
     await Storage.setGuests(weddingId, newGuests);
     await renderGuests();
   }
@@ -294,7 +308,7 @@ function parseSheetRows(rows) {
 
     guestsTitle.textContent = `${t(currentLang, 'guestsTitlePrefix')}${wedding.name}`;
     guestListEl.innerHTML = '';
-    guestEmptyEl.hidden = wedding.guests.length > 0;
+    guestEmptyEl.hidden = wedding.guests.some((g) => !g.empty);
 
     const tableLabels = (wedding.tables || []).map((tb) => tb.label).filter(Boolean);
     const tableByLabel = new Map((wedding.tables || []).map((tb) => [tb.label, tb]));
@@ -312,8 +326,9 @@ function parseSheetRows(rows) {
 
       const title = document.createElement('h3');
       title.className = 'table-group-title';
+      const realGuestCount = guests.filter((g) => !g.empty).length;
       title.innerHTML = `${escapeHtml(t(currentLang, 'tableLabel'))} ${escapeHtml(key || '—')}`
-        + (table ? ` <span class="table-group-count">(${guests.length}/${table.seats != null ? table.seats : DEFAULT_SEATS})</span>` : '');
+        + (table ? ` <span class="table-group-count">(${realGuestCount}/${table.seats != null ? table.seats : DEFAULT_SEATS})</span>` : '');
       titleRow.appendChild(title);
 
       if (table) {
@@ -354,21 +369,27 @@ function parseSheetRows(rows) {
         return li;
       }
 
-      function renderEmptySeatRow() {
+      function renderEmptySeatRow(id) {
         const li = document.createElement('li');
         li.className = 'guest-row-empty';
+        li.dataset.id = id || generateId();
         li.textContent = t(currentLang, 'emptySeatPlaceholder');
         return li;
       }
 
       if (table) {
         const seatCount = table.seats != null ? table.seats : DEFAULT_SEATS;
-        // Never hide guests beyond the seat count (e.g. a table with more guests
-        // than seats) — only expand to show extra rows, never drop anyone.
-        const slots = assignSeats(guests, Math.max(seatCount, guests.length));
-        slots.forEach((guest) => {
-          list.appendChild(guest ? renderGuestRow(guest) : renderEmptySeatRow());
+        // Render the persisted order as-is (real guests plus any intentional
+        // gaps the couple dragged in) then top up with extra placeholder rows
+        // to fill the table up to its seat count. Never hide guests beyond
+        // the seat count (e.g. a table with more guests than seats) — only
+        // expand to show extra rows, never drop anyone.
+        guests.forEach((g) => {
+          list.appendChild(g.empty ? renderEmptySeatRow(g.id) : renderGuestRow(g));
         });
+        for (let i = guests.length; i < seatCount; i += 1) {
+          list.appendChild(renderEmptySeatRow());
+        }
       } else if (guests.length === 0) {
         const emptyLi = document.createElement('li');
         emptyLi.className = 'table-guest-list-empty';
@@ -506,10 +527,12 @@ function parseSheetRows(rows) {
         if (!wedding) return;
         const table = (wedding.tables || []).find((tb) => tb.id === tableId);
         if (!table) return;
-        const affected = wedding.guests.filter((g) => g.table === table.label).length;
+        const affected = wedding.guests.filter((g) => g.table === table.label && !g.empty).length;
         if (!confirm(t(currentLang, 'confirmDeleteTable', affected))) return;
         const tables = wedding.tables.filter((tb) => tb.id !== table.id);
-        const guests = wedding.guests.map((g) => (g.table === table.label ? { ...g, table: '' } : g));
+        const guests = wedding.guests
+          .filter((g) => !(g.empty && g.table === table.label))
+          .map((g) => (g.table === table.label ? { ...g, table: '' } : g));
         await Storage.setBoard(weddingId, { guests, tables });
         await renderGuests();
       }

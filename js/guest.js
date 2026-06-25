@@ -578,7 +578,7 @@ function trimRouteEnds(points, startRetreat, endRetreat) {
     const table = (currentWedding.tables || []).find((tb) => normalize(tb.label) === q);
     if (table) {
       const tableGuests = guests.filter((g) => g.table === table.label);
-      if (tableGuests.length > 0) {
+      if (tableGuests.some((g) => !g.empty)) {
         showTableResult(table, tableGuests);
         return;
       }
