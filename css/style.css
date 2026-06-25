@@ -576,8 +576,9 @@ nav.admin-nav.admin-nav-stacked {
   gap: 16px;
   padding: 18px;
   border-radius: var(--radius);
-  background: rgba(245, 248, 249, 0.92);
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+  background: var(--paper);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.1);
 }
 
 .poster-toolbox-title {
@@ -621,6 +622,24 @@ nav.admin-nav.admin-nav-stacked {
 
 #poster-add-qr-btn:hover {
   box-shadow: 0 10px 22px rgba(224, 123, 57, 0.32);
+}
+
+#poster-add-divider-btn {
+  background: linear-gradient(135deg, var(--accent-teal), var(--accent-teal-deep));
+  box-shadow: 0 6px 14px rgba(27, 36, 64, 0.25);
+}
+
+#poster-add-divider-btn:hover {
+  box-shadow: 0 10px 22px rgba(27, 36, 64, 0.32);
+}
+
+#poster-add-icon-btn {
+  background: linear-gradient(135deg, #e8a0bf, #c2487a);
+  box-shadow: 0 6px 14px rgba(194, 72, 122, 0.25);
+}
+
+#poster-add-icon-btn:hover {
+  box-shadow: 0 10px 22px rgba(194, 72, 122, 0.32);
 }
 
 .poster-tool-btn {
