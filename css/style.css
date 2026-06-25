@@ -87,10 +87,10 @@ header.hero::after {
 }
 
 .guest-decoration-layer {
-  position: fixed;
+  position: absolute;
   inset: 0;
   pointer-events: none;
-  z-index: 1;
+  z-index: -1;
 }
 
 .guest-decoration-item {
@@ -125,8 +125,8 @@ header.hero.invite-hero {
 }
 
 /* The corner branches used to be hardcoded here — now superseded by the
-   couple's own choice of decoration (.guest-decoration), so this header no
-   longer draws its own. */
+   couple's own choice of decoration (.guest-decoration-layer), so this
+   header no longer draws its own. */
 header.hero.invite-hero::before,
 header.hero.invite-hero::after {
   content: none;

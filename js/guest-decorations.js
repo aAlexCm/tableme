@@ -135,13 +135,15 @@ export const DECORATION_POSITIONS = [
 // Each preset is drawn assuming it emerges from the bottom-left corner —
 // mirroring it horizontally/vertically reuses the same artwork for every
 // corner. A custom uploaded image is never mirrored, since it's the
-// couple's own picture and should appear exactly as given.
+// couple's own picture and should appear exactly as given. The mount layer
+// sits inside the title header, and these offsets let the artwork bleed
+// slightly past its edges (like the old hardcoded branches used to).
 const POSITION_LAYOUT = {
-  'top-left': { top: '0', left: '0', mirrorX: false, mirrorY: true },
-  'top-center': { top: '0', left: '50%', centerX: true, mirrorX: false, mirrorY: true },
-  'top-right': { top: '0', right: '0', mirrorX: true, mirrorY: true },
-  'bottom-left': { bottom: '0', left: '0', mirrorX: false, mirrorY: false },
-  'bottom-right': { bottom: '0', right: '0', mirrorX: true, mirrorY: false },
+  'top-left': { top: '-36px', left: '-14px', mirrorX: false, mirrorY: true },
+  'top-center': { top: '-36px', left: '50%', centerX: true, mirrorX: false, mirrorY: true },
+  'top-right': { top: '-36px', right: '-14px', mirrorX: true, mirrorY: true },
+  'bottom-left': { bottom: '-36px', left: '-14px', mirrorX: false, mirrorY: false },
+  'bottom-right': { bottom: '-36px', right: '-14px', mirrorX: true, mirrorY: false },
 };
 
 export function getDecorationElement(key) {
