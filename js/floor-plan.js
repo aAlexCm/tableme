@@ -315,12 +315,145 @@ function reconcileTables(wedding) {
     chairTooltipEl.hidden = true;
   }
 
-  // Dragging a guest from chair to chair was tried and reverted: pinning a
-  // guest to a specific seat index fought with list-based reordering and
-  // made guests silently snap back after a reload. Tapping a chair now only
-  // shows the occupant's name, same as hovering.
+  function buildTableBuckets(guests) {
+    const buckets = new Map();
+    guests.forEach((g) => {
+      const key = g.table || '';
+      if (!buckets.has(key)) buckets.set(key, []);
+      buckets.get(key).push(g);
+    });
+    return buckets;
+  }
+
+  function trimTrailingEmpties(bucket) {
+    let end = bucket.length;
+    while (end > 0 && bucket[end - 1].empty) end -= 1;
+    return bucket.slice(0, end);
+  }
+
+  // Every chair — occupied or empty — is a seat "container", same as in the
+  // admin guest list. Dropping a guest onto another chair swaps the two: an
+  // occupied chair swaps tables/positions with whoever was there, an empty
+  // chair just receives them and their old chair becomes the new gap (which
+  // also shows up as a "Chaise libre" placeholder back in the guest list).
+  async function moveGuestToChairContainer(sourceChairEl, targetChairEl) {
+    if (!sourceChairEl || !targetChairEl || sourceChairEl === targetChairEl) return;
+    const sourceTableId = sourceChairEl.closest('.table-unit')?.dataset.id;
+    const targetTableId = targetChairEl.closest('.table-unit')?.dataset.id;
+    const sourceTable = (wedding.tables || []).find((tb) => tb.id === sourceTableId);
+    const targetTable = (wedding.tables || []).find((tb) => tb.id === targetTableId);
+    if (!sourceTable || !targetTable) return;
+    const sourceSlot = Number(sourceChairEl.dataset.slot);
+    const targetSlot = Number(targetChairEl.dataset.slot);
+    if (!Number.isInteger(sourceSlot) || !Number.isInteger(targetSlot)) return;
+
+    const buckets = buildTableBuckets(wedding.guests);
+    const sourceBucket = buckets.get(sourceTable.label) || [];
+    const targetBucket = buckets.get(targetTable.label) || [];
+    buckets.set(sourceTable.label, sourceBucket);
+    buckets.set(targetTable.label, targetBucket);
+    const sourceGuest = sourceBucket[sourceSlot];
+    if (!sourceGuest || sourceGuest.empty) return;
+    const targetOccupant = targetBucket[targetSlot];
+
+    if (targetOccupant && !targetOccupant.empty) {
+      sourceBucket[sourceSlot] = { ...targetOccupant, table: sourceTable.label };
+      targetBucket[targetSlot] = { ...sourceGuest, table: targetTable.label };
+    } else {
+      while (targetBucket.length <= targetSlot) {
+        targetBucket.push({ id: generateId(), table: targetTable.label, empty: true });
+      }
+      targetBucket[targetSlot] = { ...sourceGuest, table: targetTable.label };
+      sourceBucket[sourceSlot] = { id: generateId(), table: sourceTable.label, empty: true };
+    }
+
+    const newGuests = [];
+    buckets.forEach((bucket) => newGuests.push(...trimTrailingEmpties(bucket)));
+    await Storage.setGuests(weddingId, newGuests);
+    await refreshAll();
+    flashDroppedGuest(sourceGuest.id);
+  }
+
+  function flashDroppedGuest(guestId) {
+    const chairEl = floorCanvasEl.querySelector(`.chair[data-guest-id="${guestId}"]`);
+    if (!chairEl) return;
+    chairEl.classList.add('just-dropped');
+    chairEl.addEventListener('animationend', () => chairEl.classList.remove('just-dropped'), { once: true });
+  }
+
   function attachChairDrag(chairEl) {
-    chairEl.addEventListener('pointerup', () => showChairTooltip(chairEl));
+    let pointerId = null;
+    let startClientX = 0;
+    let startClientY = 0;
+    let moved = false;
+    let ghostEl = null;
+    let lastDropTarget = null;
+
+    function clearDropHighlight() {
+      if (lastDropTarget) {
+        lastDropTarget.classList.remove('drop-target');
+        lastDropTarget = null;
+      }
+    }
+
+    function onPointerMove(e) {
+      if (e.pointerId !== pointerId) return;
+      const dx = e.clientX - startClientX;
+      const dy = e.clientY - startClientY;
+      if (!moved && Math.hypot(dx, dy) > 6) {
+        moved = true;
+        chairEl.classList.add('picked');
+        hideChairTooltip();
+        ghostEl = document.createElement('div');
+        ghostEl.className = 'chair-drag-ghost';
+        ghostEl.textContent = chairEl.querySelector('.chair-initials')?.textContent || '';
+        document.body.appendChild(ghostEl);
+      }
+      if (!moved) return;
+      ghostEl.style.left = `${e.clientX}px`;
+      ghostEl.style.top = `${e.clientY}px`;
+      clearDropHighlight();
+      const underPointer = document.elementFromPoint(e.clientX, e.clientY);
+      const candidate = underPointer && underPointer.closest('.chair');
+      if (candidate && candidate !== chairEl && floorCanvasEl.contains(candidate)) {
+        candidate.classList.add('drop-target');
+        lastDropTarget = candidate;
+      }
+    }
+
+    async function onPointerUp(e) {
+      if (e.pointerId !== pointerId) return;
+      chairEl.releasePointerCapture(pointerId);
+      chairEl.removeEventListener('pointermove', onPointerMove);
+      chairEl.removeEventListener('pointerup', onPointerUp);
+      pointerId = null;
+      chairEl.classList.remove('picked');
+      const dropTarget = lastDropTarget;
+      clearDropHighlight();
+      if (ghostEl) {
+        ghostEl.remove();
+        ghostEl = null;
+      }
+
+      if (!moved) {
+        showChairTooltip(chairEl);
+        return;
+      }
+
+      if (dropTarget) {
+        await moveGuestToChairContainer(chairEl, dropTarget);
+      }
+    }
+
+    chairEl.addEventListener('pointerdown', (e) => {
+      pointerId = e.pointerId;
+      startClientX = e.clientX;
+      startClientY = e.clientY;
+      moved = false;
+      chairEl.setPointerCapture(pointerId);
+      chairEl.addEventListener('pointermove', onPointerMove);
+      chairEl.addEventListener('pointerup', onPointerUp);
+    });
   }
 
   floorCanvasEl.addEventListener('mouseover', (e) => {
