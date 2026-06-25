@@ -419,7 +419,23 @@ function parseSheetRows(rows) {
         const li = document.createElement('li');
         li.className = 'guest-row-empty';
         li.dataset.id = id || generateId();
-        li.textContent = t(currentLang, 'emptySeatPlaceholder');
+        const label = document.createElement('span');
+        label.className = 'guest-row-empty-label';
+        label.textContent = t(currentLang, 'emptySeatPlaceholder');
+        li.appendChild(label);
+        if (table) {
+          const deleteLabel = escapeHtml(t(currentLang, 'deleteSeatBtn'));
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'icon-btn icon-btn-danger guest-row-empty-delete';
+          btn.dataset.action = 'delete-seat';
+          btn.dataset.id = li.dataset.id;
+          btn.dataset.tableId = table.id;
+          btn.title = deleteLabel;
+          btn.setAttribute('aria-label', deleteLabel);
+          btn.innerHTML = ICONS.trash;
+          li.appendChild(btn);
+        }
         return li;
       }
 
@@ -582,6 +598,34 @@ function parseSheetRows(rows) {
         await Storage.setBoard(weddingId, { guests, tables });
         await renderGuests();
       }
+      return;
+    }
+
+    const emptyRow = e.target.closest('.guest-row-empty');
+    if (emptyRow) {
+      const deleteBtn = e.target.closest('button[data-action="delete-seat"]');
+      if (!deleteBtn) {
+        document.querySelectorAll('.guest-row-empty.revealed').forEach((el) => {
+          if (el !== emptyRow) el.classList.remove('revealed');
+        });
+        emptyRow.classList.toggle('revealed');
+        return;
+      }
+      const { id: seatId, tableId } = deleteBtn.dataset;
+      const wedding = cachedWedding || (await Storage.getWedding(weddingId));
+      if (!wedding) return;
+      const table = (wedding.tables || []).find((tb) => tb.id === tableId);
+      if (!table) return;
+      const currentSeats = table.seats != null ? table.seats : DEFAULT_SEATS;
+      const tables = wedding.tables.map((tb) => (
+        tb.id === tableId ? { ...tb, seats: Math.max(0, currentSeats - 1) } : tb
+      ));
+      // A synthetic trailing placeholder has no matching entry in
+      // wedding.guests — filtering it out is then simply a no-op, which is
+      // exactly right since there's nothing real to remove.
+      const guests = wedding.guests.filter((g) => g.id !== seatId);
+      await renderGuests({ ...wedding, tables, guests });
+      await Storage.setBoard(weddingId, { guests, tables });
       return;
     }
 
