@@ -165,7 +165,7 @@ function parseSheetRows(rows) {
     ).element;
   }
 
-  async function commitGuestOrder(affectedTable) {
+  async function commitGuestOrder() {
     const wedding = await Storage.getWedding(weddingId);
     if (!wedding) return;
     const guestMap = new Map(wedding.guests.map((g) => [g.id, g]));
@@ -174,12 +174,7 @@ function parseSheetRows(rows) {
       const guest = guestMap.get(row.dataset.id);
       if (!guest) return;
       const table = row.closest('.table-guest-list').dataset.table;
-      // Reordering within a table must be able to override a previously pinned
-      // seat, otherwise the drag has no visible effect — so any guest in the
-      // table where the drag happened loses their pin and falls back to
-      // array-order auto-fill.
-      const seat = table === guest.table && table !== affectedTable ? guest.seat : null;
-      newGuests.push({ ...guest, table, seat });
+      newGuests.push({ ...guest, table });
     });
     await Storage.setGuests(weddingId, newGuests);
     await renderGuests();
@@ -196,10 +191,6 @@ function parseSheetRows(rows) {
       const swapIdx = direction === 'up' ? idx - 1 : idx + 1;
       if (swapIdx >= 0 && swapIdx < group.guests.length) {
         [group.guests[idx], group.guests[swapIdx]] = [group.guests[swapIdx], group.guests[idx]];
-        // A pinned seat would otherwise keep rendering at its fixed slot
-        // regardless of array order, making the swap invisible after reload —
-        // clear every pin in this table so the new array order actually wins.
-        group.guests = group.guests.map((g) => ({ ...g, seat: null }));
         moved = true;
       }
       break;
@@ -218,7 +209,7 @@ function parseSheetRows(rows) {
     }
     const wedding = await Storage.getWedding(weddingId);
     if (!wedding) return;
-    const guests = wedding.guests.map((g) => (g.id === guestId ? { ...g, table, seat: null } : g));
+    const guests = wedding.guests.map((g) => (g.id === guestId ? { ...g, table } : g));
     await Storage.setGuests(weddingId, guests);
     await renderGuests();
   }
@@ -234,9 +225,8 @@ function parseSheetRows(rows) {
       // here guarantees the reorder is actually persisted, not just visually
       // reflected via the live DOM moves done during 'dragover'.
       row.classList.remove('dragging');
-      const affectedTable = row.closest('.table-guest-list')?.dataset.table;
       draggedRow = null;
-      await commitGuestOrder(affectedTable);
+      await commitGuestOrder();
     });
 
     const handle = row.querySelector('.drag-handle');
@@ -272,10 +262,9 @@ function parseSheetRows(rows) {
 
     handle.addEventListener('touchend', async () => {
       if (!draggedRow) return;
-      const affectedTable = draggedRow.closest('.table-guest-list')?.dataset.table;
       row.classList.remove('dragging');
       draggedRow = null;
-      await commitGuestOrder(affectedTable);
+      await commitGuestOrder();
     });
   }
 
@@ -520,7 +509,7 @@ function parseSheetRows(rows) {
         const affected = wedding.guests.filter((g) => g.table === table.label).length;
         if (!confirm(t(currentLang, 'confirmDeleteTable', affected))) return;
         const tables = wedding.tables.filter((tb) => tb.id !== table.id);
-        const guests = wedding.guests.map((g) => (g.table === table.label ? { ...g, table: '', seat: null } : g));
+        const guests = wedding.guests.map((g) => (g.table === table.label ? { ...g, table: '' } : g));
         await Storage.setBoard(weddingId, { guests, tables });
         await renderGuests();
       }

@@ -46,25 +46,13 @@ export function getRectShapeSize(seatCount, rotated) {
   return rotated ? { width: short, height: long } : { width: long, height: short };
 }
 
-// Builds the slot -> guest mapping for a table. A guest with a valid `.seat`
-// (an index into the geometric chair list) is "pinned" to that exact chair;
-// everyone else auto-fills the remaining slots in array order, preserving the
-// original contiguous-fill behavior for tables with no pinned guests at all.
+// Builds the slot -> guest mapping for a table: guests simply fill the slots
+// in array order. Per-seat pinning was tried and reverted — it made list
+// reordering and floor-plan moves fight over who "owns" the seat index.
 export function assignSeats(guests, seatCount) {
   const slots = new Array(seatCount).fill(null);
-  const pinnedIds = new Set();
-  guests.forEach((g) => {
-    if (g.seat != null && g.seat >= 0 && g.seat < seatCount && !slots[g.seat]) {
-      slots[g.seat] = g;
-      pinnedIds.add(g.id);
-    }
-  });
-  const unpinned = guests.filter((g) => !pinnedIds.has(g.id));
-  let nextIdx = 0;
-  for (let i = 0; i < seatCount && nextIdx < unpinned.length; i += 1) {
-    if (slots[i]) continue;
-    slots[i] = unpinned[nextIdx];
-    nextIdx += 1;
+  for (let i = 0; i < seatCount && i < guests.length; i += 1) {
+    slots[i] = guests[i];
   }
   return slots;
 }
