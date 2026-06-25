@@ -11,11 +11,11 @@ const SHEET_WIDTH = 396;
 const SHEET_HEIGHT = 560;
 
 const FONT_OPTIONS = [
-  { key: 'playfair', label: 'Playfair Display', family: "'Playfair Display', serif", group: 'heading' },
-  { key: 'cormorant', label: 'Cormorant Garamond', family: "'Cormorant Garamond', serif", group: 'heading' },
-  { key: 'ebgaramond', label: 'EB Garamond', family: "'EB Garamond', serif", group: 'heading' },
-  { key: 'librebaskerville', label: 'Libre Baskerville', family: "'Libre Baskerville', serif", group: 'heading' },
-  { key: 'bodonimoda', label: 'Bodoni Moda', family: "'Bodoni Moda', serif", group: 'heading' },
+  { key: 'greatvibes', label: 'Great Vibes', family: "'Great Vibes', cursive", group: 'heading' },
+  { key: 'parisienne', label: 'Parisienne', family: "'Parisienne', cursive", group: 'heading' },
+  { key: 'monsieurladoulaise', label: 'Monsieur La Doulaise', family: "'Monsieur La Doulaise', cursive", group: 'heading' },
+  { key: 'pinyonscript', label: 'Pinyon Script', family: "'Pinyon Script', cursive", group: 'heading' },
+  { key: 'luxuriousscript', label: 'Luxurious Script', family: "'Luxurious Script', cursive", group: 'heading' },
   { key: 'raleway', label: 'Raleway', family: "'Raleway', sans-serif", group: 'paragraph' },
   { key: 'montserrat', label: 'Montserrat', family: "'Montserrat', sans-serif", group: 'paragraph' },
   { key: 'jost', label: 'Jost', family: "'Jost', sans-serif", group: 'paragraph' },
