@@ -64,7 +64,7 @@ export const PARTNER_ICONS = [
   {
     key: 'megaphone',
     labelKey: 'partnerIconMegaphone',
-    svg: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11v2a1 1 0 0 0 1 1h2l3.5 4.5a1 1 0 0 0 1.5-.8V6.3a1 1 0 0 0-1.5-.8L6 10H4a1 1 0 0 0-1 1Z"/><path d="M15 8a3 3 0 0 1 0 8"/><path d="M18 5a7 7 0 0 1 0 14"/></svg>',
+    svg: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>',
   },
 ];
 

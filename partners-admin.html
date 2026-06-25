@@ -49,8 +49,25 @@
         </div>
 
         <div class="field">
-          <label for="partner-link" data-i18n="partnerLinkInputLabel">Lien (site, téléphone, etc.)</label>
-          <input type="text" id="partner-link" placeholder="https://..." required />
+          <label for="partner-website" data-i18n="partnerWebsiteLabel">Site web</label>
+          <input type="text" id="partner-website" placeholder="https://..." />
+        </div>
+
+        <div class="field">
+          <label for="partner-phone" data-i18n="partnerPhoneLabel">Téléphone</label>
+          <input type="text" id="partner-phone" placeholder="+33 6 12 34 56 78" />
+        </div>
+
+        <div class="field">
+          <label data-i18n="partnerPhotoLabel">Photo</label>
+          <p class="muted small" data-i18n="partnerPhotoHint">Importez une image depuis votre ordinateur, ou collez l'URL d'une image existante.</p>
+          <div class="theme-decoration-preview" id="partner-photo-preview" hidden>
+            <img id="partner-photo-preview-img" alt="" />
+            <button type="button" class="icon-btn icon-btn-danger" id="partner-photo-remove-btn"></button>
+          </div>
+          <input type="file" id="partner-photo-file-input" accept="image/png,image/jpeg,image/webp" hidden />
+          <button type="button" class="secondary" id="partner-photo-upload-btn" data-i18n="partnerPhotoUploadBtn">Importer une image</button>
+          <input type="text" id="partner-photo-url-input" data-i18n-placeholder="partnerPhotoUrlPlaceholder" placeholder="https://...jpg" />
         </div>
 
         <h3 class="theme-font-heading" data-i18n="partnerGeoSectionTitle">Zone géographique</h3>

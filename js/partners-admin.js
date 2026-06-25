@@ -3,11 +3,35 @@ import { applyTranslations, buildLangSwitcher, t } from './i18n.js';
 import { PARTNER_CATEGORIES, PARTNER_ICONS } from './partners.js';
 
 const ADMIN_LANG_KEY = 'tableme_admin_lang';
+const MAX_PHOTO_DIMENSION = 640;
 
 const ICONS = {
   edit: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>',
   trash: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>',
 };
+
+function readAndResizeImage(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(reader.error);
+    reader.onload = () => {
+      const img = new Image();
+      img.onerror = reject;
+      img.onload = () => {
+        const scale = Math.min(1, MAX_PHOTO_DIMENSION / Math.max(img.width, img.height));
+        const width = Math.round(img.width * scale);
+        const height = Math.round(img.height * scale);
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', 0.85));
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
 
 (function () {
   let currentLang = localStorage.getItem(ADMIN_LANG_KEY) || 'fr';
@@ -23,7 +47,14 @@ const ICONS = {
   const categorySelect = document.getElementById('partner-category');
   const iconGridEl = document.getElementById('partner-icon-grid');
   const descriptionInput = document.getElementById('partner-description');
-  const linkInput = document.getElementById('partner-link');
+  const websiteInput = document.getElementById('partner-website');
+  const phoneInput = document.getElementById('partner-phone');
+  const photoPreviewEl = document.getElementById('partner-photo-preview');
+  const photoPreviewImgEl = document.getElementById('partner-photo-preview-img');
+  const photoRemoveBtn = document.getElementById('partner-photo-remove-btn');
+  const photoFileInput = document.getElementById('partner-photo-file-input');
+  const photoUploadBtn = document.getElementById('partner-photo-upload-btn');
+  const photoUrlInput = document.getElementById('partner-photo-url-input');
   const countryInput = document.getElementById('partner-country');
   const regionInput = document.getElementById('partner-region');
   const cityInput = document.getElementById('partner-city');
@@ -43,7 +74,9 @@ const ICONS = {
       category: 'transport',
       icon: 'car',
       description: 'Location de voitures de luxe avec chauffeur pour le jour J.',
-      link: 'https://example.com',
+      website: 'https://example.com',
+      phone: '',
+      photo: '',
       geo: { country: 'France', region: '', city: '' },
     },
     {
@@ -51,7 +84,9 @@ const ICONS = {
       category: 'animation',
       icon: 'music',
       description: 'Animations, jeux et photobooth pour dynamiser votre soirée.',
-      link: 'https://example.com',
+      website: 'https://example.com',
+      phone: '',
+      photo: '',
       geo: { country: 'France', region: '', city: '' },
     },
     {
@@ -59,7 +94,9 @@ const ICONS = {
       category: 'decoration',
       icon: 'flower',
       description: 'Décoration florale sur-mesure pour votre cérémonie et votre salle.',
-      link: 'https://example.com',
+      website: 'https://example.com',
+      phone: '',
+      photo: '',
       geo: { country: 'France', region: '', city: '' },
     },
   ];
@@ -147,6 +184,33 @@ const ICONS = {
   countryInput.addEventListener('input', refreshGeoOptions);
   regionInput.addEventListener('input', refreshGeoOptions);
 
+  function renderPhotoPreview() {
+    const url = photoUrlInput.value.trim();
+    if (url) {
+      photoPreviewImgEl.src = url;
+      photoPreviewEl.hidden = false;
+    } else {
+      photoPreviewEl.hidden = true;
+    }
+  }
+
+  photoUploadBtn.addEventListener('click', () => photoFileInput.click());
+
+  photoFileInput.addEventListener('change', async () => {
+    const file = photoFileInput.files[0];
+    photoFileInput.value = '';
+    if (!file) return;
+    photoUrlInput.value = await readAndResizeImage(file);
+    renderPhotoPreview();
+  });
+
+  photoUrlInput.addEventListener('input', renderPhotoPreview);
+
+  photoRemoveBtn.addEventListener('click', () => {
+    photoUrlInput.value = '';
+    renderPhotoPreview();
+  });
+
   function resetForm() {
     editingPartnerId = null;
     form.reset();
@@ -154,6 +218,7 @@ const ICONS = {
     renderIconGrid();
     renderCategoryOptions();
     refreshGeoOptions();
+    renderPhotoPreview();
     formTitleEl.textContent = t(currentLang, 'newPartnerTitle');
     submitBtn.textContent = t(currentLang, 'createBtn');
     cancelBtn.hidden = true;
@@ -166,7 +231,10 @@ const ICONS = {
     selectedIcon = partner.icon || PARTNER_ICONS[0].key;
     renderIconGrid();
     descriptionInput.value = partner.description || '';
-    linkInput.value = partner.link || '';
+    websiteInput.value = partner.website || '';
+    phoneInput.value = partner.phone || '';
+    photoUrlInput.value = partner.photo || '';
+    renderPhotoPreview();
     const geo = partner.geo || {};
     countryInput.value = geo.country || '';
     regionInput.value = geo.region || '';
@@ -242,14 +310,16 @@ const ICONS = {
       category: categorySelect.value,
       icon: selectedIcon,
       description: descriptionInput.value.trim(),
-      link: linkInput.value.trim(),
+      website: websiteInput.value.trim(),
+      phone: phoneInput.value.trim(),
+      photo: photoUrlInput.value.trim(),
       geo: {
         country: countryInput.value.trim(),
         region: regionInput.value.trim(),
         city: cityInput.value.trim(),
       },
     };
-    if (!partner.name || !partner.link || !partner.geo.country) return;
+    if (!partner.name || !partner.geo.country || (!partner.website && !partner.phone)) return;
 
     if (editingPartnerId) {
       await Storage.updatePartner(editingPartnerId, partner);
@@ -261,6 +331,7 @@ const ICONS = {
   });
 
   (async function init() {
+    photoRemoveBtn.innerHTML = ICONS.trash;
     const weddings = await Storage.getWeddings();
     weddingLocations = weddings.map((w) => w.location).filter(Boolean);
 
