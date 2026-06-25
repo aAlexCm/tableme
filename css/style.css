@@ -620,9 +620,21 @@ nav.admin-nav a:hover {
 
 .partners-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 14px;
   margin-top: 28px;
+}
+
+@media (max-width: 900px) {
+  .partners-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .partners-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .partner-card {
@@ -674,6 +686,7 @@ nav.admin-nav a:hover {
   align-items: center;
   gap: 6px;
   align-self: flex-start;
+  min-height: 20px;
   padding: 3px 10px;
   font-size: 0.66rem;
   font-weight: 600;
@@ -703,7 +716,13 @@ nav.admin-nav a:hover {
   font-family: 'Playfair Display', serif;
   font-size: 1.02rem;
   font-weight: 700;
+  line-height: 1.25;
   color: var(--charcoal);
+  min-height: 2.5rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .partner-card-desc {
