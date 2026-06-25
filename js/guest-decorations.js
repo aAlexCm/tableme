@@ -24,6 +24,7 @@ export const DECORATION_ELEMENTS = [
   {
     key: 'hearts',
     labelKey: 'decorationHearts',
+    noMirrorY: true,
     svg: `<svg viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
       <g fill="currentColor">
         <path opacity="0.85" transform="translate(20,128) scale(1.1)" d="M0,6 C-6,-2 -16,-2 -16,8 C-16,16 -8,22 0,30 C8,22 16,16 16,8 C16,-2 6,-2 0,6 Z"/>
@@ -176,11 +177,12 @@ export function applyGuestDecoration(decoration, mountEl) {
   if (layout.left != null) mountEl.style.left = layout.left;
   if (layout.right != null) mountEl.style.right = layout.right;
 
+  const preset = !isCustom ? getDecorationElement(deco.element) : null;
   const transforms = [];
   if (layout.centerX) transforms.push('translateX(-50%)');
   if (!isCustom) {
     if (layout.mirrorX) transforms.push('scaleX(-1)');
-    if (layout.mirrorY) transforms.push('scaleY(-1)');
+    if (layout.mirrorY && !(preset && preset.noMirrorY)) transforms.push('scaleY(-1)');
   }
   mountEl.style.transform = transforms.join(' ');
 
