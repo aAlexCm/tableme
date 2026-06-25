@@ -3437,6 +3437,18 @@ body.admin-theme .lang-switcher-option .check {
   color: var(--charcoal);
 }
 
+body.admin-theme select.mini-lang-select,
+body.admin-theme .modal-close,
+body.admin-theme .partner-icon-option:not(.active),
+body.admin-theme .bulk-add-feedback,
+body.admin-theme .table-shape-count,
+body.admin-theme .landmark-picker-option svg,
+body.admin-theme .shape-option,
+body.admin-theme .table-modal-guest-count,
+body.admin-theme .theme-color-field label {
+  color: var(--charcoal);
+}
+
 body.admin-theme .muted,
 body.admin-theme .table-group-count,
 body.admin-theme .table-guest-list-empty,
