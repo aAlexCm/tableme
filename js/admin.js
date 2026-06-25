@@ -12,6 +12,7 @@ const ICONS = {
   check: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
   settings: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>',
   pin: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>',
+  calendar: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></svg>',
 };
 
 (function () {
@@ -39,6 +40,12 @@ const ICONS = {
   const locationCitySelect = document.getElementById('location-city');
   let activeLocationWeddingId = null;
   let currentRegions = [];
+
+  const dateModal = document.getElementById('date-modal');
+  const dateModalClose = document.getElementById('date-modal-close');
+  const dateForm = document.getElementById('date-form');
+  const dateModalInput = document.getElementById('date-modal-input');
+  let activeDateWeddingId = null;
 
   function escapeHtml(value) {
     return String(value).replace(/[&<>"']/g, (c) => ({
@@ -99,6 +106,7 @@ const ICONS = {
       const deleteLabel = escapeHtml(t(currentLang, 'deleteBtn'));
       const featuresLabel = escapeHtml(t(currentLang, 'manageFeaturesBtn'));
       const locationLabel = escapeHtml(t(currentLang, 'manageLocationBtn'));
+      const dateBtnLabel = escapeHtml(t(currentLang, 'manageDateBtn'));
       const locationText = formatLocation(w.location);
       li.innerHTML = `
         <div class="info">
@@ -110,6 +118,7 @@ const ICONS = {
           <select class="mini-lang-select" data-id="${w.id}">${langOptions}</select>
           <a class="icon-btn" href="wedding-admin.html?id=${w.id}" title="${manageLabel}" aria-label="${manageLabel}">${ICONS.edit}</a>
           <button type="button" class="icon-btn" data-action="copy-admin-link" data-id="${w.id}" title="${copyLabel}" aria-label="${copyLabel}">${ICONS.link}</button>
+          <button type="button" class="icon-btn" data-action="manage-date" data-id="${w.id}" title="${dateBtnLabel}" aria-label="${dateBtnLabel}">${ICONS.calendar}</button>
           <button type="button" class="icon-btn" data-action="manage-location" data-id="${w.id}" title="${locationLabel}" aria-label="${locationLabel}">${ICONS.pin}</button>
           <button type="button" class="icon-btn" data-action="manage-features" data-id="${w.id}" title="${featuresLabel}" aria-label="${featuresLabel}">${ICONS.settings}</button>
           <button type="button" class="icon-btn icon-btn-danger" data-action="delete" data-id="${w.id}" title="${deleteLabel}" aria-label="${deleteLabel}">${ICONS.trash}</button>
@@ -161,6 +170,8 @@ const ICONS = {
       await openFeaturesModal(id);
     } else if (action === 'manage-location') {
       await openLocationModal(id);
+    } else if (action === 'manage-date') {
+      await openDateModal(id);
     }
   });
 
@@ -319,6 +330,37 @@ const ICONS = {
     };
     await Storage.setLocation(activeLocationWeddingId, location);
     closeLocationModal();
+    await renderWeddings();
+  });
+
+  async function openDateModal(weddingId) {
+    const wedding = await Storage.getWedding(weddingId);
+    if (!wedding) return;
+    activeDateWeddingId = weddingId;
+    dateModalInput.value = wedding.date || '';
+    dateModal.hidden = false;
+    document.body.classList.add('modal-open');
+  }
+
+  function closeDateModal() {
+    dateModal.hidden = true;
+    activeDateWeddingId = null;
+    document.body.classList.remove('modal-open');
+  }
+
+  dateModalClose.addEventListener('click', closeDateModal);
+  dateModal.addEventListener('click', (e) => {
+    if (e.target === dateModal) closeDateModal();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !dateModal.hidden) closeDateModal();
+  });
+
+  dateForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!activeDateWeddingId) return;
+    await Storage.updateWeddingDate(activeDateWeddingId, dateModalInput.value);
+    closeDateModal();
     await renderWeddings();
   });
 

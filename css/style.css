@@ -1315,6 +1315,20 @@ body.modal-open {
 
 .wedding-item .info {
   flex: 1;
+  min-width: 160px;
+}
+
+.wedding-item .actions {
+  flex: 0 0 auto;
+  max-width: 0;
+  overflow: hidden;
+  transition: max-width 0.18s ease;
+}
+
+.wedding-item:hover .actions,
+.wedding-item:focus-within .actions,
+.wedding-item.revealed .actions {
+  max-width: 400px;
 }
 
 .wedding-item-location {
@@ -3178,6 +3192,7 @@ body.admin-theme .theme-decoration-position-arrow {
   .wedding-item .actions,
   .table-group .actions {
     width: 100%;
+    max-width: none;
   }
 
   .wedding-item .info strong {

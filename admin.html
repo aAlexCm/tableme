@@ -89,6 +89,23 @@
     </div>
   </div>
 
+  <div id="date-modal" class="modal-overlay" hidden>
+    <div class="modal-panel">
+      <button type="button" class="modal-close" id="date-modal-close" aria-label="Close">&times;</button>
+      <div class="modal-scroll">
+        <h3 data-i18n="dateModalTitle">Date du mariage</h3>
+        <p class="muted small" data-i18n="dateModalHint">Modifiez la date de ce mariage.</p>
+        <form id="date-form" class="field-grid">
+          <div class="field">
+            <label for="date-modal-input" data-i18n="weddingDateLabel">Date</label>
+            <input type="date" id="date-modal-input" />
+          </div>
+          <button type="submit" data-i18n="saveBtn">Enregistrer</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <script type="module" src="js/admin.js"></script>
 </body>
 </html>
