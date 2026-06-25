@@ -622,7 +622,8 @@ nav.admin-nav.admin-nav-stacked {
 .poster-canvas-area {
   flex: 1;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
   padding: 36px 12px;
   overflow: auto;
 }
