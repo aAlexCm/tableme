@@ -196,6 +196,10 @@ function parseSheetRows(rows) {
       const swapIdx = direction === 'up' ? idx - 1 : idx + 1;
       if (swapIdx >= 0 && swapIdx < group.guests.length) {
         [group.guests[idx], group.guests[swapIdx]] = [group.guests[swapIdx], group.guests[idx]];
+        // A pinned seat would otherwise keep rendering at its fixed slot
+        // regardless of array order, making the swap invisible after reload —
+        // clear every pin in this table so the new array order actually wins.
+        group.guests = group.guests.map((g) => ({ ...g, seat: null }));
         moved = true;
       }
       break;
