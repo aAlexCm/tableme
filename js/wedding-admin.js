@@ -255,9 +255,10 @@ function parseSheetRows(rows) {
 
     handle.addEventListener('touchend', async () => {
       if (!draggedRow) return;
+      const affectedTable = draggedRow.closest('.table-guest-list')?.dataset.table;
       row.classList.remove('dragging');
       draggedRow = null;
-      await commitGuestOrder();
+      await commitGuestOrder(affectedTable);
     });
   }
 
@@ -276,7 +277,7 @@ function parseSheetRows(rows) {
     list.addEventListener('drop', async (e) => {
       e.preventDefault();
       if (!draggedRow) return;
-      await commitGuestOrder();
+      await commitGuestOrder(list.dataset.table);
     });
   }
 
