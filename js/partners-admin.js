@@ -8,6 +8,8 @@ const MAX_PHOTO_DIMENSION = 640;
 const ICONS = {
   edit: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>',
   trash: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>',
+  up: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>',
+  down: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>',
 };
 
 function readAndResizeImage(file) {
@@ -36,7 +38,9 @@ function readAndResizeImage(file) {
 (function () {
   let currentLang = localStorage.getItem(ADMIN_LANG_KEY) || 'fr';
   let editingPartnerId = null;
+  let editingPartnerOrder = null;
   let weddingLocations = [];
+  let partnersCache = [];
   let selectedIcon = PARTNER_ICONS[0].key;
 
   const langMount = document.getElementById('lang-switcher-mount');
@@ -241,6 +245,7 @@ function readAndResizeImage(file) {
 
   function resetForm() {
     editingPartnerId = null;
+    editingPartnerOrder = null;
     form.reset();
     selectedIcon = PARTNER_ICONS[0].key;
     renderIconGrid();
@@ -255,6 +260,7 @@ function readAndResizeImage(file) {
 
   function startEdit(partner) {
     editingPartnerId = partner.id;
+    editingPartnerOrder = typeof partner.order === 'number' ? partner.order : 0;
     nameInput.value = partner.name || '';
     categorySelect.value = partner.category || '';
     selectedIcon = partner.icon || PARTNER_ICONS[0].key;
@@ -282,14 +288,23 @@ function readAndResizeImage(file) {
   }
 
   async function renderPartnerList() {
-    const partners = await Storage.getPartners();
+    let partners = await Storage.getPartners();
+    partners.sort((a, b) => (a.order ?? Infinity) - (b.order ?? Infinity) || a.name.localeCompare(b.name));
+    if (partners.some((p) => typeof p.order !== 'number')) {
+      await Promise.all(partners.map((p, i) => (p.order === i ? null : Storage.updatePartner(p.id, { order: i }))));
+      partners = partners.map((p, i) => ({ ...p, order: i }));
+    }
+    partnersCache = partners;
+
     listEmptyEl.hidden = partners.length > 0;
     seedExamplesBtn.hidden = partners.length > 0;
-    listEl.innerHTML = partners.map((p) => {
+    listEl.innerHTML = partners.map((p, index) => {
       const icon = PARTNER_ICONS.find((i) => i.key === p.icon);
       const categoryLabel = PARTNER_CATEGORIES[p.category] ? t(currentLang, PARTNER_CATEGORIES[p.category].labelKey) : '';
       const editLabel = escapeHtml(t(currentLang, 'editPartnerBtn'));
       const deleteLabel = escapeHtml(t(currentLang, 'deleteBtn'));
+      const upLabel = escapeHtml(t(currentLang, 'movePartnerUpBtn'));
+      const downLabel = escapeHtml(t(currentLang, 'movePartnerDownBtn'));
       return `
         <li class="wedding-item" data-id="${p.id}">
           <div class="info">
@@ -297,6 +312,8 @@ function readAndResizeImage(file) {
             <span class="muted">${escapeHtml(categoryLabel)} &middot; ${escapeHtml(formatGeo(p.geo))}</span>
           </div>
           <div class="actions">
+            <button type="button" class="icon-btn" data-action="move-up" data-id="${p.id}" title="${upLabel}" aria-label="${upLabel}" ${index === 0 ? 'disabled' : ''}>${ICONS.up}</button>
+            <button type="button" class="icon-btn" data-action="move-down" data-id="${p.id}" title="${downLabel}" aria-label="${downLabel}" ${index === partners.length - 1 ? 'disabled' : ''}>${ICONS.down}</button>
             <button type="button" class="icon-btn" data-action="edit" data-id="${p.id}" title="${editLabel}" aria-label="${editLabel}">${ICONS.edit}</button>
             <button type="button" class="icon-btn icon-btn-danger" data-action="delete" data-id="${p.id}" title="${deleteLabel}" aria-label="${deleteLabel}">${ICONS.trash}</button>
           </div>
@@ -310,23 +327,30 @@ function readAndResizeImage(file) {
     if (!btn) return;
     const { action, id } = btn.dataset;
     if (action === 'edit') {
-      const partners = await Storage.getPartners();
-      const partner = partners.find((p) => p.id === id);
+      const partner = partnersCache.find((p) => p.id === id);
       if (partner) startEdit(partner);
     } else if (action === 'delete') {
-      const partners = await Storage.getPartners();
-      const partner = partners.find((p) => p.id === id);
+      const partner = partnersCache.find((p) => p.id === id);
       if (partner && confirm(t(currentLang, 'confirmDeletePartner', partner.name))) {
         await Storage.deletePartner(id);
         if (editingPartnerId === id) resetForm();
         await renderPartnerList();
       }
+    } else if (action === 'move-up' || action === 'move-down') {
+      const idx = partnersCache.findIndex((p) => p.id === id);
+      const swapIdx = action === 'move-up' ? idx - 1 : idx + 1;
+      if (idx < 0 || swapIdx < 0 || swapIdx >= partnersCache.length) return;
+      const a = partnersCache[idx];
+      const b = partnersCache[swapIdx];
+      await Storage.updatePartner(a.id, { order: b.order });
+      await Storage.updatePartner(b.id, { order: a.order });
+      await renderPartnerList();
     }
   });
 
   seedExamplesBtn.addEventListener('click', async () => {
-    for (const example of EXAMPLE_PARTNERS) {
-      await Storage.addPartner(example);
+    for (let i = 0; i < EXAMPLE_PARTNERS.length; i++) {
+      await Storage.addPartner({ ...EXAMPLE_PARTNERS[i], order: i });
     }
     await renderPartnerList();
   });
@@ -351,8 +375,11 @@ function readAndResizeImage(file) {
     if (!partner.name || !partner.geo.country || !hasContact) return;
 
     if (editingPartnerId) {
+      partner.order = editingPartnerOrder ?? 0;
       await Storage.updatePartner(editingPartnerId, partner);
     } else {
+      const maxOrder = partnersCache.reduce((max, p) => Math.max(max, typeof p.order === 'number' ? p.order : -1), -1);
+      partner.order = maxOrder + 1;
       await Storage.addPartner(partner);
     }
     resetForm();

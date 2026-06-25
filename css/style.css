@@ -597,17 +597,17 @@ nav.admin-nav a:hover {
 
 .partners-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 18px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px;
   margin-top: 28px;
 }
 
 .partner-card {
   display: flex;
   flex-direction: row;
-  align-items: stretch;
-  gap: 16px;
-  padding: 24px;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px;
   background: var(--paper);
   border: 1px solid var(--gold-light);
   border-radius: var(--radius-sm);
@@ -617,17 +617,22 @@ nav.admin-nav a:hover {
 .partner-card-body {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
   flex: 1;
   min-width: 0;
 }
 
 .partner-card-photo {
-  flex: 0 0 96px;
-  width: 96px;
+  flex: 0 0 110px;
+  width: 110px;
+  height: 110px;
+  padding: 0;
+  border: none;
   border-radius: var(--radius-sm);
   overflow: hidden;
   background: var(--sage-light);
+  cursor: pointer;
+  box-shadow: none;
 }
 
 .partner-card-photo img {
@@ -637,13 +642,20 @@ nav.admin-nav a:hover {
   display: block;
 }
 
+.partner-card-photo:hover,
+.partner-card-photo:active {
+  filter: none;
+  transform: none;
+  box-shadow: 0 0 0 2px var(--gold-light);
+}
+
 .partner-card-category {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   align-self: flex-start;
-  padding: 4px 12px;
-  font-size: 0.7rem;
+  padding: 3px 10px;
+  font-size: 0.66rem;
   font-weight: 600;
   letter-spacing: 0.3px;
   text-transform: uppercase;
@@ -653,19 +665,19 @@ nav.admin-nav a:hover {
 }
 
 .partner-card-category svg {
-  width: 14px;
-  height: 14px;
+  width: 13px;
+  height: 13px;
 }
 
 .partner-card-name {
   font-family: 'Playfair Display', serif;
-  font-size: 1.15rem;
+  font-size: 1.02rem;
   font-weight: 700;
   color: var(--charcoal);
 }
 
 .partner-card-desc {
-  font-size: 0.88rem;
+  font-size: 0.84rem;
   color: var(--ink);
   flex: 1;
   white-space: pre-line;
@@ -675,20 +687,32 @@ nav.admin-nav a:hover {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   margin-top: auto;
 }
 
-@media (max-width: 480px) {
-  .partner-card {
-    flex-direction: column;
-  }
+.photo-lightbox-panel {
+  max-width: 90vw;
+  max-height: 90vh;
+  padding: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  overflow: visible;
+}
 
-  .partner-card-photo {
-    flex-basis: auto;
-    width: 100%;
-    height: 160px;
-  }
+.photo-lightbox-panel img {
+  display: block;
+  max-width: 90vw;
+  max-height: 90vh;
+  border-radius: var(--radius-sm);
+}
+
+.photo-lightbox-panel .modal-close {
+  top: -14px;
+  right: -14px;
+  background: var(--paper);
+  box-shadow: 0 6px 16px rgba(33, 31, 26, 0.25);
 }
 
 .admin-quick-links {

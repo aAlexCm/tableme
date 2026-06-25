@@ -28,7 +28,35 @@ function escapeHtml(value) {
   const backLinkEl = document.getElementById('back-to-admin-link');
   const partnersGridEl = document.getElementById('partners-grid');
   const partnersEmptyEl = document.getElementById('partners-empty');
+  const photoLightbox = document.getElementById('photo-lightbox');
+  const photoLightboxImg = document.getElementById('photo-lightbox-img');
+  const photoLightboxClose = document.getElementById('photo-lightbox-close');
   let matchingPartners = [];
+
+  function openPhotoLightbox(src) {
+    photoLightboxImg.src = src;
+    photoLightbox.hidden = false;
+    document.body.classList.add('modal-open');
+  }
+
+  function closePhotoLightbox() {
+    photoLightbox.hidden = true;
+    photoLightboxImg.src = '';
+    document.body.classList.remove('modal-open');
+  }
+
+  partnersGridEl.addEventListener('click', (e) => {
+    const btn = e.target.closest('.partner-card-photo');
+    if (!btn) return;
+    openPhotoLightbox(btn.dataset.photo);
+  });
+  photoLightboxClose.addEventListener('click', closePhotoLightbox);
+  photoLightbox.addEventListener('click', (e) => {
+    if (e.target === photoLightbox) closePhotoLightbox();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !photoLightbox.hidden) closePhotoLightbox();
+  });
 
   function setLang(lang) {
     currentLang = lang;
@@ -44,7 +72,7 @@ function escapeHtml(value) {
       const categoryLabel = category ? t(currentLang, category.labelKey) : '';
       const icon = PARTNER_ICONS.find((i) => i.key === partner.icon);
       const photo = partner.photo
-        ? `<div class="partner-card-photo"><img src="${escapeHtml(partner.photo)}" alt="" /></div>`
+        ? `<button type="button" class="partner-card-photo" data-photo="${escapeHtml(partner.photo)}"><img src="${escapeHtml(partner.photo)}" alt="" /></button>`
         : '';
       const contacts = partner.contacts || {};
       const contactButtons = CONTACT_CHANNELS
@@ -100,7 +128,9 @@ function escapeHtml(value) {
   document.title = `TableMe · ${t(currentLang, 'partnersPageTitle')}`;
 
   const allPartners = await Storage.getPartners();
-  matchingPartners = allPartners.filter((partner) => matchesLocation(partner, wedding.location));
+  matchingPartners = allPartners
+    .filter((partner) => matchesLocation(partner, wedding.location))
+    .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
 
   langMount.appendChild(buildLangSwitcher(currentLang, setLang));
   applyTranslations(currentLang);
