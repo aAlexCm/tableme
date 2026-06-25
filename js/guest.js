@@ -3,6 +3,7 @@ import { applyTranslations, buildLangSwitcher, t } from './i18n.js';
 import { DEFAULT_SEATS, getRectShapeSize, buildChairs } from './table-shape.js';
 import { getLandmarkType } from './landmarks.js';
 import { applyGuestTheme, applyGuestFonts, getDefaultTheme } from './guest-themes.js';
+import { isFeatureEnabled } from './features.js';
 
 const LANG_KEY = 'tableme_lang';
 const WAYFINDING_VIEWBOX_W = 100;
@@ -243,7 +244,9 @@ function trimRouteEnds(points, startRetreat, endRetreat) {
     heading.textContent = t(currentLang, 'tablePreviewTitle');
     wrap.appendChild(heading);
 
-    const wayfindingPanel = buildWayfindingPanel(table ? `table:${table.id}` : null);
+    const wayfindingPanel = isFeatureEnabled(currentWedding, 'wayfindingGps')
+      ? buildWayfindingPanel(table ? `table:${table.id}` : null)
+      : null;
 
     const switchEl = document.createElement('div');
     switchEl.className = 'mode-switch table-preview-switch';

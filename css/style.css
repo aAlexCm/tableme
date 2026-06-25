@@ -780,6 +780,83 @@ body.modal-open {
   color: var(--charcoal);
 }
 
+.feature-toggle-list {
+  list-style: none;
+  margin: 18px 0 0;
+  padding: 0;
+}
+
+.feature-toggle-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px 0;
+  border-bottom: 1px solid rgba(100, 116, 139, 0.15);
+}
+
+.feature-toggle-item:last-child {
+  border-bottom: none;
+}
+
+.feature-toggle-label {
+  font-size: 0.92rem;
+  color: var(--charcoal);
+}
+
+.toggle-switch {
+  position: relative;
+  display: inline-flex;
+  flex: 0 0 auto;
+  width: 44px;
+  height: 26px;
+  cursor: pointer;
+}
+
+.toggle-switch input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.toggle-switch-track {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  background: rgba(100, 116, 139, 0.3);
+  transition: background 0.18s ease;
+}
+
+.toggle-switch-track::before {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.3);
+  transition: transform 0.18s ease;
+}
+
+.toggle-switch input:checked + .toggle-switch-track {
+  background: var(--gold-deep);
+}
+
+body.admin-theme .toggle-switch input:checked + .toggle-switch-track {
+  background: #64748b;
+}
+
+.toggle-switch input:checked + .toggle-switch-track::before {
+  transform: translateX(18px);
+}
+
+.toggle-switch input:focus-visible + .toggle-switch-track {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--gold) 40%, transparent);
+}
+
 .table-group {
   margin-bottom: 22px;
 }

@@ -3,6 +3,7 @@ import { applyTranslations, buildLangSwitcher, t } from './i18n.js';
 import { createTableModal } from './table-modal.js';
 import { createShareControls } from './share-controls.js';
 import { createThemeSettings } from './theme-settings.js';
+import { isFeatureEnabled } from './features.js';
 
 const LANG_KEY = 'tableme_wedding_admin_lang';
 const DEFAULT_SEATS = 8;
@@ -115,6 +116,20 @@ function parseSheetRows(rows) {
 
   function updatePageTitle() {
     document.title = `TableMe · ${t(currentLang, 'weddingAdminPageTitle')}`;
+  }
+
+  function applyFeatureGating(wedding) {
+    const bulkImportEnabled = isFeatureEnabled(wedding, 'bulkImport');
+    document.querySelectorAll('#add-mode-switch .mode-btn[data-mode="bulk"], #add-mode-switch .mode-btn[data-mode="file"]')
+      .forEach((btn) => { btn.hidden = !bulkImportEnabled; });
+
+    const themeBtn = document.getElementById('theme-settings-btn');
+    if (themeBtn) themeBtn.hidden = !isFeatureEnabled(wedding, 'themeCustomization');
+
+    const qrBtn = document.getElementById('qr-code-btn');
+    if (qrBtn) qrBtn.hidden = !isFeatureEnabled(wedding, 'qrShare');
+
+    floorPlanTabLink.hidden = !isFeatureEnabled(wedding, 'floorPlan');
   }
 
   function setLang(lang) {
@@ -716,6 +731,7 @@ function parseSheetRows(rows) {
   shareControls.init(weddingId);
   themeSettings.init();
   updatePageTitle();
+  applyFeatureGating(wedding);
 
   langMount.appendChild(buildLangSwitcher(currentLang, setLang));
   applyTranslations(currentLang);

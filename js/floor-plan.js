@@ -5,6 +5,7 @@ import { createShareControls } from './share-controls.js';
 import { createThemeSettings } from './theme-settings.js';
 import { DEFAULT_SEATS, getRectShapeSize, getTableReach, buildChairs } from './table-shape.js';
 import { LANDMARK_TYPES, getLandmarkType } from './landmarks.js';
+import { isFeatureEnabled } from './features.js';
 
 const LANG_KEY = 'tableme_wedding_admin_lang';
 
@@ -788,14 +789,25 @@ function reconcileTables(wedding) {
     currentLang = wedding.lang || 'fr';
   }
 
+  langMount.appendChild(buildLangSwitcher(currentLang, setLang));
+  applyTranslations(currentLang);
+
+  if (!isFeatureEnabled(wedding, 'floorPlan')) {
+    notFoundEl.querySelector('h2').textContent = wedding.name;
+    notFoundEl.querySelector('p').textContent = t(currentLang, 'featureDisabledMessage');
+    notFoundEl.hidden = false;
+    return;
+  }
+
   contentEl.hidden = false;
   weddingNameEl.textContent = wedding.name;
   listTabLink.href = `wedding-admin.html?id=${weddingId}`;
   shareControls.init(weddingId);
   themeSettings.init();
-
-  langMount.appendChild(buildLangSwitcher(currentLang, setLang));
-  applyTranslations(currentLang);
+  const themeBtn = document.getElementById('theme-settings-btn');
+  if (themeBtn) themeBtn.hidden = !isFeatureEnabled(wedding, 'themeCustomization');
+  const qrBtn = document.getElementById('qr-code-btn');
+  if (qrBtn) qrBtn.hidden = !isFeatureEnabled(wedding, 'qrShare');
   tableModalApi.updateLabels();
   updateFullscreenLabel();
   updatePageTitle();
