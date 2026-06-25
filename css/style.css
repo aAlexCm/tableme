@@ -555,10 +555,11 @@ nav.admin-nav.admin-nav-stacked {
   color: var(--ink);
 }
 
-.wedding-countdown-past {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: var(--charcoal);
+.wedding-countdown-caption {
+  margin-top: 8px;
+  font-size: 0.72rem;
+  font-style: italic;
+  color: var(--ink);
 }
 
 @media (max-width: 480px) {
