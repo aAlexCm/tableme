@@ -570,6 +570,7 @@ nav.admin-nav.admin-nav-stacked {
 
 .poster-toolbox {
   flex: 0 0 200px;
+  margin-top: 36px;
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -803,6 +804,7 @@ nav.admin-nav.admin-nav-stacked {
 
   .poster-toolbox {
     flex: 0 0 auto;
+    margin-top: 0;
   }
 
   .poster-canvas-area {
