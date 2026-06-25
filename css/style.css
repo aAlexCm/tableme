@@ -3135,6 +3135,10 @@ body.admin-theme .view-switch-tab.active {
   box-shadow: 0 1px 3px rgba(15, 23, 42, 0.12);
 }
 
+body.admin-theme .view-switch-tab {
+  color: var(--charcoal);
+}
+
 body.admin-theme .file-dropzone {
   border-color: color-mix(in srgb, var(--gold) 35%, transparent);
 }
