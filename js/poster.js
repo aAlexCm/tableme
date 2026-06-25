@@ -82,6 +82,7 @@ function normalizeElement(el) {
     fontSize: typeof el.fontSize === 'number' ? el.fontSize : 28,
     bold: !!el.bold,
     italic: !!el.italic,
+    align: ['left', 'center', 'right'].includes(el.align) ? el.align : 'left',
     color: el.color || '#2c2420',
   };
 }
@@ -125,6 +126,9 @@ function fontFamilyFor(fontKey) {
   const toolbarEl = document.getElementById('poster-text-toolbar');
   const boldBtn = document.getElementById('poster-bold-btn');
   const italicBtn = document.getElementById('poster-italic-btn');
+  const alignLeftBtn = document.getElementById('poster-align-left-btn');
+  const alignCenterBtn = document.getElementById('poster-align-center-btn');
+  const alignRightBtn = document.getElementById('poster-align-right-btn');
   const fontSelect = document.getElementById('poster-font-select');
   const dividerStyleSelect = document.getElementById('poster-divider-style-select');
   const iconSymbolSelect = document.getElementById('poster-icon-symbol-select');
@@ -185,6 +189,7 @@ function fontFamilyFor(fontKey) {
     node.style.fontSize = `${el.fontSize}px`;
     node.style.fontWeight = el.bold ? '700' : '400';
     node.style.fontStyle = el.italic ? 'italic' : 'normal';
+    node.style.textAlign = el.align;
     node.style.color = el.color;
   }
 
@@ -272,6 +277,9 @@ function fontFamilyFor(fontKey) {
 
     boldBtn.hidden = !isText;
     italicBtn.hidden = !isText;
+    alignLeftBtn.hidden = !isText;
+    alignCenterBtn.hidden = !isText;
+    alignRightBtn.hidden = !isText;
     fontSelect.hidden = !isText;
     dividerStyleSelect.hidden = !isDivider;
     iconSymbolSelect.hidden = !isIcon;
@@ -280,6 +288,9 @@ function fontFamilyFor(fontKey) {
     if (isText) {
       boldBtn.classList.toggle('active', el.bold);
       italicBtn.classList.toggle('active', el.italic);
+      alignLeftBtn.classList.toggle('active', el.align === 'left');
+      alignCenterBtn.classList.toggle('active', el.align === 'center');
+      alignRightBtn.classList.toggle('active', el.align === 'right');
       fontSelect.value = el.fontKey;
       sizeInput.min = '8';
       sizeInput.max = '200';
@@ -313,6 +324,9 @@ function fontFamilyFor(fontKey) {
     if (el.type === 'text') {
       boldBtn.classList.toggle('active', el.bold);
       italicBtn.classList.toggle('active', el.italic);
+      alignLeftBtn.classList.toggle('active', el.align === 'left');
+      alignCenterBtn.classList.toggle('active', el.align === 'center');
+      alignRightBtn.classList.toggle('active', el.align === 'right');
     }
     scheduleSave();
   }
@@ -551,6 +565,7 @@ function fontFamilyFor(fontKey) {
       fontSize: 28,
       bold: false,
       italic: false,
+      align: 'left',
       color: '#2c2420',
     };
     poster.elements.push(el);
@@ -620,6 +635,9 @@ function fontFamilyFor(fontKey) {
 
   boldBtn.addEventListener('click', () => updateSelected((el) => { el.bold = !el.bold; }));
   italicBtn.addEventListener('click', () => updateSelected((el) => { el.italic = !el.italic; }));
+  alignLeftBtn.addEventListener('click', () => updateSelected((el) => { el.align = 'left'; }));
+  alignCenterBtn.addEventListener('click', () => updateSelected((el) => { el.align = 'center'; }));
+  alignRightBtn.addEventListener('click', () => updateSelected((el) => { el.align = 'right'; }));
   fontSelect.addEventListener('change', () => updateSelected((el) => { el.fontKey = fontSelect.value; }));
   dividerStyleSelect.addEventListener('change', () => updateSelected((el) => { el.style = dividerStyleSelect.value; }));
   iconSymbolSelect.addEventListener('change', () => updateSelected((el) => { el.symbol = iconSymbolSelect.value; }));
