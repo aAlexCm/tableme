@@ -11,11 +11,15 @@ const SHEET_WIDTH = 396;
 const SHEET_HEIGHT = 560;
 
 const FONT_OPTIONS = [
-  { key: 'playfair', label: 'Playfair Display', family: "'Playfair Display', serif" },
-  { key: 'cormorant', label: 'Cormorant Garamond', family: "'Cormorant Garamond', serif" },
-  { key: 'greatvibes', label: 'Great Vibes', family: "'Great Vibes', cursive" },
-  { key: 'parisienne', label: 'Parisienne', family: "'Parisienne', cursive" },
-  { key: 'italiana', label: 'Italiana', family: "'Italiana', serif" },
+  { key: 'playfair', label: 'Playfair Display', family: "'Playfair Display', serif", group: 'heading' },
+  { key: 'cormorant', label: 'Cormorant Garamond', family: "'Cormorant Garamond', serif", group: 'heading' },
+  { key: 'ebgaramond', label: 'EB Garamond', family: "'EB Garamond', serif", group: 'heading' },
+  { key: 'librebaskerville', label: 'Libre Baskerville', family: "'Libre Baskerville', serif", group: 'heading' },
+  { key: 'bodonimoda', label: 'Bodoni Moda', family: "'Bodoni Moda', serif", group: 'heading' },
+  { key: 'raleway', label: 'Raleway', family: "'Raleway', sans-serif", group: 'paragraph' },
+  { key: 'montserrat', label: 'Montserrat', family: "'Montserrat', sans-serif", group: 'paragraph' },
+  { key: 'jost', label: 'Jost', family: "'Jost', sans-serif", group: 'paragraph' },
+  { key: 'nunito', label: 'Nunito', family: "'Nunito', sans-serif", group: 'paragraph' },
 ];
 
 const TRASH_ICON = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>';
@@ -644,7 +648,15 @@ function fontFamilyFor(fontKey) {
   });
 
   function populateFontSelect() {
-    fontSelect.innerHTML = FONT_OPTIONS.map((f) => `<option value="${f.key}" style="font-family:${f.family}">${f.label}</option>`).join('');
+    const renderOptions = (list) => list
+      .map((f) => `<option value="${f.key}" style="font-family:${f.family}">${f.label}</option>`)
+      .join('');
+    const headingOptions = FONT_OPTIONS.filter((f) => f.group === 'heading');
+    const paragraphOptions = FONT_OPTIONS.filter((f) => f.group === 'paragraph');
+    fontSelect.innerHTML = `
+      <optgroup label="${t(currentLang, 'posterFontGroupHeading')}">${renderOptions(headingOptions)}</optgroup>
+      <optgroup label="${t(currentLang, 'posterFontGroupParagraph')}">${renderOptions(paragraphOptions)}</optgroup>
+    `;
   }
 
   function populateDividerStyleSelect() {
@@ -686,6 +698,7 @@ function fontFamilyFor(fontKey) {
     currentLang = lang;
     localStorage.setItem(LANG_KEY, lang);
     applyTranslations(lang);
+    populateFontSelect();
     populateDividerStyleSelect();
     populateIconSymbolSelect();
     if (selectedId) selectElement(selectedId);
