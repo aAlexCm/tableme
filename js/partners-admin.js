@@ -379,7 +379,15 @@ function readAndResizeImage(file) {
   }
 
   async function renderPartnerStats() {
-    const clicks = (await Storage.getPartnerClicks()).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+    let clicks;
+    try {
+      clicks = await Storage.getPartnerClicks();
+    } catch (err) {
+      console.warn('getPartnerClicks failed (check Firestore rules for the partnerClicks collection)', err);
+      statsEmptyEl.hidden = false;
+      return;
+    }
+    clicks.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
 
     const totalViews = clicks.filter((c) => c.type === 'view').length;
     const totalPhoto = clicks.filter((c) => c.type === 'photo').length;
