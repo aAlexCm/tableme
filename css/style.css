@@ -703,7 +703,8 @@ nav.admin-nav.admin-nav-stacked {
 
 .poster-guide {
   position: absolute;
-  background: #ef476f;
+  background: var(--gold-deep);
+  opacity: 0.45;
   pointer-events: none;
   z-index: 50;
 }
