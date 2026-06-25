@@ -59,6 +59,7 @@ function parseSheetRows(rows) {
   let currentLang = localStorage.getItem(LANG_KEY) || 'fr';
   let draggedRow = null;
   let lastDragTarget = null;
+  let cachedWedding = null;
 
   const langMount = document.getElementById('lang-switcher-mount');
   const notFoundEl = document.getElementById('not-found');
@@ -186,7 +187,7 @@ function parseSheetRows(rows) {
   // capacity with no one seated after it).
   async function moveGuestToContainer(sourceRow, targetRow) {
     if (!sourceRow || !targetRow || sourceRow === targetRow) return;
-    const wedding = await Storage.getWedding(weddingId);
+    const wedding = cachedWedding || (await Storage.getWedding(weddingId));
     if (!wedding) return;
 
     const sourceTableKey = sourceRow.closest('.table-guest-list').dataset.table;
@@ -222,8 +223,11 @@ function parseSheetRows(rows) {
 
     const newGuests = [];
     buckets.forEach((bucket) => newGuests.push(...trimTrailingEmpties(bucket)));
+    // Render immediately from the locally-computed result instead of waiting
+    // on a write + a re-fetch round trip — that double network hop is what
+    // made the drop feel like it landed a full second late.
+    await renderGuests({ ...wedding, guests: newGuests });
     await Storage.setGuests(weddingId, newGuests);
-    await renderGuests();
   }
 
   async function moveGuest(guestId, direction) {
@@ -343,9 +347,10 @@ function parseSheetRows(rows) {
     });
   }
 
-  async function renderGuests() {
-    const wedding = await Storage.getWedding(weddingId);
+  async function renderGuests(weddingOverride) {
+    const wedding = weddingOverride || (await Storage.getWedding(weddingId));
     if (!wedding) return;
+    cachedWedding = wedding;
 
     guestsTitle.textContent = `${t(currentLang, 'guestsTitlePrefix')}${wedding.name}`;
     guestListEl.innerHTML = '';
