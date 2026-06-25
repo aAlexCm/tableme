@@ -100,7 +100,9 @@ function fontFamilyFor(fontKey) {
   function applyTextStyle(node, el) {
     node.style.left = `${el.x}px`;
     node.style.top = `${el.y}px`;
-    node.style.fontFamily = fontFamilyFor(el.fontKey);
+    // body.admin-theme * forces Inter with !important; only an inline
+    // !important on this element can win against that rule.
+    node.style.setProperty('font-family', fontFamilyFor(el.fontKey), 'important');
     node.style.fontSize = `${el.fontSize}px`;
     node.style.fontWeight = el.bold ? '700' : '400';
     node.style.fontStyle = el.italic ? 'italic' : 'normal';
