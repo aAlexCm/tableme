@@ -897,6 +897,10 @@ nav.admin-nav.admin-nav-stacked {
 }
 
 @media (max-width: 760px) {
+  #poster-content nav.admin-nav {
+    margin-bottom: 18px;
+  }
+
   .poster-workspace {
     flex-direction: column;
   }
@@ -906,8 +910,14 @@ nav.admin-nav.admin-nav-stacked {
     margin-top: 0;
   }
 
+  .poster-toolbox-tools {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
   .poster-canvas-area {
     width: 100%;
+    padding-top: 20px;
   }
 }
 
