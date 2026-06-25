@@ -106,8 +106,11 @@ function fontFamilyFor(fontKey) {
   const contentEl = document.getElementById('poster-content');
   const weddingNameEl = document.getElementById('poster-wedding-name');
   const backLinkEl = document.getElementById('poster-back-link');
+  const workspaceEl = document.querySelector('.poster-workspace');
+  const toolboxEl = document.querySelector('.poster-toolbox');
   const sheetEl = document.getElementById('poster-sheet');
   const sheetContentEl = document.getElementById('poster-sheet-content');
+  const bgSwatchFillEl = document.getElementById('poster-bg-swatch-fill');
   const addTextBtn = document.getElementById('poster-add-text-btn');
   const addQrBtn = document.getElementById('poster-add-qr-btn');
   const addDividerBtn = document.getElementById('poster-add-divider-btn');
@@ -145,6 +148,21 @@ function fontFamilyFor(fontKey) {
 
   function applyBackground() {
     sheetEl.style.background = poster.background;
+    if (bgSwatchFillEl) bgSwatchFillEl.setAttribute('fill', poster.background);
+  }
+
+  // The bg-color field's rendered height varies with font/label length, so
+  // rather than guessing a fixed margin we measure where the sheet actually
+  // ends up and align the toolbox to match, once layout has settled.
+  function syncToolboxAlignment() {
+    if (!toolboxEl || !workspaceEl) return;
+    if (!window.matchMedia('(min-width: 761px)').matches) {
+      toolboxEl.style.marginTop = '';
+      return;
+    }
+    const sheetTop = sheetEl.getBoundingClientRect().top;
+    const workspaceTop = workspaceEl.getBoundingClientRect().top;
+    toolboxEl.style.marginTop = `${Math.max(0, sheetTop - workspaceTop)}px`;
   }
 
   function getTextWithoutHandle(node) {
@@ -665,6 +683,7 @@ function fontFamilyFor(fontKey) {
     populateDividerStyleSelect();
     populateIconSymbolSelect();
     if (selectedId) selectElement(selectedId);
+    requestAnimationFrame(syncToolboxAlignment);
   }
 
   if (!weddingId) {
@@ -700,4 +719,11 @@ function fontFamilyFor(fontKey) {
 
   langMount.appendChild(buildLangSwitcher(currentLang, setLang));
   applyTranslations(currentLang);
+
+  requestAnimationFrame(syncToolboxAlignment);
+  let resizeTimer = null;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(syncToolboxAlignment, 150);
+  });
 })();

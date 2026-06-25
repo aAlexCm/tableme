@@ -53,7 +53,14 @@
         <div class="poster-canvas-area">
           <div class="poster-bg-field">
             <label for="poster-bg-color-input" data-i18n="posterBgColorLabel">Couleur de la page</label>
-            <input type="color" id="poster-bg-color-input" value="#ffffff" />
+            <span class="poster-bg-swatch">
+              <svg viewBox="0 0 24 24" width="22" height="22">
+                <path d="M5 9 L19 9 L17.3 19.2a2 2 0 0 1-2 1.6h-6.6a2 2 0 0 1-2-1.6L5 9Z" fill="none" stroke="#6b7280" stroke-width="1.5" stroke-linejoin="round"/>
+                <ellipse cx="12" cy="9" rx="7" ry="2.1" fill="none" stroke="#6b7280" stroke-width="1.5"/>
+                <ellipse id="poster-bg-swatch-fill" cx="12" cy="9" rx="5.4" ry="1.3" stroke="#6b7280" stroke-width="0.6"/>
+              </svg>
+              <input type="color" id="poster-bg-color-input" value="#ffffff" />
+            </span>
           </div>
 
           <div class="poster-sheet" id="poster-sheet">
