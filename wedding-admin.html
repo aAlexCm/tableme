@@ -80,9 +80,18 @@
         <div class="card-header-row">
           <h2 data-i18n="addGuestTitle">Ajouter un invité</h2>
           <div class="mode-switch" id="add-mode-switch">
-            <button type="button" class="mode-btn active" data-mode="single" data-i18n="addModeSingle">Un par un</button>
-            <button type="button" class="mode-btn" data-mode="bulk" data-i18n="addModeBulk">Plusieurs</button>
-            <button type="button" class="mode-btn" data-mode="file" data-i18n="addModeFile">Fichier</button>
+            <button type="button" class="mode-btn active" data-mode="single">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              <span data-i18n="addModeSingle">Un par un</span>
+            </button>
+            <button type="button" class="mode-btn" data-mode="bulk">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              <span data-i18n="addModeBulk">Plusieurs</span>
+            </button>
+            <button type="button" class="mode-btn" data-mode="file">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.9 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg>
+              <span data-i18n="addModeFile">Fichier</span>
+            </button>
           </div>
         </div>
 

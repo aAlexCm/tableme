@@ -865,6 +865,7 @@ nav.admin-nav a:hover {
 .mode-btn {
   height: 30px;
   padding: 0 14px;
+  gap: 6px;
   font-size: 0.74rem;
   font-weight: 600;
   border-radius: var(--radius-pill);
@@ -872,6 +873,10 @@ nav.admin-nav a:hover {
   color: var(--sage-deep);
   border: none;
   box-shadow: none;
+}
+
+.mode-btn svg {
+  flex: 0 0 auto;
 }
 
 .mode-btn:hover {
