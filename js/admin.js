@@ -1,6 +1,7 @@
 import { Storage } from './storage.js';
 import { LANGS, LANG_LABELS, applyTranslations, buildLangSwitcher, t } from './i18n.js';
 import { FEATURE_FLAGS, isFeatureEnabled } from './features.js';
+import { getCountries, getRegions, getCities } from './geo.js';
 
 const ADMIN_LANG_KEY = 'tableme_admin_lang';
 
@@ -33,10 +34,11 @@ const ICONS = {
   const locationModal = document.getElementById('location-modal');
   const locationModalClose = document.getElementById('location-modal-close');
   const locationForm = document.getElementById('location-form');
-  const locationCityInput = document.getElementById('location-city');
-  const locationRegionInput = document.getElementById('location-region');
-  const locationCountryInput = document.getElementById('location-country');
+  const locationCountrySelect = document.getElementById('location-country');
+  const locationRegionSelect = document.getElementById('location-region');
+  const locationCitySelect = document.getElementById('location-city');
   let activeLocationWeddingId = null;
+  let currentRegions = [];
 
   function escapeHtml(value) {
     return String(value).replace(/[&<>"']/g, (c) => ({
@@ -217,16 +219,80 @@ const ICONS = {
     await Storage.setFeatures(activeFeaturesWeddingId, features);
   });
 
+  function populateSelect(select, items, selectedName, placeholderText) {
+    const options = [`<option value="">${escapeHtml(placeholderText)}</option>`].concat(
+      items.map((item) => `<option value="${escapeHtml(item.name)}">${escapeHtml(item.name)}</option>`)
+    );
+    if (selectedName && !items.some((item) => item.name === selectedName)) {
+      options.push(`<option value="${escapeHtml(selectedName)}">${escapeHtml(selectedName)}</option>`);
+    }
+    select.innerHTML = options.join('');
+    select.value = selectedName || '';
+  }
+
+  function resetSelect(select) {
+    select.innerHTML = `<option value="">${escapeHtml(t(currentLang, 'locationChoosePlaceholder'))}</option>`;
+    select.value = '';
+    select.disabled = true;
+  }
+
+  async function loadCountryOptions(selectedCountry) {
+    locationCountrySelect.disabled = true;
+    const countries = await getCountries();
+    populateSelect(locationCountrySelect, countries, selectedCountry, t(currentLang, 'locationChoosePlaceholder'));
+    locationCountrySelect.disabled = false;
+  }
+
+  async function loadRegionOptions(country, selectedRegion) {
+    resetSelect(locationCitySelect);
+    if (!country) {
+      resetSelect(locationRegionSelect);
+      currentRegions = [];
+      return;
+    }
+    locationRegionSelect.disabled = true;
+    currentRegions = await getRegions(country);
+    populateSelect(locationRegionSelect, currentRegions, selectedRegion, t(currentLang, 'locationChoosePlaceholder'));
+    locationRegionSelect.disabled = false;
+  }
+
+  async function loadCityOptions(country, regionName, selectedCity) {
+    if (!regionName) {
+      resetSelect(locationCitySelect);
+      return;
+    }
+    locationCitySelect.disabled = true;
+    const region = currentRegions.find((r) => r.name === regionName) || { name: regionName };
+    const cities = await getCities(country, region);
+    populateSelect(locationCitySelect, cities, selectedCity, t(currentLang, 'locationChoosePlaceholder'));
+    locationCitySelect.disabled = false;
+  }
+
+  locationCountrySelect.addEventListener('change', () => {
+    loadRegionOptions(locationCountrySelect.value, '');
+  });
+
+  locationRegionSelect.addEventListener('change', () => {
+    loadCityOptions(locationCountrySelect.value, locationRegionSelect.value, '');
+  });
+
   async function openLocationModal(weddingId) {
     const wedding = await Storage.getWedding(weddingId);
     if (!wedding) return;
     activeLocationWeddingId = weddingId;
     const location = wedding.location || {};
-    locationCityInput.value = location.city || '';
-    locationRegionInput.value = location.region || '';
-    locationCountryInput.value = location.country || '';
     locationModal.hidden = false;
     document.body.classList.add('modal-open');
+
+    resetSelect(locationRegionSelect);
+    resetSelect(locationCitySelect);
+    await loadCountryOptions(location.country);
+    if (location.country) {
+      await loadRegionOptions(location.country, location.region);
+      if (location.region) {
+        await loadCityOptions(location.country, location.region, location.city);
+      }
+    }
   }
 
   function closeLocationModal() {
@@ -247,9 +313,9 @@ const ICONS = {
     e.preventDefault();
     if (!activeLocationWeddingId) return;
     const location = {
-      city: locationCityInput.value.trim(),
-      region: locationRegionInput.value.trim(),
-      country: locationCountryInput.value.trim(),
+      country: locationCountrySelect.value,
+      region: locationRegionSelect.value,
+      city: locationCitySelect.value,
     };
     await Storage.setLocation(activeLocationWeddingId, location);
     closeLocationModal();

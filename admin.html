@@ -72,16 +72,16 @@
         <p class="muted small" data-i18n="locationModalHint">Pour savoir où se déroule ce mariage.</p>
         <form id="location-form" class="field-grid">
           <div class="field">
-            <label for="location-city" data-i18n="locationCityLabel">Ville</label>
-            <input type="text" id="location-city" data-i18n-placeholder="locationCityPlaceholder" placeholder="ex: Cluj-Napoca" />
+            <label for="location-country" data-i18n="locationCountryLabel">Pays</label>
+            <select id="location-country"></select>
           </div>
           <div class="field">
             <label for="location-region" data-i18n="locationRegionLabel">Région / Département</label>
-            <input type="text" id="location-region" data-i18n-placeholder="locationRegionPlaceholder" placeholder="ex: Cluj" />
+            <select id="location-region" disabled></select>
           </div>
           <div class="field">
-            <label for="location-country" data-i18n="locationCountryLabel">Pays</label>
-            <input type="text" id="location-country" data-i18n-placeholder="locationCountryPlaceholder" placeholder="ex: Roumanie" />
+            <label for="location-city" data-i18n="locationCityLabel">Ville</label>
+            <select id="location-city" disabled></select>
           </div>
           <button type="submit" data-i18n="saveBtn">Enregistrer</button>
         </form>
