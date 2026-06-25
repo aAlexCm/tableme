@@ -131,8 +131,8 @@ export function createThemeSettings({ weddingId, getLang }) {
     themeCustomGridEl.innerHTML = GUEST_THEME_COLOR_KEYS.map((key) => `
       <div class="theme-color-field">
         <label for="theme-color-${key}">${escapeHtml(t(lang, THEME_COLOR_LABEL_KEYS[key]))}</label>
-        <span class="color-hex-field">
-          <input type="color" id="theme-color-${key}" class="color-hex-swatch" data-key="${key}" value="${theme.colors[key]}" />
+        <span class="theme-color-field-controls">
+          <input type="color" id="theme-color-${key}" data-key="${key}" value="${theme.colors[key]}" />
           <input type="text" id="theme-color-hex-${key}" class="color-hex-input" maxlength="7" spellcheck="false" />
         </span>
       </div>
