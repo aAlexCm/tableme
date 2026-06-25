@@ -3,12 +3,12 @@ import { applyTranslations, buildLangSwitcher, t } from './i18n.js';
 
 const LANG_KEY = 'tableme_wedding_admin_lang';
 
-// A4 at ~96dpi. A3 has the same aspect ratio as A4 (the A-series always
-// does), so switching format is just scaling the same base layout up by
-// sqrt(2) rather than recomputing every element's position.
-const A4_WIDTH = 794;
-const A4_HEIGHT = 1123;
-const A3_SCALE = Math.SQRT2;
+// A4-proportioned (1:1.41421) reference canvas, kept compact on screen —
+// html2canvas/jsPDF stretch the rasterized sheet to fill the true A4 page
+// size regardless of this pixel size, so shrinking it doesn't affect print
+// or PDF fidelity, only how big the editor looks on screen.
+const SHEET_WIDTH = 500;
+const SHEET_HEIGHT = 707;
 
 const FONT_OPTIONS = [
   { key: 'playfair', label: 'Playfair Display', family: "'Playfair Display', serif" },
@@ -22,13 +22,12 @@ const TRASH_ICON = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" 
 const DRAG_ICON = '<svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><circle cx="8" cy="6" r="1.5"/><circle cx="16" cy="6" r="1.5"/><circle cx="8" cy="12" r="1.5"/><circle cx="16" cy="12" r="1.5"/><circle cx="8" cy="18" r="1.5"/><circle cx="16" cy="18" r="1.5"/></svg>';
 
 function getDefaultPoster() {
-  return { format: 'A4', elements: [] };
+  return { elements: [] };
 }
 
 function normalizePoster(poster) {
   if (!poster) return getDefaultPoster();
   return {
-    format: poster.format === 'A3' ? 'A3' : 'A4',
     elements: Array.isArray(poster.elements)
       ? poster.elements.map((el) => ({
         id: el.id || generateId(),
@@ -63,9 +62,7 @@ function fontFamilyFor(fontKey) {
   const backLinkEl = document.getElementById('poster-back-link');
   const sheetEl = document.getElementById('poster-sheet');
   const sheetContentEl = document.getElementById('poster-sheet-content');
-  const qrEl = document.getElementById('poster-qr');
   const addTextBtn = document.getElementById('poster-add-text-btn');
-  const formatSwitchEl = document.getElementById('poster-format-switch');
   const downloadBtn = document.getElementById('poster-download-btn');
   const printBtn = document.getElementById('poster-print-btn');
 
@@ -88,14 +85,9 @@ function fontFamilyFor(fontKey) {
     }, 500);
   }
 
-  function applyFormat() {
-    const isA3 = poster.format === 'A3';
-    sheetEl.style.width = `${A4_WIDTH * (isA3 ? A3_SCALE : 1)}px`;
-    sheetEl.style.height = `${A4_HEIGHT * (isA3 ? A3_SCALE : 1)}px`;
-    sheetContentEl.style.transform = isA3 ? `scale(${A3_SCALE})` : 'scale(1)';
-    formatSwitchEl.querySelectorAll('.mode-btn').forEach((btn) => {
-      btn.classList.toggle('active', btn.dataset.format === poster.format);
-    });
+  function applySheetSize() {
+    sheetEl.style.width = `${SHEET_WIDTH}px`;
+    sheetEl.style.height = `${SHEET_HEIGHT}px`;
   }
 
   function getTextWithoutHandle(node) {
@@ -167,11 +159,10 @@ function fontFamilyFor(fontKey) {
       const startY = e.clientY;
       const startLeft = el.x;
       const startTop = el.y;
-      const scale = poster.format === 'A3' ? A3_SCALE : 1;
 
       function onMove(ev) {
-        const dx = (ev.clientX - startX) / scale;
-        const dy = (ev.clientY - startY) / scale;
+        const dx = ev.clientX - startX;
+        const dy = ev.clientY - startY;
         el.x = Math.max(0, startLeft + dx);
         el.y = Math.max(0, startTop + dy);
         node.style.left = `${el.x}px`;
@@ -247,18 +238,6 @@ function fontFamilyFor(fontKey) {
     scheduleSave();
   });
 
-  formatSwitchEl.addEventListener('click', (e) => {
-    const btn = e.target.closest('.mode-btn');
-    if (!btn) return;
-    poster.format = btn.dataset.format;
-    applyFormat();
-    if (selectedId) {
-      const node = sheetContentEl.querySelector(`[data-id="${selectedId}"]`);
-      if (node) positionToolbar(node);
-    }
-    scheduleSave();
-  });
-
   boldBtn.addEventListener('click', () => updateSelected((el) => { el.bold = !el.bold; }));
   italicBtn.addEventListener('click', () => updateSelected((el) => { el.italic = !el.italic; }));
   fontSelect.addEventListener('change', () => updateSelected((el) => { el.fontKey = fontSelect.value; }));
@@ -281,24 +260,12 @@ function fontFamilyFor(fontKey) {
     fontSelect.innerHTML = FONT_OPTIONS.map((f) => `<option value="${f.key}" style="font-family:${f.family}">${f.label}</option>`).join('');
   }
 
-  function renderQr(id) {
-    qrEl.innerHTML = '';
-    const url = `${window.location.origin}${window.location.pathname.replace('poster.html', '')}index.html?id=${id}`;
-    new window.QRCode(qrEl, {
-      text: url,
-      width: 220,
-      height: 220,
-      colorDark: '#2c2420',
-      colorLight: '#ffffff',
-    });
-  }
-
   downloadBtn.addEventListener('click', async () => {
     downloadBtn.disabled = true;
     try {
-      const canvas = await window.html2canvas(sheetEl, { scale: 2, useCORS: true });
+      const canvas = await window.html2canvas(sheetEl, { scale: 3, useCORS: true });
       const { jsPDF } = window.jspdf;
-      const pdf = new jsPDF({ unit: 'mm', format: poster.format.toLowerCase(), orientation: 'portrait' });
+      const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
       const pageWidth = pdf.internal.pageSize.getWidth();
       const pageHeight = pdf.internal.pageSize.getHeight();
       const imgData = canvas.toDataURL('image/png');
@@ -316,7 +283,7 @@ function fontFamilyFor(fontKey) {
       styleTag.id = 'poster-print-size-style';
       document.head.appendChild(styleTag);
     }
-    styleTag.textContent = `@page { size: ${poster.format === 'A3' ? 'A3' : 'A4'}; margin: 0; }`;
+    styleTag.textContent = '@page { size: A4; margin: 0; }';
     window.print();
   });
 
@@ -349,8 +316,7 @@ function fontFamilyFor(fontKey) {
   deleteBtn.innerHTML = TRASH_ICON;
   populateFontSelect();
   poster = normalizePoster(wedding.poster);
-  applyFormat();
-  renderQr(weddingId);
+  applySheetSize();
   poster.elements.forEach((el) => createTextNode(el));
 
   langMount.appendChild(buildLangSwitcher(currentLang, setLang));

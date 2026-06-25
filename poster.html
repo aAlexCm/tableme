@@ -20,7 +20,7 @@
     </div>
 
     <div id="poster-content" hidden>
-      <nav class="admin-nav">
+      <nav class="admin-nav admin-nav-stacked">
         <strong id="poster-wedding-name"></strong>
         <div class="admin-nav-actions">
           <a href="#" id="poster-back-link" data-i18n="backToAdminLink">&larr; Retour</a>
@@ -34,21 +34,11 @@
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/></svg>
             <span data-i18n="posterAddTextBtn">Ajouter du texte</span>
           </button>
-
-          <div class="poster-format-field">
-            <label data-i18n="posterFormatLabel">Format</label>
-            <div class="mode-switch" id="poster-format-switch">
-              <button type="button" class="mode-btn active" data-format="A4">A4</button>
-              <button type="button" class="mode-btn" data-format="A3">A3</button>
-            </div>
-          </div>
         </aside>
 
         <div class="poster-canvas-area">
           <div class="poster-sheet" id="poster-sheet">
-            <div class="poster-sheet-content" id="poster-sheet-content">
-              <div class="poster-qr" id="poster-qr"></div>
-            </div>
+            <div class="poster-sheet-content" id="poster-sheet-content"></div>
           </div>
         </div>
       </div>
@@ -75,7 +65,6 @@
     <button type="button" class="icon-btn icon-btn-danger" id="poster-delete-text-btn"></button>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
   <script type="module" src="js/poster.js"></script>

@@ -598,20 +598,6 @@ nav.admin-nav.admin-nav-stacked {
   justify-content: flex-start;
 }
 
-.poster-format-field {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.poster-format-field label {
-  font-size: 0.68rem;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  font-weight: 600;
-  color: var(--ink);
-}
-
 .poster-canvas-area {
   flex: 1;
   display: flex;
@@ -632,16 +618,8 @@ nav.admin-nav.admin-nav-stacked {
 
 .poster-sheet-content {
   position: relative;
-  width: 794px;
-  height: 1123px;
-  transform-origin: top left;
-}
-
-.poster-qr {
-  position: absolute;
-  left: 50%;
-  bottom: 90px;
-  transform: translateX(-50%);
+  width: 100%;
+  height: 100%;
 }
 
 .poster-text-el {
