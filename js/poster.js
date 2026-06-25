@@ -553,11 +553,17 @@ function fontFamilyFor(fontKey) {
     const node = createTextNode(el);
     selectElement(el.id);
     node.focus();
-    const range = document.createRange();
-    range.selectNodeContents(node);
-    const sel = window.getSelection();
-    sel.removeAllRanges();
-    sel.addRange(range);
+    // Select only the text node, not the drag/resize handles appended after
+    // it — selecting the whole element would let typing delete those handles
+    // along with the placeholder text.
+    const textNode = node.firstChild;
+    if (textNode) {
+      const range = document.createRange();
+      range.selectNodeContents(textNode);
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+    }
     scheduleSave();
   });
 
