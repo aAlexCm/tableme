@@ -3186,6 +3186,13 @@ body.admin-theme .lang-switcher-menu {
   box-shadow: 0 10px 26px rgba(15, 23, 42, 0.15);
 }
 
+body.admin-theme .lang-switcher-chevron,
+body.admin-theme .lang-switcher-option,
+body.admin-theme .lang-switcher-option[aria-selected='true'],
+body.admin-theme .lang-switcher-option .check {
+  color: var(--charcoal);
+}
+
 body.admin-theme .muted,
 body.admin-theme .table-group-count,
 body.admin-theme .table-guest-list-empty,
