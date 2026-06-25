@@ -23,12 +23,29 @@ const DRAG_ICON = '<svg viewBox="0 0 24 24" width="13" height="13" fill="current
 
 const QR_RENDER_SIZE = 256;
 
+const DIVIDER_PRESETS = [
+  { key: 'plain', i18nKey: 'dividerPresetPlain', ornament: '' },
+  { key: 'heart', i18nKey: 'dividerPresetHeart', ornament: '♥' },
+  { key: 'diamond', i18nKey: 'dividerPresetDiamond', ornament: '◆' },
+  { key: 'dot', i18nKey: 'dividerPresetDot', ornament: '•' },
+  { key: 'flourish', i18nKey: 'dividerPresetFlourish', ornament: '❦' },
+];
+
+const ICON_PRESETS = [
+  { key: 'heart', i18nKey: 'iconPresetHeart', symbol: '♥' },
+  { key: 'rings', i18nKey: 'iconPresetRings', symbol: '⚭' },
+  { key: 'flower', i18nKey: 'iconPresetFlower', symbol: '❀' },
+  { key: 'star', i18nKey: 'iconPresetStar', symbol: '✦' },
+  { key: 'floral', i18nKey: 'iconPresetFloral', symbol: '❦' },
+  { key: 'fleur', i18nKey: 'iconPresetFleur', symbol: '⚜' },
+];
+
 function getDefaultPoster() {
-  return { elements: [] };
+  return { elements: [], background: '#ffffff' };
 }
 
 function normalizeElement(el) {
-  const type = el.type === 'qr' ? 'qr' : 'text';
+  const type = ['qr', 'divider', 'icon'].includes(el.type) ? el.type : 'text';
   const base = {
     id: el.id || generateId(),
     type,
@@ -36,7 +53,23 @@ function normalizeElement(el) {
     y: typeof el.y === 'number' ? el.y : 80,
   };
   if (type === 'qr') {
-    return { ...base, size: typeof el.size === 'number' ? el.size : 140 };
+    return { ...base, size: typeof el.size === 'number' ? el.size : 140, color: el.color || '#2c2420' };
+  }
+  if (type === 'divider') {
+    return {
+      ...base,
+      width: typeof el.width === 'number' ? el.width : 200,
+      color: el.color || '#2c2420',
+      style: DIVIDER_PRESETS.some((p) => p.key === el.style) ? el.style : DIVIDER_PRESETS[0].key,
+    };
+  }
+  if (type === 'icon') {
+    return {
+      ...base,
+      size: typeof el.size === 'number' ? el.size : 48,
+      color: el.color || '#2c2420',
+      symbol: ICON_PRESETS.some((p) => p.key === el.symbol) ? el.symbol : ICON_PRESETS[0].key,
+    };
   }
   return {
     ...base,
@@ -53,6 +86,7 @@ function normalizePoster(poster) {
   if (!poster) return getDefaultPoster();
   return {
     elements: Array.isArray(poster.elements) ? poster.elements.map(normalizeElement) : [],
+    background: typeof poster.background === 'string' ? poster.background : '#ffffff',
   };
 }
 
@@ -76,6 +110,8 @@ function fontFamilyFor(fontKey) {
   const sheetContentEl = document.getElementById('poster-sheet-content');
   const addTextBtn = document.getElementById('poster-add-text-btn');
   const addQrBtn = document.getElementById('poster-add-qr-btn');
+  const addDividerBtn = document.getElementById('poster-add-divider-btn');
+  const addIconBtn = document.getElementById('poster-add-icon-btn');
   const downloadBtn = document.getElementById('poster-download-btn');
   const printBtn = document.getElementById('poster-print-btn');
 
@@ -83,9 +119,12 @@ function fontFamilyFor(fontKey) {
   const boldBtn = document.getElementById('poster-bold-btn');
   const italicBtn = document.getElementById('poster-italic-btn');
   const fontSelect = document.getElementById('poster-font-select');
+  const dividerStyleSelect = document.getElementById('poster-divider-style-select');
+  const iconSymbolSelect = document.getElementById('poster-icon-symbol-select');
   const sizeInput = document.getElementById('poster-size-input');
   const colorInput = document.getElementById('poster-color-input');
   const deleteBtn = document.getElementById('poster-delete-text-btn');
+  const bgColorInput = document.getElementById('poster-bg-color-input');
 
   let poster = getDefaultPoster();
   let selectedId = null;
@@ -102,6 +141,10 @@ function fontFamilyFor(fontKey) {
   function applySheetSize() {
     sheetEl.style.width = `${SHEET_WIDTH}px`;
     sheetEl.style.height = `${SHEET_HEIGHT}px`;
+  }
+
+  function applyBackground() {
+    sheetEl.style.background = poster.background;
   }
 
   function getTextWithoutHandle(node) {
@@ -123,15 +166,58 @@ function fontFamilyFor(fontKey) {
     node.style.color = el.color;
   }
 
+  function renderQrCanvas(node, el) {
+    const wrap = node.querySelector('.poster-qr-canvas');
+    if (!wrap) return;
+    wrap.innerHTML = '';
+    new window.QRCode(wrap, {
+      text: guestUrl,
+      width: QR_RENDER_SIZE,
+      height: QR_RENDER_SIZE,
+      colorDark: el.color,
+      colorLight: 'rgba(0,0,0,0)',
+    });
+  }
+
   function applyQrStyle(node, el) {
     node.style.left = `${el.x}px`;
     node.style.top = `${el.y}px`;
     node.style.width = `${el.size}px`;
     node.style.height = `${el.size}px`;
+    renderQrCanvas(node, el);
+  }
+
+  function applyDividerStyle(node, el) {
+    node.style.left = `${el.x}px`;
+    node.style.top = `${el.y}px`;
+    node.style.width = `${el.width}px`;
+    node.style.color = el.color;
+    const ornamentEl = node.querySelector('.poster-divider-ornament');
+    if (ornamentEl) {
+      const preset = DIVIDER_PRESETS.find((p) => p.key === el.style) || DIVIDER_PRESETS[0];
+      ornamentEl.textContent = preset.ornament;
+      ornamentEl.hidden = !preset.ornament;
+    }
+  }
+
+  function applyIconStyle(node, el) {
+    node.style.left = `${el.x}px`;
+    node.style.top = `${el.y}px`;
+    node.style.width = `${el.size}px`;
+    node.style.height = `${el.size}px`;
+    node.style.color = el.color;
+    const glyph = node.querySelector('.poster-icon-glyph');
+    if (glyph) {
+      const preset = ICON_PRESETS.find((p) => p.key === el.symbol) || ICON_PRESETS[0];
+      glyph.textContent = preset.symbol;
+      glyph.style.fontSize = `${Math.round(el.size * 0.8)}px`;
+    }
   }
 
   function applyElementStyle(node, el) {
     if (el.type === 'qr') applyQrStyle(node, el);
+    else if (el.type === 'divider') applyDividerStyle(node, el);
+    else if (el.type === 'icon') applyIconStyle(node, el);
     else applyTextStyle(node, el);
   }
 
@@ -157,19 +243,35 @@ function fontFamilyFor(fontKey) {
     sheetContentEl.querySelectorAll('.poster-el').forEach((n) => {
       n.classList.toggle('selected', n.dataset.id === id);
     });
-    const isText = el.type !== 'qr';
+
+    const isText = el.type === 'text';
+    const isDivider = el.type === 'divider';
+    const isIcon = el.type === 'icon';
+
     boldBtn.hidden = !isText;
     italicBtn.hidden = !isText;
     fontSelect.hidden = !isText;
-    colorInput.hidden = !isText;
+    dividerStyleSelect.hidden = !isDivider;
+    iconSymbolSelect.hidden = !isIcon;
+    colorInput.value = el.color;
+
     if (isText) {
       boldBtn.classList.toggle('active', el.bold);
       italicBtn.classList.toggle('active', el.italic);
       fontSelect.value = el.fontKey;
-      colorInput.value = el.color;
       sizeInput.min = '8';
       sizeInput.max = '200';
       sizeInput.value = el.fontSize;
+    } else if (isDivider) {
+      dividerStyleSelect.value = el.style;
+      sizeInput.min = '60';
+      sizeInput.max = '320';
+      sizeInput.value = el.width;
+    } else if (isIcon) {
+      iconSymbolSelect.value = el.symbol;
+      sizeInput.min = '20';
+      sizeInput.max = '200';
+      sizeInput.value = el.size;
     } else {
       sizeInput.min = '60';
       sizeInput.max = '320';
@@ -186,7 +288,7 @@ function fontFamilyFor(fontKey) {
     mutator(el);
     const node = sheetContentEl.querySelector(`[data-id="${selectedId}"]`);
     if (node) applyElementStyle(node, el);
-    if (el.type !== 'qr') {
+    if (el.type === 'text') {
       boldBtn.classList.toggle('active', el.bold);
       italicBtn.classList.toggle('active', el.italic);
     }
@@ -222,21 +324,25 @@ function fontFamilyFor(fontKey) {
     });
   }
 
-  function wireResize(handle, node, el) {
+  // Generic corner/edge resize: `get`/`set` read and write the element's
+  // size-like property, `onChange` re-applies the visual consequence (qr and
+  // icon resize a square box, divider resizes a line's width, text resizes
+  // its font size) without needing a full applyElementStyle() pass per move.
+  function wireResize(handle, node, el, { get, set, min, max, onChange }) {
     handle.addEventListener('mousedown', (e) => {
       e.preventDefault();
       e.stopPropagation();
       selectElement(el.id);
       const startX = e.clientX;
-      const startSize = el.size;
+      const startValue = get(el);
 
       function onMove(ev) {
         const dx = ev.clientX - startX;
-        el.size = Math.min(320, Math.max(60, startSize + dx));
-        node.style.width = `${el.size}px`;
-        node.style.height = `${el.size}px`;
+        const value = Math.min(max, Math.max(min, startValue + dx));
+        set(el, value);
+        onChange(node, el);
         positionToolbar(node);
-        if (selectedId === el.id) sizeInput.value = el.size;
+        if (selectedId === el.id) sizeInput.value = value;
       }
       function onUp() {
         document.removeEventListener('mousemove', onMove);
@@ -255,13 +361,6 @@ function fontFamilyFor(fontKey) {
 
     const canvasWrap = document.createElement('div');
     canvasWrap.className = 'poster-qr-canvas';
-    new window.QRCode(canvasWrap, {
-      text: guestUrl,
-      width: QR_RENDER_SIZE,
-      height: QR_RENDER_SIZE,
-      colorDark: '#2c2420',
-      colorLight: '#ffffff',
-    });
     node.appendChild(canvasWrap);
 
     const handle = document.createElement('span');
@@ -270,13 +369,97 @@ function fontFamilyFor(fontKey) {
     node.appendChild(handle);
 
     const resizeHandle = document.createElement('span');
-    resizeHandle.className = 'poster-qr-resize-handle';
+    resizeHandle.className = 'poster-resize-handle';
     node.appendChild(resizeHandle);
 
     node.addEventListener('mousedown', () => selectElement(el.id));
     wireDrag(handle, node, el);
-    wireResize(resizeHandle, node, el);
+    wireResize(resizeHandle, node, el, {
+      get: (e) => e.size,
+      set: (e, v) => { e.size = v; },
+      min: 60,
+      max: 320,
+      onChange: (n, e) => {
+        n.style.width = `${e.size}px`;
+        n.style.height = `${e.size}px`;
+      },
+    });
     applyQrStyle(node, el);
+    sheetContentEl.appendChild(node);
+    return node;
+  }
+
+  function createDividerNode(el) {
+    const node = document.createElement('div');
+    node.className = 'poster-el poster-divider-el';
+    node.dataset.id = el.id;
+
+    const lineBefore = document.createElement('span');
+    lineBefore.className = 'poster-divider-line';
+    const ornament = document.createElement('span');
+    ornament.className = 'poster-divider-ornament';
+    const lineAfter = document.createElement('span');
+    lineAfter.className = 'poster-divider-line';
+    node.appendChild(lineBefore);
+    node.appendChild(ornament);
+    node.appendChild(lineAfter);
+
+    const handle = document.createElement('span');
+    handle.className = 'poster-text-drag-handle';
+    handle.innerHTML = DRAG_ICON;
+    node.appendChild(handle);
+
+    const resizeHandle = document.createElement('span');
+    resizeHandle.className = 'poster-divider-resize-handle';
+    node.appendChild(resizeHandle);
+
+    node.addEventListener('mousedown', () => selectElement(el.id));
+    wireDrag(handle, node, el);
+    wireResize(resizeHandle, node, el, {
+      get: (e) => e.width,
+      set: (e, v) => { e.width = v; },
+      min: 60,
+      max: 320,
+      onChange: (n, e) => { n.style.width = `${e.width}px`; },
+    });
+    applyDividerStyle(node, el);
+    sheetContentEl.appendChild(node);
+    return node;
+  }
+
+  function createIconNode(el) {
+    const node = document.createElement('div');
+    node.className = 'poster-el poster-icon-el';
+    node.dataset.id = el.id;
+
+    const glyph = document.createElement('span');
+    glyph.className = 'poster-icon-glyph';
+    node.appendChild(glyph);
+
+    const handle = document.createElement('span');
+    handle.className = 'poster-text-drag-handle';
+    handle.innerHTML = DRAG_ICON;
+    node.appendChild(handle);
+
+    const resizeHandle = document.createElement('span');
+    resizeHandle.className = 'poster-resize-handle';
+    node.appendChild(resizeHandle);
+
+    node.addEventListener('mousedown', () => selectElement(el.id));
+    wireDrag(handle, node, el);
+    wireResize(resizeHandle, node, el, {
+      get: (e) => e.size,
+      set: (e, v) => { e.size = v; },
+      min: 20,
+      max: 200,
+      onChange: (n, e) => {
+        n.style.width = `${e.size}px`;
+        n.style.height = `${e.size}px`;
+        const g = n.querySelector('.poster-icon-glyph');
+        if (g) g.style.fontSize = `${Math.round(e.size * 0.8)}px`;
+      },
+    });
+    applyIconStyle(node, el);
     sheetContentEl.appendChild(node);
     return node;
   }
@@ -295,6 +478,11 @@ function fontFamilyFor(fontKey) {
     handle.innerHTML = DRAG_ICON;
     node.appendChild(handle);
 
+    const resizeHandle = document.createElement('span');
+    resizeHandle.className = 'poster-resize-handle';
+    resizeHandle.contentEditable = 'false';
+    node.appendChild(resizeHandle);
+
     node.addEventListener('mousedown', () => selectElement(el.id));
     node.addEventListener('input', () => {
       el.text = getTextWithoutHandle(node);
@@ -306,9 +494,23 @@ function fontFamilyFor(fontKey) {
     });
 
     wireDrag(handle, node, el);
+    wireResize(resizeHandle, node, el, {
+      get: (e) => e.fontSize,
+      set: (e, v) => { e.fontSize = v; },
+      min: 8,
+      max: 200,
+      onChange: (n, e) => { n.style.fontSize = `${e.fontSize}px`; },
+    });
     applyTextStyle(node, el);
     sheetContentEl.appendChild(node);
     return node;
+  }
+
+  function createElementNode(el) {
+    if (el.type === 'qr') return createQrNode(el);
+    if (el.type === 'divider') return createDividerNode(el);
+    if (el.type === 'icon') return createIconNode(el);
+    return createTextNode(el);
   }
 
   document.addEventListener('mousedown', (e) => {
@@ -348,6 +550,7 @@ function fontFamilyFor(fontKey) {
       x: 80 + (poster.elements.length % 5) * 14,
       y: 80 + (poster.elements.length % 5) * 28,
       size: 140,
+      color: '#2c2420',
     };
     poster.elements.push(el);
     createQrNode(el);
@@ -355,13 +558,48 @@ function fontFamilyFor(fontKey) {
     scheduleSave();
   });
 
+  addDividerBtn.addEventListener('click', () => {
+    const el = {
+      id: generateId(),
+      type: 'divider',
+      x: 60 + (poster.elements.length % 5) * 14,
+      y: 80 + (poster.elements.length % 5) * 28,
+      width: 200,
+      color: '#2c2420',
+      style: DIVIDER_PRESETS[0].key,
+    };
+    poster.elements.push(el);
+    createDividerNode(el);
+    selectElement(el.id);
+    scheduleSave();
+  });
+
+  addIconBtn.addEventListener('click', () => {
+    const el = {
+      id: generateId(),
+      type: 'icon',
+      x: 80 + (poster.elements.length % 5) * 14,
+      y: 80 + (poster.elements.length % 5) * 28,
+      size: 48,
+      color: '#2c2420',
+      symbol: ICON_PRESETS[0].key,
+    };
+    poster.elements.push(el);
+    createIconNode(el);
+    selectElement(el.id);
+    scheduleSave();
+  });
+
   boldBtn.addEventListener('click', () => updateSelected((el) => { el.bold = !el.bold; }));
   italicBtn.addEventListener('click', () => updateSelected((el) => { el.italic = !el.italic; }));
   fontSelect.addEventListener('change', () => updateSelected((el) => { el.fontKey = fontSelect.value; }));
+  dividerStyleSelect.addEventListener('change', () => updateSelected((el) => { el.style = dividerStyleSelect.value; }));
+  iconSymbolSelect.addEventListener('change', () => updateSelected((el) => { el.symbol = iconSymbolSelect.value; }));
   sizeInput.addEventListener('input', () => updateSelected((el) => {
     const value = Number(sizeInput.value);
     if (!(value > 0)) return;
-    if (el.type === 'qr') el.size = value;
+    if (el.type === 'qr' || el.type === 'icon') el.size = value;
+    else if (el.type === 'divider') el.width = value;
     else el.fontSize = value;
   }));
   colorInput.addEventListener('input', () => updateSelected((el) => { el.color = colorInput.value; }));
@@ -375,8 +613,22 @@ function fontFamilyFor(fontKey) {
     scheduleSave();
   });
 
+  bgColorInput.addEventListener('input', () => {
+    poster.background = bgColorInput.value;
+    applyBackground();
+    scheduleSave();
+  });
+
   function populateFontSelect() {
     fontSelect.innerHTML = FONT_OPTIONS.map((f) => `<option value="${f.key}" style="font-family:${f.family}">${f.label}</option>`).join('');
+  }
+
+  function populateDividerStyleSelect() {
+    dividerStyleSelect.innerHTML = DIVIDER_PRESETS.map((p) => `<option value="${p.key}">${t(currentLang, p.i18nKey)}</option>`).join('');
+  }
+
+  function populateIconSymbolSelect() {
+    iconSymbolSelect.innerHTML = ICON_PRESETS.map((p) => `<option value="${p.key}">${p.symbol} ${t(currentLang, p.i18nKey)}</option>`).join('');
   }
 
   downloadBtn.addEventListener('click', async () => {
@@ -410,6 +662,9 @@ function fontFamilyFor(fontKey) {
     currentLang = lang;
     localStorage.setItem(LANG_KEY, lang);
     applyTranslations(lang);
+    populateDividerStyleSelect();
+    populateIconSymbolSelect();
+    if (selectedId) selectElement(selectedId);
   }
 
   if (!weddingId) {
@@ -434,10 +689,14 @@ function fontFamilyFor(fontKey) {
 
   deleteBtn.innerHTML = TRASH_ICON;
   populateFontSelect();
+  populateDividerStyleSelect();
+  populateIconSymbolSelect();
   guestUrl = `${window.location.origin}${window.location.pathname.replace(/[^/]+$/, '')}index.html?id=${weddingId}`;
   poster = normalizePoster(wedding.poster);
   applySheetSize();
-  poster.elements.forEach((el) => (el.type === 'qr' ? createQrNode(el) : createTextNode(el)));
+  applyBackground();
+  bgColorInput.value = poster.background;
+  poster.elements.forEach((el) => createElementNode(el));
 
   langMount.appendChild(buildLangSwitcher(currentLang, setLang));
   applyTranslations(currentLang);

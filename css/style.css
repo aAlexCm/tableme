@@ -589,6 +589,25 @@ nav.admin-nav.admin-nav-stacked {
   color: var(--ink);
 }
 
+.poster-bg-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+  padding: 8px 14px;
+  border-radius: var(--radius-pill);
+  background: rgba(245, 248, 249, 0.92);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+  font-size: 0.78rem;
+  color: var(--ink);
+}
+
+.poster-bg-field input[type='color'] {
+  width: 32px;
+  height: 28px;
+  padding: 2px;
+}
+
 .poster-toolbox-tools {
   display: flex;
   flex-wrap: wrap;
@@ -652,7 +671,7 @@ nav.admin-nav.admin-nav-stacked {
   white-space: pre-wrap;
 }
 
-.poster-text-el.selected {
+.poster-el.selected {
   outline: 1.5px dashed var(--gold-deep);
 }
 
@@ -673,21 +692,14 @@ nav.admin-nav.admin-nav-stacked {
   user-select: none;
 }
 
-.poster-text-el.selected .poster-text-drag-handle {
+.poster-el.selected .poster-text-drag-handle {
   display: flex;
 }
 
-.poster-qr-el {
+.poster-qr-el,
+.poster-icon-el {
   position: absolute;
   cursor: default;
-}
-
-.poster-qr-el.selected {
-  outline: 1.5px dashed var(--gold-deep);
-}
-
-.poster-qr-el.selected .poster-text-drag-handle {
-  display: flex;
 }
 
 .poster-qr-canvas {
@@ -702,7 +714,7 @@ nav.admin-nav.admin-nav-stacked {
   display: block;
 }
 
-.poster-qr-resize-handle {
+.poster-resize-handle {
   position: absolute;
   right: -6px;
   bottom: -6px;
@@ -714,8 +726,55 @@ nav.admin-nav.admin-nav-stacked {
   cursor: nwse-resize;
 }
 
-.poster-qr-el.selected .poster-qr-resize-handle {
+.poster-el.selected .poster-resize-handle {
   display: block;
+}
+
+.poster-divider-resize-handle {
+  position: absolute;
+  top: 50%;
+  right: -6px;
+  transform: translateY(-50%);
+  display: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  background: var(--gold-deep);
+  cursor: ew-resize;
+}
+
+.poster-el.selected .poster-divider-resize-handle {
+  display: block;
+}
+
+.poster-divider-el {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  height: 24px;
+  cursor: default;
+}
+
+.poster-divider-line {
+  flex: 1;
+  height: 1px;
+  background: currentColor;
+}
+
+.poster-divider-ornament {
+  padding: 0 8px;
+  font-size: 16px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.poster-icon-glyph {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
 }
 
 .poster-actions {
@@ -788,12 +847,12 @@ nav.admin-nav.admin-nav-stacked {
   }
 
   .poster-text-drag-handle,
-  .poster-qr-resize-handle {
+  .poster-resize-handle,
+  .poster-divider-resize-handle {
     display: none !important;
   }
 
-  .poster-text-el.selected,
-  .poster-qr-el.selected {
+  .poster-el.selected {
     outline: none !important;
   }
 }
