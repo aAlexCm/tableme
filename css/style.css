@@ -3187,7 +3187,19 @@ body.admin-theme .table-group-count,
 body.admin-theme .table-guest-list-empty,
 body.admin-theme .guest-row-empty,
 body.admin-theme .empty-state {
-  color: var(--sage-deep);
+  color: var(--charcoal);
+}
+
+body.admin-theme nav.admin-nav a,
+body.admin-theme .admin-tools-label,
+body.admin-theme .field label,
+body.admin-theme .mode-btn {
+  color: var(--charcoal);
+}
+
+body.admin-theme input::placeholder,
+body.admin-theme textarea::placeholder {
+  color: var(--charcoal);
 }
 
 /* Floor-plan canvas: the --gold/--sage variables above already neutralize most of this,
