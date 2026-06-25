@@ -602,7 +602,7 @@ nav.admin-nav.admin-nav-stacked {
   flex: 1;
   display: flex;
   justify-content: center;
-  padding: 12px;
+  padding: 36px 12px;
   overflow: auto;
 }
 
@@ -610,7 +610,7 @@ nav.admin-nav.admin-nav-stacked {
   position: relative;
   flex: 0 0 auto;
   background: #ffffff;
-  box-shadow: 0 12px 40px rgba(15, 23, 42, 0.25);
+  box-shadow: 0 6px 24px rgba(15, 23, 42, 0.12);
   overflow: hidden;
 }
 
