@@ -530,7 +530,7 @@ nav.admin-nav a:hover {
   border-radius: 18px;
   border: none;
   background: linear-gradient(135deg, var(--gold), var(--gold-deep));
-  box-shadow: 0 10px 22px rgba(91, 75, 196, 0.25);
+  box-shadow: 0 10px 22px color-mix(in srgb, var(--gold-deep) 25%, transparent);
   white-space: normal;
   text-align: left;
   text-decoration: none;
@@ -542,7 +542,7 @@ nav.admin-nav a:hover {
 
 .admin-tool-tile:hover {
   transform: translateY(-3px);
-  box-shadow: 0 16px 30px rgba(91, 75, 196, 0.32);
+  box-shadow: 0 16px 30px color-mix(in srgb, var(--gold-deep) 32%, transparent);
 }
 
 .admin-tool-tile-icon {
@@ -583,7 +583,7 @@ nav.admin-nav a:hover {
 
 .admin-tool-tile.is-disabled:hover {
   transform: none;
-  box-shadow: 0 10px 22px rgba(91, 75, 196, 0.25);
+  box-shadow: 0 10px 22px color-mix(in srgb, var(--gold-deep) 25%, transparent);
 }
 
 .admin-tool-tile-badge {
@@ -602,20 +602,20 @@ nav.admin-nav a:hover {
 
 .admin-tool-tile.tile-accent-blue {
   background: linear-gradient(135deg, var(--sage), var(--sage-deep));
-  box-shadow: 0 10px 22px rgba(47, 156, 128, 0.25);
+  box-shadow: 0 10px 22px color-mix(in srgb, var(--sage-deep) 25%, transparent);
 }
 
 .admin-tool-tile.tile-accent-blue:hover {
-  box-shadow: 0 16px 30px rgba(47, 156, 128, 0.32);
+  box-shadow: 0 16px 30px color-mix(in srgb, var(--sage-deep) 32%, transparent);
 }
 
 .admin-tool-tile.tile-accent-teal {
   background: linear-gradient(135deg, var(--accent-teal), var(--accent-teal-deep));
-  box-shadow: 0 10px 22px rgba(217, 123, 63, 0.25);
+  box-shadow: 0 10px 22px color-mix(in srgb, var(--accent-teal-deep) 25%, transparent);
 }
 
 .admin-tool-tile.tile-accent-teal:hover {
-  box-shadow: 0 16px 30px rgba(217, 123, 63, 0.32);
+  box-shadow: 0 16px 30px color-mix(in srgb, var(--accent-teal-deep) 32%, transparent);
 }
 
 .partners-grid {
@@ -3053,19 +3053,19 @@ body.admin-theme .theme-decoration-position-arrow {
    sky-blue (secondary) accent duo for admin.html/wedding-admin.html/etc., scoped
    via body.admin-theme so the guest-facing pages keep their wedding styling. */
 body.admin-theme {
-  --gold: #8e7cf0;
-  --gold-deep: #5b4bc4;
-  --gold-light: #ece8fb;
-  --sage: #4fc3a1;
-  --sage-deep: #2f9c80;
-  --sage-light: #e3f7f0;
-  --ink: #4b5563;
-  --charcoal: #1f2937;
-  --cream: #f9fafb;
+  --gold: #1aafaa;
+  --gold-deep: #0e7c78;
+  --gold-light: #dff6f5;
+  --sage: #f4a261;
+  --sage-deep: #e07b39;
+  --sage-light: #fdeedd;
+  --ink: #6b7280;
+  --charcoal: #1b1f3b;
+  --cream: #eafbfa;
   --paper: #ffffff;
-  --accent-teal: #f4a261;
-  --accent-teal-deep: #d97b3f;
-  --accent-teal-light: #fdecd8;
+  --accent-teal: #2e3a59;
+  --accent-teal-deep: #1b2440;
+  --accent-teal-light: #e7e9f0;
 }
 
 /* Admin theme uses Lato instead of the guest theme's wedding-style Playfair
