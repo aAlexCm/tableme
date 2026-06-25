@@ -164,6 +164,28 @@ function parseSheetRows(rows) {
     ).element;
   }
 
+  function swapRows(rowA, rowB) {
+    if (rowA === rowB) return;
+    const marker = document.createComment('');
+    rowA.before(marker);
+    rowB.replaceWith(rowA);
+    marker.replaceWith(rowB);
+  }
+
+  function placeDraggedRow(list, draggedEl, y) {
+    const afterEl = getDragAfterElement(list, y);
+    if (afterEl == null) {
+      list.appendChild(draggedEl);
+    } else if (afterEl.classList.contains('guest-row-empty')) {
+      // Dropping a guest onto an empty seat means they take that exact seat —
+      // swap positions instead of just shoving the placeholder further down,
+      // which used to leave the seat unoccupied and the guest still floating.
+      swapRows(draggedEl, afterEl);
+    } else {
+      list.insertBefore(draggedEl, afterEl);
+    }
+  }
+
   async function commitGuestOrder() {
     const wedding = await Storage.getWedding(weddingId);
     if (!wedding) return;
@@ -264,12 +286,7 @@ function parseSheetRows(rows) {
         const elAtPoint = document.elementFromPoint(touch.clientX, touch.clientY);
         const list = elAtPoint && elAtPoint.closest('.table-guest-list');
         if (!list) return;
-        const afterEl = getDragAfterElement(list, touch.clientY);
-        if (afterEl == null) {
-          list.appendChild(draggedRow);
-        } else {
-          list.insertBefore(draggedRow, afterEl);
-        }
+        placeDraggedRow(list, draggedRow, touch.clientY);
       },
       { passive: false }
     );
@@ -286,12 +303,7 @@ function parseSheetRows(rows) {
     list.addEventListener('dragover', (e) => {
       e.preventDefault();
       if (!draggedRow) return;
-      const afterEl = getDragAfterElement(list, e.clientY);
-      if (afterEl == null) {
-        list.appendChild(draggedRow);
-      } else {
-        list.insertBefore(draggedRow, afterEl);
-      }
+      placeDraggedRow(list, draggedRow, e.clientY);
     });
 
     list.addEventListener('drop', (e) => {
