@@ -806,6 +806,11 @@ function reconcileTables(wedding) {
   if (themeBtn) themeBtn.hidden = !isFeatureEnabled(wedding, 'themeCustomization');
   const qrBtn = document.getElementById('qr-code-btn');
   if (qrBtn) qrBtn.hidden = !isFeatureEnabled(wedding, 'qrShare');
+  const partnersTile = document.getElementById('partners-tile');
+  if (partnersTile) {
+    partnersTile.href = `partenaires.html?id=${weddingId}`;
+    partnersTile.hidden = !isFeatureEnabled(wedding, 'sponsorPartners');
+  }
   tableModalApi.updateLabels();
   updateFullscreenLabel();
   updatePageTitle();

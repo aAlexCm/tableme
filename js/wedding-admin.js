@@ -129,6 +129,9 @@ function parseSheetRows(rows) {
     const qrBtn = document.getElementById('qr-code-btn');
     if (qrBtn) qrBtn.hidden = !isFeatureEnabled(wedding, 'qrShare');
 
+    const partnersTile = document.getElementById('partners-tile');
+    if (partnersTile) partnersTile.hidden = !isFeatureEnabled(wedding, 'sponsorPartners');
+
     floorPlanTabLink.hidden = !isFeatureEnabled(wedding, 'floorPlan');
   }
 
@@ -733,6 +736,8 @@ function parseSheetRows(rows) {
   contentEl.hidden = false;
   weddingNameEl.textContent = wedding.name;
   floorPlanTabLink.href = `floor-plan.html?id=${weddingId}`;
+  const partnersTile = document.getElementById('partners-tile');
+  if (partnersTile) partnersTile.href = `partenaires.html?id=${weddingId}`;
   shareControls.init(weddingId);
   themeSettings.init();
   updatePageTitle();

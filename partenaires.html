@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>TableMe · Partenaires</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="admin-theme">
+  <div class="page page-wide">
+    <div id="lang-switcher-mount" class="lang-switcher-mount"></div>
+
+    <div id="not-found" class="card" hidden>
+      <h2 data-i18n="weddingNotFoundTitle">Mariage introuvable</h2>
+      <p class="muted" data-i18n="weddingNotFoundDesc">Ce lien n'est pas valide ou ce mariage a été supprimé.</p>
+    </div>
+
+    <div id="partners-content" hidden>
+      <nav class="admin-nav">
+        <strong id="wedding-admin-name"></strong>
+        <div class="admin-nav-actions">
+          <a href="#" id="back-to-admin-link" data-i18n="backToAdminLink">&larr; Retour</a>
+        </div>
+      </nav>
+
+      <header class="hero">
+        <p class="eyebrow" data-i18n="partnersEyebrow">Bons plans mariage</p>
+        <h1 data-i18n="partnersTitle">Nos partenaires recommandés</h1>
+        <div class="divider"><span></span></div>
+        <p data-i18n="partnersSubtitle">Des prestataires de confiance pour vous accompagner le jour J.</p>
+      </header>
+
+      <div class="partners-grid" id="partners-grid"></div>
+      <p class="empty-state" id="partners-empty" data-i18n="partnersEmpty" hidden>Aucun partenaire pour le moment.</p>
+    </div>
+  </div>
+
+  <script type="module" src="js/partners-page.js"></script>
+</body>
+</html>
