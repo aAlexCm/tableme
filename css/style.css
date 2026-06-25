@@ -638,33 +638,6 @@ nav.admin-nav.admin-nav-stacked {
   gap: 10px;
 }
 
-#poster-add-qr-btn {
-  background: linear-gradient(135deg, var(--sage), var(--sage-deep));
-  box-shadow: 0 6px 14px rgba(224, 123, 57, 0.25);
-}
-
-#poster-add-qr-btn:hover {
-  box-shadow: 0 10px 22px rgba(224, 123, 57, 0.32);
-}
-
-#poster-add-divider-btn {
-  background: linear-gradient(135deg, var(--accent-teal), var(--accent-teal-deep));
-  box-shadow: 0 6px 14px rgba(27, 36, 64, 0.25);
-}
-
-#poster-add-divider-btn:hover {
-  box-shadow: 0 10px 22px rgba(27, 36, 64, 0.32);
-}
-
-#poster-add-icon-btn {
-  background: linear-gradient(135deg, #e8a0bf, #c2487a);
-  box-shadow: 0 6px 14px rgba(194, 72, 122, 0.25);
-}
-
-#poster-add-icon-btn:hover {
-  box-shadow: 0 10px 22px rgba(194, 72, 122, 0.32);
-}
-
 .poster-tool-btn {
   display: flex;
   flex-direction: column;
