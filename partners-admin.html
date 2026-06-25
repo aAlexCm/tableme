@@ -93,6 +93,46 @@
       <p class="empty-state" id="partner-list-empty" data-i18n="partnersListEmpty" hidden>Aucun partenaire créé pour le moment.</p>
       <button type="button" class="secondary" id="seed-examples-btn" data-i18n="seedExamplesBtn" hidden>Charger 3 exemples</button>
     </div>
+
+    <div class="card">
+      <h2 data-i18n="partnerStatsTitle">Statistiques de fréquentation</h2>
+      <p class="muted small" data-i18n="partnerStatsSubtitle">Suivez si les mariés consultent vos partenaires ou passent par vous pour les contacter.</p>
+
+      <div class="partner-stats-summary" id="partner-stats-summary"></div>
+
+      <h3 class="theme-font-heading" data-i18n="partnerStatsTopPartnersTitle">Partenaires les plus consultés</h3>
+      <div class="partner-stats-bars" id="partner-stats-bars"></div>
+
+      <h3 class="theme-font-heading" data-i18n="partnerStatsByWeddingTitle">Par mariage</h3>
+      <div class="partner-stats-table-wrap">
+        <table class="partner-stats-table" id="partner-stats-by-wedding">
+          <thead>
+            <tr>
+              <th data-i18n="partnerStatsWeddingCol">Mariage</th>
+              <th data-i18n="partnerStatsViewsCol">Visites</th>
+              <th data-i18n="partnerStatsClicksCol">Clics</th>
+              <th data-i18n="partnerStatsLastActivityCol">Dernière activité</th>
+            </tr>
+          </thead>
+          <tbody id="partner-stats-by-wedding-body"></tbody>
+        </table>
+      </div>
+
+      <h3 class="theme-font-heading" data-i18n="partnerStatsRecentTitle">Activité récente</h3>
+      <div class="partner-stats-table-wrap">
+        <table class="partner-stats-table" id="partner-stats-recent">
+          <thead>
+            <tr>
+              <th data-i18n="partnerStatsDateCol">Date</th>
+              <th data-i18n="partnerStatsWeddingCol">Mariage</th>
+              <th data-i18n="partnerStatsActionCol">Action</th>
+            </tr>
+          </thead>
+          <tbody id="partner-stats-recent-body"></tbody>
+        </table>
+      </div>
+      <p class="empty-state" id="partner-stats-empty" data-i18n="partnerStatsEmpty" hidden>Aucune activité enregistrée pour le moment.</p>
+    </div>
   </div>
 
   <script type="module" src="js/partners-admin.js"></script>

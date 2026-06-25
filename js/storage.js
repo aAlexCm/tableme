@@ -25,6 +25,7 @@ export function normalize(str) {
 
 const weddingsCol = collection(db, 'weddings');
 const partnersCol = collection(db, 'partners');
+const partnerClicksCol = collection(db, 'partnerClicks');
 
 export const Storage = {
   async getWeddings() {
@@ -120,5 +121,20 @@ export const Storage = {
 
   async deletePartner(partnerId) {
     await deleteDoc(doc(db, 'partners', partnerId));
+  },
+
+  // Best-effort analytics: a logging failure should never break the guest's
+  // browsing experience, so this swallows its own errors instead of throwing.
+  async logPartnerEvent(event) {
+    try {
+      await addDoc(partnerClicksCol, { ...event, createdAt: Date.now() });
+    } catch (err) {
+      console.warn('logPartnerEvent failed', err);
+    }
+  },
+
+  async getPartnerClicks() {
+    const snap = await getDocs(partnerClicksCol);
+    return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
   },
 };

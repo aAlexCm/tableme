@@ -69,6 +69,12 @@ function readAndResizeImage(file) {
   const listEmptyEl = document.getElementById('partner-list-empty');
   const seedExamplesBtn = document.getElementById('seed-examples-btn');
 
+  const statsSummaryEl = document.getElementById('partner-stats-summary');
+  const statsBarsEl = document.getElementById('partner-stats-bars');
+  const statsByWeddingBodyEl = document.getElementById('partner-stats-by-wedding-body');
+  const statsRecentBodyEl = document.getElementById('partner-stats-recent-body');
+  const statsEmptyEl = document.getElementById('partner-stats-empty');
+
   const EXAMPLE_PARTNERS = [
     {
       name: 'Prestige Wedding Cars',
@@ -128,6 +134,7 @@ function readAndResizeImage(file) {
     if (country) await loadRegionOptions(country, region);
     if (country && region) await loadCityOptions(country, region, city);
     await renderPartnerList();
+    await renderPartnerStats();
   }
 
   function renderCategoryOptions() {
@@ -355,6 +362,90 @@ function readAndResizeImage(file) {
     }).join('');
   }
 
+  function formatDateTime(ms) {
+    if (!ms) return '';
+    const locale = currentLang === 'en' ? 'en-GB' : currentLang === 'ro' ? 'ro-RO' : 'fr-FR';
+    return new Date(ms).toLocaleString(locale, {
+      day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit',
+    });
+  }
+
+  function describePartnerEvent(event) {
+    if (event.type === 'view') return t(currentLang, 'partnerStatsEventView');
+    if (event.type === 'photo') return t(currentLang, 'partnerStatsEventPhoto', event.partnerName || '');
+    const channel = CONTACT_CHANNELS.find((c) => c.key === event.contactType);
+    const channelLabel = channel ? t(currentLang, channel.labelKey) : (event.contactType || '');
+    return t(currentLang, 'partnerStatsEventContact', event.partnerName || '', channelLabel);
+  }
+
+  async function renderPartnerStats() {
+    const clicks = (await Storage.getPartnerClicks()).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+
+    const totalViews = clicks.filter((c) => c.type === 'view').length;
+    const totalPhoto = clicks.filter((c) => c.type === 'photo').length;
+    const totalContact = clicks.filter((c) => c.type === 'contact').length;
+
+    statsSummaryEl.innerHTML = [
+      [t(currentLang, 'partnerStatsViewsLabel'), totalViews],
+      [t(currentLang, 'partnerStatsPhotoLabel'), totalPhoto],
+      [t(currentLang, 'partnerStatsContactLabel'), totalContact],
+    ].map(([label, value]) => `
+      <div class="partner-stat-tile">
+        <span class="partner-stat-value">${value}</span>
+        <span class="partner-stat-label">${escapeHtml(label)}</span>
+      </div>
+    `).join('');
+
+    const partnerCounts = new Map();
+    clicks.forEach((c) => {
+      if (!c.partnerId || c.type === 'view') return;
+      partnerCounts.set(c.partnerId, (partnerCounts.get(c.partnerId) || 0) + 1);
+    });
+    const topPartners = [...partnerCounts.entries()]
+      .map(([id, count]) => ({ name: (partnersCache.find((p) => p.id === id) || {}).name || id, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5);
+    const maxCount = topPartners.length ? topPartners[0].count : 0;
+    statsBarsEl.innerHTML = topPartners.map(({ name, count }) => `
+      <div class="partner-stats-bar-row">
+        <span class="partner-stats-bar-label">${escapeHtml(name)}</span>
+        <div class="partner-stats-bar-track">
+          <div class="partner-stats-bar-fill" style="width:${maxCount ? Math.max(6, (count / maxCount) * 100) : 0}%"></div>
+        </div>
+        <span class="partner-stats-bar-count">${count}</span>
+      </div>
+    `).join('');
+
+    const weddingStats = new Map();
+    clicks.forEach((c) => {
+      if (!c.weddingId) return;
+      const entry = weddingStats.get(c.weddingId) || { name: c.weddingName || c.weddingId, views: 0, clicks: 0, last: 0 };
+      if (c.type === 'view') entry.views += 1;
+      else entry.clicks += 1;
+      entry.last = Math.max(entry.last, c.createdAt || 0);
+      weddingStats.set(c.weddingId, entry);
+    });
+    const weddingRows = [...weddingStats.values()].sort((a, b) => b.last - a.last);
+    statsByWeddingBodyEl.innerHTML = weddingRows.map((w) => `
+      <tr>
+        <td>${escapeHtml(w.name)}</td>
+        <td>${w.views}</td>
+        <td>${w.clicks}</td>
+        <td>${formatDateTime(w.last)}</td>
+      </tr>
+    `).join('');
+
+    statsRecentBodyEl.innerHTML = clicks.slice(0, 30).map((c) => `
+      <tr>
+        <td>${formatDateTime(c.createdAt)}</td>
+        <td>${escapeHtml(c.weddingName || '')}</td>
+        <td>${escapeHtml(describePartnerEvent(c))}</td>
+      </tr>
+    `).join('');
+
+    statsEmptyEl.hidden = clicks.length > 0;
+  }
+
   listEl.addEventListener('click', async (e) => {
     const btn = e.target.closest('button');
     if (!btn) return;
@@ -431,5 +522,6 @@ function readAndResizeImage(file) {
     resetGeoSelect(regionSelect, t(currentLang, 'partnerGeoAnyRegion'));
     resetGeoSelect(citySelect, t(currentLang, 'partnerGeoAnyCity'));
     await renderPartnerList();
+    await renderPartnerStats();
   })();
 })();

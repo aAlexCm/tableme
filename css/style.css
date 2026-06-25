@@ -801,6 +801,105 @@ nav.admin-nav.admin-nav-stacked {
   gap: 6px;
 }
 
+.partner-stats-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  margin: 12px 0 24px;
+}
+
+.partner-stat-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--gold-light) 60%, transparent);
+}
+
+.partner-stat-value {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--charcoal);
+}
+
+.partner-stat-label {
+  font-size: 0.78rem;
+  color: var(--ink);
+}
+
+.partner-stats-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.partner-stats-bar-row {
+  display: grid;
+  grid-template-columns: minmax(100px, 160px) 1fr 32px;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.85rem;
+}
+
+.partner-stats-bar-label {
+  color: var(--charcoal);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.partner-stats-bar-track {
+  height: 10px;
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--gold-light) 70%, transparent);
+  overflow: hidden;
+}
+
+.partner-stats-bar-fill {
+  height: 100%;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(90deg, var(--gold), var(--gold-deep));
+}
+
+.partner-stats-bar-count {
+  text-align: right;
+  font-weight: 600;
+  color: var(--charcoal);
+}
+
+.partner-stats-table-wrap {
+  overflow-x: auto;
+  margin-bottom: 8px;
+}
+
+.partner-stats-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.partner-stats-table th,
+.partner-stats-table td {
+  text-align: left;
+  padding: 8px 10px;
+  border-bottom: 1px solid color-mix(in srgb, var(--gold) 18%, transparent);
+  white-space: nowrap;
+}
+
+.partner-stats-table th {
+  color: var(--ink);
+  font-weight: 600;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.partner-stats-table td {
+  color: var(--charcoal);
+}
+
 .partner-icon-option {
   display: flex;
   align-items: center;

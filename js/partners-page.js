@@ -32,6 +32,18 @@ function escapeHtml(value) {
   const photoLightboxImg = document.getElementById('photo-lightbox-img');
   const photoLightboxClose = document.getElementById('photo-lightbox-close');
   let matchingPartners = [];
+  let pageViewLogged = false;
+
+  function logEvent(type, partner, contactType) {
+    Storage.logPartnerEvent({
+      weddingId,
+      weddingName: wedding.name,
+      partnerId: partner ? partner.id : null,
+      partnerName: partner ? partner.name : null,
+      type,
+      contactType: contactType || null,
+    });
+  }
 
   function openPhotoLightbox(src) {
     photoLightboxImg.src = src;
@@ -46,9 +58,18 @@ function escapeHtml(value) {
   }
 
   partnersGridEl.addEventListener('click', (e) => {
-    const btn = e.target.closest('.partner-card-photo');
-    if (!btn) return;
-    openPhotoLightbox(btn.dataset.photo);
+    const photoBtn = e.target.closest('.partner-card-photo');
+    if (photoBtn) {
+      openPhotoLightbox(photoBtn.dataset.photo);
+      const partner = matchingPartners.find((p) => p.id === photoBtn.dataset.partnerId);
+      logEvent('photo', partner);
+      return;
+    }
+    const contactLink = e.target.closest('.partner-card-contact');
+    if (contactLink) {
+      const partner = matchingPartners.find((p) => p.id === contactLink.dataset.partnerId);
+      logEvent('contact', partner, contactLink.dataset.channel);
+    }
   });
   photoLightboxClose.addEventListener('click', closePhotoLightbox);
   photoLightbox.addEventListener('click', (e) => {
@@ -73,7 +94,7 @@ function escapeHtml(value) {
       const categoryColorClass = category && category.color ? ` cat-${category.color}` : '';
       const icon = PARTNER_ICONS.find((i) => i.key === partner.icon);
       const photo = partner.photo
-        ? `<button type="button" class="partner-card-photo" data-photo="${escapeHtml(partner.photo)}"><img src="${escapeHtml(partner.photo)}" alt="" /></button>`
+        ? `<button type="button" class="partner-card-photo" data-photo="${escapeHtml(partner.photo)}" data-partner-id="${partner.id}"><img src="${escapeHtml(partner.photo)}" alt="" /></button>`
         : '';
       const contacts = partner.contacts || {};
       const contactButtons = CONTACT_CHANNELS
@@ -82,7 +103,7 @@ function escapeHtml(value) {
           const href = buildContactHref(channel.key, contacts[channel.key]);
           const label = escapeHtml(t(currentLang, channel.labelKey));
           const isExternal = channel.key !== 'phone';
-          return `<a class="icon-btn partner-card-contact" href="${escapeHtml(href)}" title="${label}" aria-label="${label}"${isExternal ? ' target="_blank" rel="noopener noreferrer"' : ''}>${channel.svg}</a>`;
+          return `<a class="icon-btn partner-card-contact" data-partner-id="${partner.id}" data-channel="${channel.key}" href="${escapeHtml(href)}" title="${label}" aria-label="${label}"${isExternal ? ' target="_blank" rel="noopener noreferrer"' : ''}>${channel.svg}</a>`;
         })
         .join('');
       return `
@@ -136,4 +157,9 @@ function escapeHtml(value) {
   langMount.appendChild(buildLangSwitcher(currentLang, setLang));
   applyTranslations(currentLang);
   renderPartners();
+
+  if (!pageViewLogged) {
+    pageViewLogged = true;
+    logEvent('view', null);
+  }
 })();
