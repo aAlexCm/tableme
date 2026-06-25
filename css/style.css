@@ -1320,6 +1320,7 @@ body.modal-open {
 
 .wedding-item .actions {
   flex: 0 0 auto;
+  flex-wrap: nowrap;
   max-width: 0;
   overflow: hidden;
   transition: max-width 0.18s ease;
@@ -3193,6 +3194,7 @@ body.admin-theme .theme-decoration-position-arrow {
   .table-group .actions {
     width: 100%;
     max-width: none;
+    flex-wrap: wrap;
   }
 
   .wedding-item .info strong {
