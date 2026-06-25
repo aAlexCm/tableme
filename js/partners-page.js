@@ -1,7 +1,7 @@
 import { Storage } from './storage.js';
 import { applyTranslations, buildLangSwitcher, t } from './i18n.js';
 import { isFeatureEnabled } from './features.js';
-import { PARTNER_CATEGORIES, PARTNER_ICONS, matchesLocation } from './partners.js';
+import { PARTNER_CATEGORIES, PARTNER_ICONS, CONTACT_CHANNELS, buildContactHref, matchesLocation } from './partners.js';
 
 const LANG_KEY = 'tableme_wedding_admin_lang';
 
@@ -37,8 +37,6 @@ function escapeHtml(value) {
     renderPartners();
   }
 
-  const PHONE_ICON = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>';
-
   function renderPartners() {
     partnersEmptyEl.hidden = matchingPartners.length > 0;
     partnersGridEl.innerHTML = matchingPartners.map((partner) => {
@@ -48,19 +46,23 @@ function escapeHtml(value) {
       const photo = partner.photo
         ? `<div class="partner-card-photo"><img src="${escapeHtml(partner.photo)}" alt="" /></div>`
         : '';
-      const websiteLink = partner.website
-        ? `<a class="partner-card-link" href="${escapeHtml(partner.website)}" target="_blank" rel="noopener noreferrer">${escapeHtml(t(currentLang, 'partnerLinkLabel'))} &rarr;</a>`
-        : '';
-      const phoneLink = partner.phone
-        ? `<a class="partner-card-link" href="tel:${escapeHtml(partner.phone)}">${PHONE_ICON} ${escapeHtml(partner.phone)}</a>`
-        : '';
+      const contacts = partner.contacts || {};
+      const contactButtons = CONTACT_CHANNELS
+        .filter((channel) => contacts[channel.key])
+        .map((channel) => {
+          const href = buildContactHref(channel.key, contacts[channel.key]);
+          const label = escapeHtml(t(currentLang, channel.labelKey));
+          const isExternal = channel.key !== 'phone';
+          return `<a class="icon-btn partner-card-contact" href="${escapeHtml(href)}" title="${label}" aria-label="${label}"${isExternal ? ' target="_blank" rel="noopener noreferrer"' : ''}>${channel.svg}</a>`;
+        })
+        .join('');
       return `
         <div class="partner-card">
           ${photo}
           <span class="partner-card-category">${icon ? icon.svg : ''}${escapeHtml(categoryLabel)}</span>
           <h3 class="partner-card-name">${escapeHtml(partner.name)}</h3>
           <p class="partner-card-desc">${escapeHtml(partner.description)}</p>
-          <div class="partner-card-actions">${websiteLink}${phoneLink}</div>
+          <div class="partner-card-actions">${contactButtons}</div>
         </div>
       `;
     }).join('');

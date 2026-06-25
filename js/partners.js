@@ -72,6 +72,68 @@ export function getPartnerIcon(key) {
   return PARTNER_ICONS.find((icon) => icon.key === key) || null;
 }
 
+// Contact channels a partner can fill in — each renders as a small round
+// icon button (linking out) on the couple-facing card when non-empty.
+// `hrefPrefix` turns a raw phone number into a tel: link; the rest are
+// expected to be full URLs pasted as-is.
+export const CONTACT_CHANNELS = [
+  {
+    key: 'website',
+    labelKey: 'partnerWebsiteLabel',
+    placeholder: 'https://...',
+    hrefPrefix: '',
+    svg: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg>',
+  },
+  {
+    key: 'phone',
+    labelKey: 'partnerPhoneLabel',
+    placeholder: '+33 6 12 34 56 78',
+    hrefPrefix: 'tel:',
+    svg: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>',
+  },
+  {
+    key: 'whatsapp',
+    labelKey: 'contactWhatsappLabel',
+    placeholder: 'https://wa.me/33612345678',
+    hrefPrefix: '',
+    svg: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>',
+  },
+  {
+    key: 'facebook',
+    labelKey: 'contactFacebookLabel',
+    placeholder: 'https://facebook.com/...',
+    hrefPrefix: '',
+    svg: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M14 8h-2a2 2 0 0 0-2 2v2H8v3h2v6h3v-6h2l1-3h-3v-1a1 1 0 0 1 1-1h2z"/></svg>',
+  },
+  {
+    key: 'instagram',
+    labelKey: 'contactInstagramLabel',
+    placeholder: 'https://instagram.com/...',
+    hrefPrefix: '',
+    svg: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17" cy="7" r="1" fill="currentColor"/></svg>',
+  },
+  {
+    key: 'tiktok',
+    labelKey: 'contactTiktokLabel',
+    placeholder: 'https://tiktok.com/@...',
+    hrefPrefix: '',
+    svg: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v9"/><circle cx="9" cy="14" r="3"/><path d="M12 8a4 4 0 0 0 4 4"/></svg>',
+  },
+  {
+    key: 'youtube',
+    labelKey: 'contactYoutubeLabel',
+    placeholder: 'https://youtube.com/@...',
+    hrefPrefix: '',
+    svg: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="4"/><path d="M10 9l5 3-5 3z" fill="currentColor"/></svg>',
+  },
+];
+
+export function buildContactHref(channelKey, value) {
+  const channel = CONTACT_CHANNELS.find((c) => c.key === channelKey);
+  if (!channel || !value) return '';
+  return `${channel.hrefPrefix}${value}`;
+}
+
 // A partner targets a country (always), optionally narrowed to a region,
 // optionally narrowed further to a city — so it only ever matches weddings
 // at or below the specificity level the admin chose.

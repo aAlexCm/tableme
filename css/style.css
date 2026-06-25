@@ -614,10 +614,11 @@ nav.admin-nav a:hover {
 }
 
 .partner-card-photo {
-  margin: -24px -24px 4px;
-  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  width: 96px;
+  height: 96px;
+  align-self: flex-start;
+  border-radius: var(--radius-sm);
   overflow: hidden;
-  aspect-ratio: 16 / 9;
   background: var(--sage-light);
 }
 
@@ -665,21 +666,8 @@ nav.admin-nav a:hover {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 16px;
+  gap: 10px;
   margin-top: auto;
-}
-
-.partner-card-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-weight: 600;
-  color: var(--gold-deep);
-  text-decoration: none;
-}
-
-.partner-card-link:hover {
-  color: var(--charcoal);
 }
 
 .admin-quick-links {
@@ -692,6 +680,19 @@ nav.admin-nav a:hover {
   gap: 8px;
   max-width: 420px;
   min-width: 0;
+}
+
+.partner-contacts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+  margin-top: 8px;
+}
+
+.partner-contacts-grid .field label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .partner-icon-option {

@@ -1,6 +1,6 @@
 import { Storage } from './storage.js';
 import { applyTranslations, buildLangSwitcher, t } from './i18n.js';
-import { PARTNER_CATEGORIES, PARTNER_ICONS } from './partners.js';
+import { PARTNER_CATEGORIES, PARTNER_ICONS, CONTACT_CHANNELS } from './partners.js';
 
 const ADMIN_LANG_KEY = 'tableme_admin_lang';
 const MAX_PHOTO_DIMENSION = 640;
@@ -47,8 +47,7 @@ function readAndResizeImage(file) {
   const categorySelect = document.getElementById('partner-category');
   const iconGridEl = document.getElementById('partner-icon-grid');
   const descriptionInput = document.getElementById('partner-description');
-  const websiteInput = document.getElementById('partner-website');
-  const phoneInput = document.getElementById('partner-phone');
+  const contactsGridEl = document.getElementById('partner-contacts-grid');
   const photoPreviewEl = document.getElementById('partner-photo-preview');
   const photoPreviewImgEl = document.getElementById('partner-photo-preview-img');
   const photoRemoveBtn = document.getElementById('partner-photo-remove-btn');
@@ -74,8 +73,7 @@ function readAndResizeImage(file) {
       category: 'transport',
       icon: 'car',
       description: 'Location de voitures de luxe avec chauffeur pour le jour J.',
-      website: 'https://example.com',
-      phone: '',
+      contacts: { website: 'https://example.com' },
       photo: '',
       geo: { country: 'France', region: '', city: '' },
     },
@@ -84,8 +82,7 @@ function readAndResizeImage(file) {
       category: 'animation',
       icon: 'music',
       description: 'Animations, jeux et photobooth pour dynamiser votre soirée.',
-      website: 'https://example.com',
-      phone: '',
+      contacts: { website: 'https://example.com' },
       photo: '',
       geo: { country: 'France', region: '', city: '' },
     },
@@ -94,8 +91,7 @@ function readAndResizeImage(file) {
       category: 'decoration',
       icon: 'flower',
       description: 'Décoration florale sur-mesure pour votre cérémonie et votre salle.',
-      website: 'https://example.com',
-      phone: '',
+      contacts: { website: 'https://example.com' },
       photo: '',
       geo: { country: 'France', region: '', city: '' },
     },
@@ -122,6 +118,7 @@ function readAndResizeImage(file) {
     updatePageTitle();
     renderCategoryOptions();
     renderIconGrid();
+    renderContactsFields();
     renderPartnerList();
   }
 
@@ -150,6 +147,37 @@ function readAndResizeImage(file) {
     selectedIcon = btn.dataset.icon;
     renderIconGrid();
   });
+
+  function renderContactsFields() {
+    const values = {};
+    CONTACT_CHANNELS.forEach((channel) => {
+      const existing = document.getElementById(`partner-contact-${channel.key}`);
+      values[channel.key] = existing ? existing.value : '';
+    });
+    contactsGridEl.innerHTML = CONTACT_CHANNELS.map((channel) => `
+      <div class="field">
+        <label for="partner-contact-${channel.key}">${channel.svg}${escapeHtml(t(currentLang, channel.labelKey))}</label>
+        <input type="text" id="partner-contact-${channel.key}" data-channel="${channel.key}" placeholder="${escapeHtml(channel.placeholder)}" />
+      </div>
+    `).join('');
+    CONTACT_CHANNELS.forEach((channel) => {
+      document.getElementById(`partner-contact-${channel.key}`).value = values[channel.key] || '';
+    });
+  }
+
+  function getContactsFromForm() {
+    const contacts = {};
+    CONTACT_CHANNELS.forEach((channel) => {
+      contacts[channel.key] = document.getElementById(`partner-contact-${channel.key}`).value.trim();
+    });
+    return contacts;
+  }
+
+  function setContactsInForm(contacts) {
+    CONTACT_CHANNELS.forEach((channel) => {
+      document.getElementById(`partner-contact-${channel.key}`).value = (contacts && contacts[channel.key]) || '';
+    });
+  }
 
   function distinctValues(values) {
     const seen = new Map();
@@ -217,6 +245,7 @@ function readAndResizeImage(file) {
     selectedIcon = PARTNER_ICONS[0].key;
     renderIconGrid();
     renderCategoryOptions();
+    setContactsInForm({});
     refreshGeoOptions();
     renderPhotoPreview();
     formTitleEl.textContent = t(currentLang, 'newPartnerTitle');
@@ -231,8 +260,7 @@ function readAndResizeImage(file) {
     selectedIcon = partner.icon || PARTNER_ICONS[0].key;
     renderIconGrid();
     descriptionInput.value = partner.description || '';
-    websiteInput.value = partner.website || '';
-    phoneInput.value = partner.phone || '';
+    setContactsInForm(partner.contacts);
     photoUrlInput.value = partner.photo || '';
     renderPhotoPreview();
     const geo = partner.geo || {};
@@ -305,13 +333,13 @@ function readAndResizeImage(file) {
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
+    const contacts = getContactsFromForm();
     const partner = {
       name: nameInput.value.trim(),
       category: categorySelect.value,
       icon: selectedIcon,
       description: descriptionInput.value.trim(),
-      website: websiteInput.value.trim(),
-      phone: phoneInput.value.trim(),
+      contacts,
       photo: photoUrlInput.value.trim(),
       geo: {
         country: countryInput.value.trim(),
@@ -319,7 +347,8 @@ function readAndResizeImage(file) {
         city: cityInput.value.trim(),
       },
     };
-    if (!partner.name || !partner.geo.country || (!partner.website && !partner.phone)) return;
+    const hasContact = Object.values(contacts).some(Boolean);
+    if (!partner.name || !partner.geo.country || !hasContact) return;
 
     if (editingPartnerId) {
       await Storage.updatePartner(editingPartnerId, partner);
@@ -340,6 +369,7 @@ function readAndResizeImage(file) {
     updatePageTitle();
     renderCategoryOptions();
     renderIconGrid();
+    renderContactsFields();
     refreshGeoOptions();
     await renderPartnerList();
   })();
