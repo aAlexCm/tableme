@@ -93,8 +93,10 @@
     <select id="poster-divider-style-select"></select>
     <select id="poster-icon-symbol-select"></select>
     <input type="number" id="poster-size-input" min="8" max="200" />
-    <input type="color" id="poster-color-input" />
-    <input type="text" id="poster-hex-input" class="color-hex-input" maxlength="7" spellcheck="false" />
+    <span class="color-hex-field">
+      <input type="color" id="poster-color-input" class="color-hex-swatch" />
+      <input type="text" id="poster-hex-input" class="color-hex-input" maxlength="7" spellcheck="false" />
+    </span>
     <button type="button" class="icon-btn icon-btn-danger" id="poster-delete-text-btn"></button>
   </div>
 

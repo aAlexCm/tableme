@@ -634,12 +634,31 @@ nav.admin-nav.admin-nav-stacked {
 
 .color-hex-input {
   width: 78px;
-  height: 28px;
-  padding: 0 8px;
+  height: 32px;
+  padding: 0 8px 0 28px;
   font-size: 0.78rem;
   font-family: 'Inter', monospace;
   text-transform: uppercase;
   letter-spacing: 0.4px;
+}
+
+.color-hex-field {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.color-hex-swatch {
+  position: absolute;
+  left: 5px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: 1px solid rgba(15, 23, 42, 0.18);
+  border-radius: 4px;
+  cursor: pointer;
 }
 
 .poster-toolbox-tools {
@@ -858,12 +877,6 @@ nav.admin-nav.admin-nav-stacked {
   width: 56px;
   height: 32px;
   padding: 0 6px;
-}
-
-.poster-text-toolbar input[type='color'] {
-  width: 32px;
-  height: 32px;
-  padding: 2px;
 }
 
 .poster-text-toolbar .color-hex-input {
@@ -2436,22 +2449,6 @@ select.mini-lang-select {
   color: var(--sage-deep);
   text-transform: none;
   letter-spacing: 0;
-}
-
-.theme-color-field-controls {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.theme-color-field input[type='color'] {
-  width: 40px;
-  height: 32px;
-  padding: 2px;
-  border: 1px solid rgba(138, 150, 120, 0.3);
-  border-radius: 8px;
-  background: var(--paper);
-  cursor: pointer;
 }
 
 .theme-color-field .color-hex-input {
