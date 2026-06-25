@@ -194,14 +194,18 @@ function fontFamilyFor(fontKey) {
   function applyTextStyle(node, el) {
     node.style.left = `${el.x}px`;
     node.style.top = `${el.y}px`;
-    // body.admin-theme * forces Inter with !important; only an inline
-    // !important on this element can win against that rule.
-    node.style.setProperty('font-family', fontFamilyFor(el.fontKey), 'important');
-    node.style.fontSize = `${el.fontSize}px`;
-    node.style.fontWeight = el.bold ? '700' : '400';
-    node.style.fontStyle = el.italic ? 'italic' : 'normal';
-    node.style.textAlign = el.align;
-    node.style.color = el.color;
+    const content = node.querySelector('.poster-text-content');
+    if (!content) return;
+    // body.admin-theme * matches .poster-text-content directly (it's a `*`
+    // rule) and wins over a value merely inherited from the outer node, even
+    // an !important one — so font-family must be set on this element itself,
+    // also with !important, to actually beat that blanket rule.
+    content.style.setProperty('font-family', fontFamilyFor(el.fontKey), 'important');
+    content.style.fontSize = `${el.fontSize}px`;
+    content.style.fontWeight = el.bold ? '700' : '400';
+    content.style.fontStyle = el.italic ? 'italic' : 'normal';
+    content.style.textAlign = el.align;
+    content.style.color = el.color;
   }
 
   function renderQrCanvas(node, el) {
