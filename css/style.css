@@ -312,6 +312,14 @@ button:hover, a.secondary:hover {
   box-shadow: 0 10px 22px rgba(138, 109, 60, 0.3);
 }
 
+/* `button { display: inline-flex }` above is an author rule, which beats the
+   browser's own `[hidden] { display: none }` regardless of specificity —
+   without this, setting `.hidden = true` on any button silently does
+   nothing and it stays visible. */
+button[hidden], a[hidden] {
+  display: none;
+}
+
 button:active, a.secondary:active {
   transform: translateY(0);
 }
