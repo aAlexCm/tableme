@@ -218,20 +218,25 @@ function parseSheetRows(rows) {
     if (sourceIdx === -1) return;
     const sourceGuest = sourceBucket[sourceIdx];
     const targetBucket = buckets.get(targetTableKey) || [];
-    const targetIdx = targetBucket.findIndex((g) => g.id === targetId);
+    buckets.set(sourceTableKey, sourceBucket);
+    buckets.set(targetTableKey, targetBucket);
 
     if (!targetIsEmpty) {
+      const targetIdx = targetBucket.findIndex((g) => g.id === targetId);
       if (targetIdx === -1) return;
       const targetGuest = targetBucket[targetIdx];
       sourceBucket[sourceIdx] = { ...targetGuest, table: sourceTableKey };
       targetBucket[targetIdx] = { ...sourceGuest, table: targetTableKey };
     } else {
-      const movedGuest = { ...sourceGuest, table: targetTableKey };
-      if (targetIdx === -1) {
-        targetBucket.push(movedGuest);
-      } else {
-        targetBucket[targetIdx] = movedGuest;
+      // A synthetic trailing placeholder (beyond the persisted bucket) has
+      // no id to look up — using the row's actual position in its list as
+      // the target slot, and padding up to it, makes the guest land exactly
+      // where they were dropped instead of always one slot too early.
+      const targetSlot = [...targetRow.parentElement.children].indexOf(targetRow);
+      while (targetBucket.length <= targetSlot) {
+        targetBucket.push({ id: generateId(), table: targetTableKey, empty: true });
       }
+      targetBucket[targetSlot] = { ...sourceGuest, table: targetTableKey };
       // Read everything needed from sourceBucket before mutating it — when
       // source and target are the same table this is the same array.
       sourceBucket[sourceIdx] = { id: generateId(), table: sourceTableKey, empty: true };
