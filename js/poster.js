@@ -1,5 +1,6 @@
 import { Storage, generateId } from './storage.js';
 import { applyTranslations, buildLangSwitcher, t } from './i18n.js';
+import { wireColorHexPair } from './color-hex.js';
 
 const LANG_KEY = 'tableme_wedding_admin_lang';
 
@@ -134,8 +135,12 @@ function fontFamilyFor(fontKey) {
   const iconSymbolSelect = document.getElementById('poster-icon-symbol-select');
   const sizeInput = document.getElementById('poster-size-input');
   const colorInput = document.getElementById('poster-color-input');
+  const hexInput = document.getElementById('poster-hex-input');
   const deleteBtn = document.getElementById('poster-delete-text-btn');
   const bgColorInput = document.getElementById('poster-bg-color-input');
+  const bgHexInput = document.getElementById('poster-bg-hex-input');
+  wireColorHexPair(colorInput, hexInput);
+  wireColorHexPair(bgColorInput, bgHexInput);
 
   let poster = getDefaultPoster();
   let selectedId = null;
@@ -285,6 +290,7 @@ function fontFamilyFor(fontKey) {
     dividerStyleSelect.hidden = !isDivider;
     iconSymbolSelect.hidden = !isIcon;
     colorInput.value = el.color;
+    hexInput.value = el.color.toUpperCase();
 
     if (isText) {
       boldBtn.classList.toggle('active', el.bold);
@@ -753,6 +759,7 @@ function fontFamilyFor(fontKey) {
   applySheetSize();
   applyBackground();
   bgColorInput.value = poster.background;
+  bgHexInput.value = poster.background.toUpperCase();
   poster.elements.forEach((el) => createElementNode(el));
 
   langMount.appendChild(buildLangSwitcher(currentLang, setLang));

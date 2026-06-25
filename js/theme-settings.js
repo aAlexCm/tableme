@@ -9,6 +9,7 @@ import {
 } from './guest-themes.js';
 import { DECORATION_ELEMENTS, DECORATION_POSITIONS, getDefaultDecoration, normalizeDecoration } from './guest-decorations.js';
 import { ICONS as TABLE_ICONS } from './table-modal.js';
+import { wireColorHexPair } from './color-hex.js';
 
 const UPLOAD_ICON = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg>';
 const NONE_ICON = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M5 19 19 5"/></svg>';
@@ -130,9 +131,17 @@ export function createThemeSettings({ weddingId, getLang }) {
     themeCustomGridEl.innerHTML = GUEST_THEME_COLOR_KEYS.map((key) => `
       <div class="theme-color-field">
         <label for="theme-color-${key}">${escapeHtml(t(lang, THEME_COLOR_LABEL_KEYS[key]))}</label>
-        <input type="color" id="theme-color-${key}" data-key="${key}" value="${theme.colors[key]}" />
+        <span class="theme-color-field-controls">
+          <input type="color" id="theme-color-${key}" data-key="${key}" value="${theme.colors[key]}" />
+          <input type="text" id="theme-color-hex-${key}" class="color-hex-input" maxlength="7" spellcheck="false" />
+        </span>
       </div>
     `).join('');
+    GUEST_THEME_COLOR_KEYS.forEach((key) => {
+      const colorInput = document.getElementById(`theme-color-${key}`);
+      const hexInput = document.getElementById(`theme-color-hex-${key}`);
+      if (colorInput && hexInput) wireColorHexPair(colorInput, hexInput);
+    });
 
     const decoration = normalizeDecoration(theme.decoration);
     const decorationOptions = [

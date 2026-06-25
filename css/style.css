@@ -632,6 +632,16 @@ nav.admin-nav.admin-nav-stacked {
   cursor: pointer;
 }
 
+.color-hex-input {
+  width: 78px;
+  height: 28px;
+  padding: 0 8px;
+  font-size: 0.78rem;
+  font-family: 'Inter', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
 .poster-toolbox-tools {
   display: flex;
   flex-direction: column;
@@ -854,6 +864,11 @@ nav.admin-nav.admin-nav-stacked {
   width: 32px;
   height: 32px;
   padding: 2px;
+}
+
+.poster-text-toolbar .color-hex-input {
+  width: 70px;
+  height: 32px;
 }
 
 .poster-text-toolbar .icon-btn {
@@ -2423,6 +2438,12 @@ select.mini-lang-select {
   letter-spacing: 0;
 }
 
+.theme-color-field-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .theme-color-field input[type='color'] {
   width: 40px;
   height: 32px;
@@ -2431,6 +2452,11 @@ select.mini-lang-select {
   border-radius: 8px;
   background: var(--paper);
   cursor: pointer;
+}
+
+.theme-color-field .color-hex-input {
+  width: 76px;
+  height: 32px;
 }
 
 .theme-decoration-grid {
