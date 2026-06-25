@@ -562,6 +562,210 @@ nav.admin-nav.admin-nav-stacked {
   color: var(--ink);
 }
 
+.poster-workspace {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.poster-toolbox {
+  flex: 0 0 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 18px;
+  border-radius: var(--radius);
+  background: rgba(245, 248, 249, 0.92);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+}
+
+.poster-toolbox-title {
+  margin: 0;
+  font-size: 0.72rem;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.poster-tool-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 0.88rem;
+  justify-content: flex-start;
+}
+
+.poster-format-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.poster-format-field label {
+  font-size: 0.68rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.poster-canvas-area {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  padding: 24px;
+  overflow: auto;
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--charcoal) 6%, var(--cream));
+}
+
+.poster-sheet {
+  position: relative;
+  flex: 0 0 auto;
+  background: #ffffff;
+  box-shadow: 0 12px 40px rgba(15, 23, 42, 0.25);
+  overflow: hidden;
+}
+
+.poster-sheet-content {
+  position: relative;
+  width: 794px;
+  height: 1123px;
+  transform-origin: top left;
+}
+
+.poster-qr {
+  position: absolute;
+  left: 50%;
+  bottom: 90px;
+  transform: translateX(-50%);
+}
+
+.poster-text-el {
+  position: absolute;
+  min-width: 24px;
+  min-height: 1.2em;
+  padding: 2px 6px;
+  outline: none;
+  cursor: text;
+  white-space: pre-wrap;
+}
+
+.poster-text-el.selected {
+  outline: 1.5px dashed var(--gold-deep);
+}
+
+.poster-text-drag-handle {
+  position: absolute;
+  top: -22px;
+  left: -6px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  background: var(--gold-deep);
+  color: #fff;
+  cursor: move;
+  user-select: none;
+}
+
+.poster-text-el.selected .poster-text-drag-handle {
+  display: flex;
+}
+
+.poster-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.poster-text-toolbar {
+  position: fixed;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  background: var(--paper);
+  box-shadow: 0 10px 26px rgba(15, 23, 42, 0.25);
+}
+
+.poster-text-toolbar select {
+  width: auto;
+  height: 32px;
+  padding: 0 8px;
+  font-size: 0.78rem;
+}
+
+.poster-text-toolbar input[type='number'] {
+  width: 56px;
+  height: 32px;
+  padding: 0 6px;
+}
+
+.poster-text-toolbar input[type='color'] {
+  width: 32px;
+  height: 32px;
+  padding: 2px;
+}
+
+.poster-text-toolbar .icon-btn {
+  width: 32px;
+  height: 32px;
+}
+
+.poster-text-toolbar .icon-btn.active {
+  background: var(--gold-light);
+  border-color: var(--gold);
+  color: var(--gold-deep);
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  .poster-sheet,
+  .poster-sheet * {
+    visibility: visible;
+  }
+
+  .poster-sheet {
+    position: absolute;
+    top: 0;
+    left: 0;
+    box-shadow: none;
+  }
+
+  .poster-text-drag-handle {
+    display: none !important;
+  }
+}
+
+@media (max-width: 760px) {
+  .poster-workspace {
+    flex-direction: column;
+  }
+
+  .poster-toolbox {
+    flex: 0 0 auto;
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .poster-canvas-area {
+    width: 100%;
+  }
+}
+
 @media (max-width: 480px) {
   .wedding-countdown-units {
     gap: 8px;

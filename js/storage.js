@@ -56,6 +56,10 @@ export const Storage = {
     await updateDoc(doc(db, 'weddings', weddingId), { date });
   },
 
+  async setPoster(weddingId, poster) {
+    await updateDoc(doc(db, 'weddings', weddingId), { poster });
+  },
+
   async addGuest(weddingId, name, table) {
     const wedding = await this.getWedding(weddingId);
     if (!wedding) return null;

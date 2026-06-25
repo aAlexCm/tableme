@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>TableMe · Affiche</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700&family=Great+Vibes&family=Parisienne&family=Italiana&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="admin-theme">
+  <div class="page page-wide">
+    <div id="lang-switcher-mount" class="lang-switcher-mount"></div>
+
+    <div id="not-found" class="card" hidden>
+      <h2 data-i18n="weddingNotFoundTitle">Mariage introuvable</h2>
+      <p class="muted" data-i18n="weddingNotFoundDesc">Ce lien n'est pas valide ou ce mariage a été supprimé.</p>
+    </div>
+
+    <div id="poster-content" hidden>
+      <nav class="admin-nav">
+        <strong id="poster-wedding-name"></strong>
+        <div class="admin-nav-actions">
+          <a href="#" id="poster-back-link" data-i18n="backToAdminLink">&larr; Retour</a>
+        </div>
+      </nav>
+
+      <div class="poster-workspace">
+        <aside class="poster-toolbox">
+          <p class="poster-toolbox-title" data-i18n="posterToolboxTitle">Outils</p>
+          <button type="button" class="poster-tool-btn" id="poster-add-text-btn">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/></svg>
+            <span data-i18n="posterAddTextBtn">Ajouter du texte</span>
+          </button>
+
+          <div class="poster-format-field">
+            <label data-i18n="posterFormatLabel">Format</label>
+            <div class="mode-switch" id="poster-format-switch">
+              <button type="button" class="mode-btn active" data-format="A4">A4</button>
+              <button type="button" class="mode-btn" data-format="A3">A3</button>
+            </div>
+          </div>
+        </aside>
+
+        <div class="poster-canvas-area">
+          <div class="poster-sheet" id="poster-sheet">
+            <div class="poster-sheet-content" id="poster-sheet-content">
+              <div class="poster-qr" id="poster-qr"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="poster-actions">
+        <button type="button" class="secondary" id="poster-download-btn">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
+          <span data-i18n="posterDownloadPdfBtn">Télécharger en PDF</span>
+        </button>
+        <button type="button" id="poster-print-btn">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          <span data-i18n="posterPrintBtn">Imprimer</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="poster-text-toolbar" id="poster-text-toolbar" hidden>
+    <button type="button" class="icon-btn" id="poster-bold-btn"><b>B</b></button>
+    <button type="button" class="icon-btn" id="poster-italic-btn"><i>I</i></button>
+    <select id="poster-font-select"></select>
+    <input type="number" id="poster-size-input" min="8" max="200" />
+    <input type="color" id="poster-color-input" />
+    <button type="button" class="icon-btn icon-btn-danger" id="poster-delete-text-btn"></button>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <script type="module" src="js/poster.js"></script>
+</body>
+</html>
