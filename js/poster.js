@@ -148,6 +148,7 @@ function fontFamilyFor(fontKey) {
   const sizeInput = document.getElementById('poster-size-input');
   const colorInput = document.getElementById('poster-color-input');
   const hexInput = document.getElementById('poster-hex-input');
+  const duplicateBtn = document.getElementById('poster-duplicate-btn');
   const deleteBtn = document.getElementById('poster-delete-text-btn');
   const bgColorInput = document.getElementById('poster-bg-color-input');
   const bgHexInput = document.getElementById('poster-bg-hex-input');
@@ -685,6 +686,16 @@ function fontFamilyFor(fontKey) {
     const node = sheetContentEl.querySelector(`[data-id="${selectedId}"]`);
     if (node) node.remove();
     deselect();
+    scheduleSave();
+  });
+
+  duplicateBtn.addEventListener('click', () => {
+    const el = poster.elements.find((e) => e.id === selectedId);
+    if (!el) return;
+    const copy = { ...el, id: generateId(), x: el.x + 16, y: el.y + 16 };
+    poster.elements.push(copy);
+    createElementNode(copy);
+    selectElement(copy.id);
     scheduleSave();
   });
 
