@@ -811,6 +811,8 @@ function reconcileTables(wedding) {
     partnersTile.href = `partenaires.html?id=${weddingId}`;
     partnersTile.hidden = !isFeatureEnabled(wedding, 'sponsorPartners');
   }
+  const posterTile = document.getElementById('poster-tile');
+  if (posterTile) posterTile.href = `poster.html?id=${weddingId}`;
   tableModalApi.updateLabels();
   updateFullscreenLabel();
   updatePageTitle();
