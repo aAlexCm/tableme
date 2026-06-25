@@ -818,8 +818,10 @@ nav.admin-nav.admin-nav-stacked {
   position: fixed;
   z-index: 60;
   align-items: center;
+  flex-wrap: wrap;
   gap: 6px;
   padding: 6px 8px;
+  max-width: calc(100vw - 16px);
   border-radius: var(--radius-sm);
   background: var(--paper);
   box-shadow: 0 10px 26px rgba(15, 23, 42, 0.25);

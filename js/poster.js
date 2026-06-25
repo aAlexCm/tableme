@@ -250,8 +250,9 @@ function fontFamilyFor(fontKey) {
 
   function positionToolbar(node) {
     const rect = node.getBoundingClientRect();
-    toolbarEl.style.left = `${Math.max(8, rect.left)}px`;
-    toolbarEl.style.top = `${Math.max(8, rect.top - 46)}px`;
+    const maxLeft = Math.max(8, window.innerWidth - toolbarEl.offsetWidth - 8);
+    toolbarEl.style.left = `${Math.min(maxLeft, Math.max(8, rect.left))}px`;
+    toolbarEl.style.top = `${Math.max(8, rect.top - toolbarEl.offsetHeight - 10)}px`;
   }
 
   function deselect() {
