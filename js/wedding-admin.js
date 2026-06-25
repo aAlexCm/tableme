@@ -58,6 +58,7 @@ function parseSheetRows(rows) {
 
   let currentLang = localStorage.getItem(LANG_KEY) || 'fr';
   let draggedRow = null;
+  let lastDragTarget = null;
 
   const langMount = document.getElementById('lang-switcher-mount');
   const notFoundEl = document.getElementById('not-found');
@@ -146,72 +147,81 @@ function parseSheetRows(rows) {
     return sortedKeys.map((key) => ({ key, guests: groups.get(key) }));
   }
 
-  function getDragAfterElement(container, y) {
-    // Empty-seat placeholders must count as valid drop anchors too, otherwise
-    // a guest can never be dropped into an empty slot — the calculation would
-    // always land it after the placeholder instead of taking its place.
-    const rows = [...container.querySelectorAll('.guest-row:not(.dragging), .guest-row-empty')];
-    return rows.reduce(
-      (closest, row) => {
-        const box = row.getBoundingClientRect();
-        const offset = y - box.top - box.height / 2;
-        if (offset < 0 && offset > closest.offset) {
-          return { offset, element: row };
-        }
-        return closest;
-      },
-      { offset: Number.NEGATIVE_INFINITY, element: null }
-    ).element;
+  function buildTableBuckets(guests) {
+    const buckets = new Map();
+    guests.forEach((g) => {
+      const key = g.table || '';
+      if (!buckets.has(key)) buckets.set(key, []);
+      buckets.get(key).push(g);
+    });
+    return buckets;
   }
 
-  function swapRows(rowA, rowB) {
-    if (rowA === rowB) return;
-    const marker = document.createComment('');
-    rowA.before(marker);
-    rowB.replaceWith(rowA);
-    marker.replaceWith(rowB);
+  function trimTrailingEmpties(bucket) {
+    let end = bucket.length;
+    while (end > 0 && bucket[end - 1].empty) end -= 1;
+    return bucket.slice(0, end);
   }
 
-  function placeDraggedRow(list, draggedEl, y) {
-    const afterEl = getDragAfterElement(list, y);
-    if (afterEl == null) {
-      list.appendChild(draggedEl);
-    } else if (afterEl.classList.contains('guest-row-empty')) {
-      // Dropping a guest onto an empty seat means they take that exact seat —
-      // swap positions instead of just shoving the placeholder further down,
-      // which used to leave the seat unoccupied and the guest still floating.
-      swapRows(draggedEl, afterEl);
-    } else {
-      list.insertBefore(draggedEl, afterEl);
-    }
+  function clearDropHighlight() {
+    document.querySelectorAll('.guest-row-drop-target').forEach((el) => el.classList.remove('guest-row-drop-target'));
   }
 
-  async function commitGuestOrder() {
+  function highlightDropTarget(target) {
+    if (target === lastDragTarget) return;
+    clearDropHighlight();
+    if (target) target.classList.add('guest-row-drop-target');
+    lastDragTarget = target;
+  }
+
+  function getRowUnderPoint(x, y) {
+    const el = document.elementFromPoint(x, y);
+    return el && el.closest('.guest-row, .guest-row-empty');
+  }
+
+  // Every row — occupied or empty — is a seat "container". Dropping a guest
+  // onto another container swaps the two: a real guest swaps tables/positions
+  // with whoever was there, an empty container just receives them and their
+  // old seat becomes the new gap (or just shrinks away if it was trailing
+  // capacity with no one seated after it).
+  async function moveGuestToContainer(sourceRow, targetRow) {
+    if (!sourceRow || !targetRow || sourceRow === targetRow) return;
     const wedding = await Storage.getWedding(weddingId);
     if (!wedding) return;
-    const guestMap = new Map(wedding.guests.map((g) => [g.id, g]));
-    const entries = [];
-    guestListEl.querySelectorAll('.guest-row, .guest-row-empty').forEach((row) => {
-      const table = row.closest('.table-guest-list').dataset.table;
-      if (row.classList.contains('guest-row-empty')) {
-        entries.push({ id: row.dataset.id, table, empty: true });
-        return;
+
+    const sourceTableKey = sourceRow.closest('.table-guest-list').dataset.table;
+    const targetTableKey = targetRow.closest('.table-guest-list').dataset.table;
+    const sourceId = sourceRow.dataset.id;
+    const targetId = targetRow.dataset.id;
+    const targetIsEmpty = targetRow.classList.contains('guest-row-empty');
+
+    const buckets = buildTableBuckets(wedding.guests);
+    const sourceBucket = buckets.get(sourceTableKey) || [];
+    const sourceIdx = sourceBucket.findIndex((g) => g.id === sourceId);
+    if (sourceIdx === -1) return;
+    const sourceGuest = sourceBucket[sourceIdx];
+    const targetBucket = buckets.get(targetTableKey) || [];
+    const targetIdx = targetBucket.findIndex((g) => g.id === targetId);
+
+    if (!targetIsEmpty) {
+      if (targetIdx === -1) return;
+      const targetGuest = targetBucket[targetIdx];
+      sourceBucket[sourceIdx] = { ...targetGuest, table: sourceTableKey };
+      targetBucket[targetIdx] = { ...sourceGuest, table: targetTableKey };
+    } else {
+      const movedGuest = { ...sourceGuest, table: targetTableKey };
+      if (targetIdx === -1) {
+        targetBucket.push(movedGuest);
+      } else {
+        targetBucket[targetIdx] = movedGuest;
       }
-      const guest = guestMap.get(row.dataset.id);
-      if (!guest) return;
-      entries.push({ ...guest, table });
-    });
-    // Empty rows are just rendering filler up to the seat count and get
-    // recomputed on every render — only keep the ones that sit *before*
-    // another guest of the same table, i.e. an intentional gap the couple
-    // dragged a guest below. Trailing ones carry no information.
-    const lastRealIndexByTable = new Map();
-    entries.forEach((entry, i) => {
-      if (!entry.empty) lastRealIndexByTable.set(entry.table, i);
-    });
-    const newGuests = entries.filter(
-      (entry, i) => !entry.empty || i < (lastRealIndexByTable.get(entry.table) ?? -1)
-    );
+      // Read everything needed from sourceBucket before mutating it — when
+      // source and target are the same table this is the same array.
+      sourceBucket[sourceIdx] = { id: generateId(), table: sourceTableKey, empty: true };
+    }
+
+    const newGuests = [];
+    buckets.forEach((bucket) => newGuests.push(...trimTrailingEmpties(bucket)));
     await Storage.setGuests(weddingId, newGuests);
     await renderGuests();
   }
@@ -251,19 +261,34 @@ function parseSheetRows(rows) {
   }
 
   function attachRowDragEvents(row) {
-    row.addEventListener('dragstart', () => {
+    let ghostEl = null;
+
+    function startDrag() {
       draggedRow = row;
+      lastDragTarget = null;
       row.classList.add('dragging');
-    });
-    row.addEventListener('dragend', async () => {
-      // 'dragend' always fires once a drag operation ends, unlike 'drop' which
-      // some embedded/webview browsers fail to dispatch reliably — committing
-      // here guarantees the reorder is actually persisted, not just visually
-      // reflected via the live DOM moves done during 'dragover'.
+      document.body.classList.add('dragging-guest-row');
+    }
+
+    async function endDrag() {
       row.classList.remove('dragging');
+      document.body.classList.remove('dragging-guest-row');
+      const target = lastDragTarget;
+      clearDropHighlight();
+      const source = draggedRow;
       draggedRow = null;
-      await commitGuestOrder();
-    });
+      if (ghostEl) {
+        ghostEl.remove();
+        ghostEl = null;
+      }
+      await moveGuestToContainer(source, target);
+    }
+
+    row.addEventListener('dragstart', startDrag);
+    // 'dragend' always fires once a drag operation ends, unlike 'drop' which
+    // some embedded/webview browsers fail to dispatch reliably — committing
+    // here guarantees the move is actually persisted.
+    row.addEventListener('dragend', endDrag);
 
     const handle = row.querySelector('.drag-handle');
 
@@ -271,8 +296,11 @@ function parseSheetRows(rows) {
       'touchstart',
       (e) => {
         e.preventDefault();
-        draggedRow = row;
-        row.classList.add('dragging');
+        startDrag();
+        ghostEl = document.createElement('div');
+        ghostEl.className = 'guest-row-drag-ghost';
+        ghostEl.textContent = row.querySelector('.guest-row-name')?.textContent || '';
+        document.body.appendChild(ghostEl);
       },
       { passive: false }
     );
@@ -283,19 +311,19 @@ function parseSheetRows(rows) {
         if (!draggedRow) return;
         e.preventDefault();
         const touch = e.touches[0];
-        const elAtPoint = document.elementFromPoint(touch.clientX, touch.clientY);
-        const list = elAtPoint && elAtPoint.closest('.table-guest-list');
-        if (!list) return;
-        placeDraggedRow(list, draggedRow, touch.clientY);
+        if (ghostEl) {
+          ghostEl.style.left = `${touch.clientX}px`;
+          ghostEl.style.top = `${touch.clientY}px`;
+        }
+        const hovered = getRowUnderPoint(touch.clientX, touch.clientY);
+        highlightDropTarget(hovered && hovered !== draggedRow ? hovered : null);
       },
       { passive: false }
     );
 
     handle.addEventListener('touchend', async () => {
       if (!draggedRow) return;
-      row.classList.remove('dragging');
-      draggedRow = null;
-      await commitGuestOrder();
+      await endDrag();
     });
   }
 
@@ -303,7 +331,8 @@ function parseSheetRows(rows) {
     list.addEventListener('dragover', (e) => {
       e.preventDefault();
       if (!draggedRow) return;
-      placeDraggedRow(list, draggedRow, e.clientY);
+      const hovered = getRowUnderPoint(e.clientX, e.clientY);
+      highlightDropTarget(hovered && hovered !== draggedRow ? hovered : null);
     });
 
     list.addEventListener('drop', (e) => {

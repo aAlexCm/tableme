@@ -893,6 +893,56 @@ body.modal-open {
   z-index: 5;
 }
 
+/* While reordering, the row under the cursor keeps changing as the list
+   reshuffles — letting :hover and the transition react to that made rows
+   flicker constantly and made it hard to tell where a drop would land. */
+body.dragging-guest-row .guest-row,
+body.dragging-guest-row .guest-row-empty {
+  transition: none;
+}
+
+body.dragging-guest-row .guest-row:not(.dragging):hover {
+  background: var(--paper);
+  box-shadow: 0 6px 16px rgba(138, 109, 60, 0.06);
+}
+
+body.admin-theme.dragging-guest-row .guest-row:not(.dragging):hover {
+  background: var(--paper);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+}
+
+/* The row currently under the pointer while dragging — this is the seat the
+   guest would land in if dropped right now. */
+.guest-row-drop-target {
+  border-color: var(--gold-deep) !important;
+  background: color-mix(in srgb, var(--gold) 16%, var(--paper)) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--gold) 40%, transparent) !important;
+}
+
+body.admin-theme .guest-row-drop-target {
+  border-color: #64748b !important;
+  background: color-mix(in srgb, #64748b 14%, var(--paper)) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, #64748b 35%, transparent) !important;
+}
+
+.guest-row-drag-ghost {
+  position: fixed;
+  top: 0;
+  left: 0;
+  transform: translate(-50%, -130%);
+  padding: 8px 14px;
+  border-radius: var(--radius);
+  background: var(--gold);
+  color: #fff;
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 50;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.3);
+}
+
 .drag-handle {
   display: flex;
   align-items: center;
