@@ -7,11 +7,12 @@ import {
   GUEST_FONT_BODY_OPTIONS,
   getDefaultTheme,
 } from './guest-themes.js';
-import { DECORATION_ELEMENTS, DECORATION_POSITIONS, getDefaultDecoration } from './guest-decorations.js';
+import { DECORATION_ELEMENTS, DECORATION_POSITIONS, getDefaultDecoration, normalizeDecoration } from './guest-decorations.js';
 import { ICONS as TABLE_ICONS } from './table-modal.js';
 
 const UPLOAD_ICON = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg>';
 const NONE_ICON = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M5 19 19 5"/></svg>';
+const ARROW_ICON = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="4"/><polyline points="6 10 12 4 18 10"/></svg>';
 const MAX_DECORATION_DIMENSION = 480;
 
 function readAndResizeImage(file) {
@@ -80,7 +81,7 @@ export function createThemeSettings({ weddingId, getLang }) {
   const decorationPreviewImgEl = document.getElementById('theme-decoration-preview-img');
   const decorationRemoveBtn = document.getElementById('theme-decoration-remove-btn');
   const decorationPositionFieldEl = document.getElementById('theme-decoration-position-field');
-  const decorationPositionSelectEl = document.getElementById('theme-decoration-position');
+  const decorationPositionGridEl = document.getElementById('theme-decoration-position-grid');
 
   function updateLabels() {
     const lang = getLang();
@@ -133,7 +134,7 @@ export function createThemeSettings({ weddingId, getLang }) {
       </div>
     `).join('');
 
-    const decoration = theme.decoration || getDefaultDecoration();
+    const decoration = normalizeDecoration(theme.decoration);
     const decorationOptions = [
       { key: 'none', labelKey: 'decorationNone', preview: NONE_ICON },
       ...DECORATION_ELEMENTS.map((opt) => ({ key: opt.key, labelKey: opt.labelKey, preview: opt.svg })),
@@ -157,8 +158,11 @@ export function createThemeSettings({ weddingId, getLang }) {
     }
 
     decorationPositionFieldEl.hidden = decoration.element === 'none';
-    decorationPositionSelectEl.innerHTML = DECORATION_POSITIONS.map((pos) => `
-      <option value="${pos.key}" ${decoration.position === pos.key ? 'selected' : ''}>${escapeHtml(t(lang, pos.labelKey))}</option>
+    decorationPositionGridEl.innerHTML = DECORATION_POSITIONS.map((pos) => `
+      <button type="button" class="theme-decoration-position-option${decoration.positions.includes(pos.key) ? ' active' : ''}" data-position="${pos.key}" style="grid-area:${pos.key}" title="${escapeHtml(t(lang, pos.labelKey))}">
+        <span class="theme-decoration-position-arrow" style="transform:rotate(${pos.arrowAngle}deg)">${ARROW_ICON}</span>
+        <span class="theme-decoration-position-label">${escapeHtml(t(lang, pos.labelKey))}</span>
+      </button>
     `).join('');
   }
 
@@ -240,10 +244,10 @@ export function createThemeSettings({ weddingId, getLang }) {
     const wedding = await Storage.getWedding(weddingId);
     if (!wedding) return;
     const theme = wedding.theme || getDefaultTheme();
-    const prevDecoration = theme.decoration || getDefaultDecoration();
+    const prevDecoration = normalizeDecoration(theme.decoration);
     const decoration = {
       element: key,
-      position: prevDecoration.position || getDefaultDecoration().position,
+      positions: prevDecoration.positions,
       customImage: key === 'custom' ? prevDecoration.customImage || null : null,
     };
     await Storage.setTheme(weddingId, { ...theme, decoration });
@@ -260,7 +264,7 @@ export function createThemeSettings({ weddingId, getLang }) {
     const wedding = await Storage.getWedding(weddingId);
     if (!wedding) return;
     const theme = wedding.theme || getDefaultTheme();
-    const prevDecoration = theme.decoration || getDefaultDecoration();
+    const prevDecoration = normalizeDecoration(theme.decoration);
     const decoration = { ...prevDecoration, element: 'custom', customImage: dataUrl };
     await Storage.setTheme(weddingId, { ...theme, decoration });
     await render();
@@ -275,13 +279,22 @@ export function createThemeSettings({ weddingId, getLang }) {
     await render();
   });
 
-  decorationPositionSelectEl.addEventListener('change', async () => {
+  decorationPositionGridEl.addEventListener('click', async (e) => {
+    const btn = e.target.closest('.theme-decoration-position-option');
+    if (!btn) return;
+    const key = btn.dataset.position;
     const wedding = await Storage.getWedding(weddingId);
     if (!wedding) return;
     const theme = wedding.theme || getDefaultTheme();
-    const prevDecoration = theme.decoration || getDefaultDecoration();
-    const decoration = { ...prevDecoration, position: decorationPositionSelectEl.value };
+    const prevDecoration = normalizeDecoration(theme.decoration);
+    const isActive = prevDecoration.positions.includes(key);
+    if (isActive && prevDecoration.positions.length === 1) return;
+    const positions = isActive
+      ? prevDecoration.positions.filter((p) => p !== key)
+      : [...prevDecoration.positions, key];
+    const decoration = { ...prevDecoration, positions };
     await Storage.setTheme(weddingId, { ...theme, decoration });
+    await render();
   });
 
   function init() {

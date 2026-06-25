@@ -122,12 +122,14 @@ export const DECORATION_ELEMENTS = [
   },
 ];
 
+// `arrowAngle` rotates a single up-pointing arrow icon to face each corner,
+// so the position picker shows visually where the decoration will land.
 export const DECORATION_POSITIONS = [
-  { key: 'top-left', labelKey: 'positionTopLeft' },
-  { key: 'top-center', labelKey: 'positionTopCenter' },
-  { key: 'top-right', labelKey: 'positionTopRight' },
-  { key: 'bottom-left', labelKey: 'positionBottomLeft' },
-  { key: 'bottom-right', labelKey: 'positionBottomRight' },
+  { key: 'top-left', labelKey: 'positionTopLeft', arrowAngle: -45 },
+  { key: 'top-center', labelKey: 'positionTopCenter', arrowAngle: 0 },
+  { key: 'top-right', labelKey: 'positionTopRight', arrowAngle: 45 },
+  { key: 'bottom-left', labelKey: 'positionBottomLeft', arrowAngle: -135 },
+  { key: 'bottom-right', labelKey: 'positionBottomRight', arrowAngle: 135 },
 ];
 
 // Each preset is drawn assuming it emerges from the bottom-left corner —
@@ -147,52 +149,63 @@ export function getDecorationElement(key) {
 }
 
 export function getDefaultDecoration() {
-  return { element: 'none', position: 'top-right', customImage: null };
+  return { element: 'none', positions: ['top-right'], customImage: null };
+}
+
+// Older saved themes stored a single `position` string — fold that into the
+// new `positions` array so existing weddings keep their chosen corner.
+export function normalizeDecoration(decoration) {
+  const deco = decoration || {};
+  let positions = Array.isArray(deco.positions) && deco.positions.length
+    ? deco.positions
+    : (deco.position ? [deco.position] : getDefaultDecoration().positions);
+  positions = positions.filter((key) => POSITION_LAYOUT[key]);
+  if (positions.length === 0) positions = getDefaultDecoration().positions;
+  return {
+    element: deco.element || 'none',
+    positions,
+    customImage: deco.customImage || null,
+  };
 }
 
 export function applyGuestDecoration(decoration, mountEl) {
   if (!mountEl) return;
-  const deco = decoration || getDefaultDecoration();
-  mountEl.removeAttribute('style');
+  const deco = normalizeDecoration(decoration);
   mountEl.innerHTML = '';
 
-  if (!deco.element || deco.element === 'none') {
-    mountEl.hidden = true;
-    return;
-  }
+  if (!deco.element || deco.element === 'none') return;
 
   const isCustom = deco.element === 'custom' && deco.customImage;
-  if (!isCustom && deco.element !== 'custom' && !getDecorationElement(deco.element)) {
-    mountEl.hidden = true;
-    return;
-  }
-  if (deco.element === 'custom' && !deco.customImage) {
-    mountEl.hidden = true;
-    return;
-  }
-
-  const layout = POSITION_LAYOUT[deco.position] || POSITION_LAYOUT['top-right'];
-  if (layout.top != null) mountEl.style.top = layout.top;
-  if (layout.bottom != null) mountEl.style.bottom = layout.bottom;
-  if (layout.left != null) mountEl.style.left = layout.left;
-  if (layout.right != null) mountEl.style.right = layout.right;
+  if (!isCustom && deco.element !== 'custom' && !getDecorationElement(deco.element)) return;
+  if (deco.element === 'custom' && !deco.customImage) return;
 
   const preset = !isCustom ? getDecorationElement(deco.element) : null;
-  const transforms = [];
-  if (layout.centerX) transforms.push('translateX(-50%)');
-  if (!isCustom) {
-    if (layout.mirrorX) transforms.push('scaleX(-1)');
-    if (layout.mirrorY && !(preset && preset.noMirrorY)) transforms.push('scaleY(-1)');
-  }
-  mountEl.style.transform = transforms.join(' ');
 
-  if (isCustom) {
-    const img = document.createElement('img');
-    img.src = deco.customImage;
-    img.alt = '';
-    mountEl.appendChild(img);
-  } else {
-    mountEl.innerHTML = getDecorationElement(deco.element).svg;
-  }
-  mountEl.hidden = false;
+  deco.positions.forEach((positionKey) => {
+    const layout = POSITION_LAYOUT[positionKey] || POSITION_LAYOUT['top-right'];
+    const item = document.createElement('div');
+    item.className = 'guest-decoration-item';
+    if (layout.top != null) item.style.top = layout.top;
+    if (layout.bottom != null) item.style.bottom = layout.bottom;
+    if (layout.left != null) item.style.left = layout.left;
+    if (layout.right != null) item.style.right = layout.right;
+
+    const transforms = [];
+    if (layout.centerX) transforms.push('translateX(-50%)');
+    if (!isCustom) {
+      if (layout.mirrorX) transforms.push('scaleX(-1)');
+      if (layout.mirrorY && !(preset && preset.noMirrorY)) transforms.push('scaleY(-1)');
+    }
+    item.style.transform = transforms.join(' ');
+
+    if (isCustom) {
+      const img = document.createElement('img');
+      img.src = deco.customImage;
+      img.alt = '';
+      item.appendChild(img);
+    } else {
+      item.innerHTML = preset.svg;
+    }
+    mountEl.appendChild(item);
+  });
 }
