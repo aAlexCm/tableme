@@ -7,8 +7,8 @@ const LANG_KEY = 'tableme_wedding_admin_lang';
 // html2canvas/jsPDF stretch the rasterized sheet to fill the true A4 page
 // size regardless of this pixel size, so shrinking it doesn't affect print
 // or PDF fidelity, only how big the editor looks on screen.
-const SHEET_WIDTH = 500;
-const SHEET_HEIGHT = 707;
+const SHEET_WIDTH = 360;
+const SHEET_HEIGHT = 509;
 
 const FONT_OPTIONS = [
   { key: 'playfair', label: 'Playfair Display', family: "'Playfair Display', serif" },
@@ -263,7 +263,7 @@ function fontFamilyFor(fontKey) {
   downloadBtn.addEventListener('click', async () => {
     downloadBtn.disabled = true;
     try {
-      const canvas = await window.html2canvas(sheetEl, { scale: 3, useCORS: true });
+      const canvas = await window.html2canvas(sheetEl, { scale: 4, useCORS: true });
       const { jsPDF } = window.jspdf;
       const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
       const pageWidth = pdf.internal.pageSize.getWidth();
