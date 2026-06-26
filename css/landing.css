@@ -234,13 +234,60 @@ body.landing-theme {
   line-height: 1.5;
 }
 
-.landing-screenshots-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+.landing-carousel {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.landing-carousel-arrow {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border-radius: 50%;
+  background: var(--paper);
+  border: 1px solid var(--gold-light);
+  color: var(--charcoal);
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.landing-carousel-arrow:hover {
+  background: var(--sage-light);
+}
+
+.landing-carousel-arrow:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.landing-carousel-arrow:disabled:hover {
+  background: var(--paper);
+}
+
+.landing-carousel-viewport {
+  flex: 1 1 auto;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+
+.landing-carousel-viewport::-webkit-scrollbar {
+  display: none;
+}
+
+.landing-carousel-track {
+  display: flex;
   gap: 22px;
 }
 
 .landing-screenshot-frame {
+  flex: 0 0 calc((100% - 44px) / 3);
+  scroll-snap-align: start;
   margin: 0;
   border-radius: var(--radius);
   overflow: hidden;
@@ -455,12 +502,26 @@ body.landing-theme {
 
   .landing-steps,
   .landing-features-grid,
-  .landing-screenshots-grid,
   .landing-pricing-grid {
     grid-template-columns: 1fr;
   }
 
   .landing-pricing-card-featured {
     transform: none;
+  }
+
+  .landing-screenshot-frame {
+    flex-basis: 100%;
+  }
+
+  .landing-carousel-arrow {
+    width: 34px;
+    height: 34px;
+  }
+}
+
+@media (min-width: 761px) and (max-width: 900px) {
+  .landing-screenshot-frame {
+    flex-basis: calc((100% - 22px) / 2);
   }
 }

@@ -40,6 +40,29 @@ const LANG_KEY = 'tableme_landing_lang';
     link.addEventListener('click', closeNav);
   });
 
+  const carouselViewport = document.getElementById('landing-carousel-viewport');
+  const carouselPrev = document.getElementById('landing-carousel-prev');
+  const carouselNext = document.getElementById('landing-carousel-next');
+
+  function carouselStep(dir) {
+    const frame = carouselViewport.querySelector('.landing-screenshot-frame');
+    if (!frame) return;
+    const gap = parseFloat(getComputedStyle(carouselViewport.querySelector('.landing-carousel-track')).gap) || 0;
+    carouselViewport.scrollBy({ left: dir * (frame.getBoundingClientRect().width + gap), behavior: 'smooth' });
+  }
+
+  function updateCarouselArrows() {
+    const maxScroll = carouselViewport.scrollWidth - carouselViewport.clientWidth;
+    carouselPrev.disabled = carouselViewport.scrollLeft <= 1;
+    carouselNext.disabled = carouselViewport.scrollLeft >= maxScroll - 1;
+  }
+
+  carouselPrev.addEventListener('click', () => carouselStep(-1));
+  carouselNext.addEventListener('click', () => carouselStep(1));
+  carouselViewport.addEventListener('scroll', updateCarouselArrows);
+  window.addEventListener('resize', updateCarouselArrows);
+  updateCarouselArrows();
+
   const lightbox = document.getElementById('screenshot-lightbox');
   const lightboxImg = document.getElementById('screenshot-lightbox-img');
   const lightboxClose = document.getElementById('screenshot-lightbox-close');

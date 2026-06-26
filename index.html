@@ -115,43 +115,53 @@
 
   <section class="landing-section landing-screenshots" id="screenshots">
     <h2 data-i18n="landingScreenshotsTitle">Un aperçu de l'application</h2>
-    <div class="landing-screenshots-grid">
-      <figure class="landing-screenshot-frame">
-        <button type="button" class="landing-screenshot-btn" data-full="images/screenshot-dashboard.png">
-          <img src="images/screenshot-dashboard.png" alt="" loading="lazy" />
-        </button>
-        <figcaption data-i18n="landingScreenshot1Caption">Votre tableau de bord</figcaption>
-      </figure>
-      <figure class="landing-screenshot-frame">
-        <button type="button" class="landing-screenshot-btn" data-full="images/screenshot-floorplan.png">
-          <img src="images/screenshot-floorplan.png" alt="" loading="lazy" />
-        </button>
-        <figcaption data-i18n="landingScreenshot2Caption">Plan de salle interactif</figcaption>
-      </figure>
-      <figure class="landing-screenshot-frame">
-        <button type="button" class="landing-screenshot-btn" data-full="images/screenshot-guestlist.png">
-          <img src="images/screenshot-guestlist.png" alt="" loading="lazy" />
-        </button>
-        <figcaption data-i18n="landingScreenshot3Caption">Liste d'invités</figcaption>
-      </figure>
-      <figure class="landing-screenshot-frame">
-        <button type="button" class="landing-screenshot-btn" data-full="images/screenshot-import.png">
-          <img src="images/screenshot-import.png" alt="" loading="lazy" />
-        </button>
-        <figcaption data-i18n="landingScreenshot4Caption">Import de votre liste</figcaption>
-      </figure>
-      <figure class="landing-screenshot-frame">
-        <button type="button" class="landing-screenshot-btn" data-full="images/screenshot-qrcode.png">
-          <img src="images/screenshot-qrcode.png" alt="" loading="lazy" />
-        </button>
-        <figcaption data-i18n="landingScreenshot5Caption">Partage en QR code</figcaption>
-      </figure>
-      <figure class="landing-screenshot-frame">
-        <button type="button" class="landing-screenshot-btn" data-full="images/screenshot-poster.png">
-          <img src="images/screenshot-poster.png" alt="" loading="lazy" />
-        </button>
-        <figcaption data-i18n="landingScreenshot6Caption">Affiche imprimable</figcaption>
-      </figure>
+    <div class="landing-carousel">
+      <button type="button" class="landing-carousel-arrow landing-carousel-prev" id="landing-carousel-prev" aria-label="Previous">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <div class="landing-carousel-viewport" id="landing-carousel-viewport">
+        <div class="landing-carousel-track">
+          <figure class="landing-screenshot-frame">
+            <button type="button" class="landing-screenshot-btn" data-full="images/screenshot-dashboard.png">
+              <img src="images/screenshot-dashboard.png" alt="" loading="lazy" />
+            </button>
+            <figcaption data-i18n="landingScreenshot1Caption">Votre tableau de bord</figcaption>
+          </figure>
+          <figure class="landing-screenshot-frame">
+            <button type="button" class="landing-screenshot-btn" data-full="images/screenshot-floorplan.png">
+              <img src="images/screenshot-floorplan.png" alt="" loading="lazy" />
+            </button>
+            <figcaption data-i18n="landingScreenshot2Caption">Plan de salle interactif</figcaption>
+          </figure>
+          <figure class="landing-screenshot-frame">
+            <button type="button" class="landing-screenshot-btn" data-full="images/screenshot-guestlist.png">
+              <img src="images/screenshot-guestlist.png" alt="" loading="lazy" />
+            </button>
+            <figcaption data-i18n="landingScreenshot3Caption">Liste d'invités</figcaption>
+          </figure>
+          <figure class="landing-screenshot-frame">
+            <button type="button" class="landing-screenshot-btn" data-full="images/screenshot-import.png">
+              <img src="images/screenshot-import.png" alt="" loading="lazy" />
+            </button>
+            <figcaption data-i18n="landingScreenshot4Caption">Import de votre liste</figcaption>
+          </figure>
+          <figure class="landing-screenshot-frame">
+            <button type="button" class="landing-screenshot-btn" data-full="images/screenshot-qrcode.png">
+              <img src="images/screenshot-qrcode.png" alt="" loading="lazy" />
+            </button>
+            <figcaption data-i18n="landingScreenshot5Caption">Partage en QR code</figcaption>
+          </figure>
+          <figure class="landing-screenshot-frame">
+            <button type="button" class="landing-screenshot-btn" data-full="images/screenshot-poster.png">
+              <img src="images/screenshot-poster.png" alt="" loading="lazy" />
+            </button>
+            <figcaption data-i18n="landingScreenshot6Caption">Affiche imprimable</figcaption>
+          </figure>
+        </div>
+      </div>
+      <button type="button" class="landing-carousel-arrow landing-carousel-next" id="landing-carousel-next" aria-label="Next">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg>
+      </button>
     </div>
   </section>
 
