@@ -504,6 +504,11 @@ body.landing-theme {
     right: 18px;
   }
 
+  body.landing-theme .lang-switcher-menu {
+    top: auto;
+    bottom: calc(100% + 8px);
+  }
+
   .landing-hero h1 {
     font-size: 1.8rem;
   }
