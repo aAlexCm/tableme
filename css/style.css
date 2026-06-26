@@ -1391,7 +1391,23 @@ nav.admin-nav.admin-nav-stacked {
 }
 
 .admin-quick-links {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
   margin-bottom: 18px;
+}
+
+.admin-login-card {
+  max-width: 380px;
+  margin: 60px auto;
+}
+
+.form-error-text {
+  margin: -6px 0 4px;
+  font-size: 0.82rem;
+  color: var(--error);
 }
 
 .partner-icon-grid {

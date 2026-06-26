@@ -14,8 +14,26 @@
   <div class="page">
     <div id="lang-switcher-mount" class="lang-switcher-mount"></div>
 
+    <div id="partners-admin-login" class="card admin-login-card" hidden>
+      <h2 data-i18n="adminLoginTitle">Connexion</h2>
+      <form id="partners-admin-login-form" class="field-grid field-grid-single">
+        <div class="field">
+          <label for="partners-admin-login-email" data-i18n="adminLoginEmailLabel">Email</label>
+          <input type="email" id="partners-admin-login-email" autocomplete="username" required />
+        </div>
+        <div class="field">
+          <label for="partners-admin-login-password" data-i18n="adminLoginPasswordLabel">Mot de passe</label>
+          <input type="password" id="partners-admin-login-password" autocomplete="current-password" required />
+        </div>
+        <p class="form-error-text" id="partners-admin-login-error" hidden></p>
+        <button type="submit" data-i18n="adminLoginSubmitBtn">Se connecter</button>
+      </form>
+    </div>
+
+    <div id="partners-admin-content" hidden>
     <div class="admin-quick-links">
       <a class="secondary" href="admin.html" data-i18n="backToAdminLink">&larr; Retour</a>
+      <button type="button" class="secondary" id="partners-admin-logout-btn" data-i18n="adminLogoutBtn">Se déconnecter</button>
     </div>
 
     <header class="hero">
@@ -132,6 +150,7 @@
         </table>
       </div>
       <p class="empty-state" id="partner-stats-empty" data-i18n="partnerStatsEmpty" hidden>Aucune activité enregistrée pour le moment.</p>
+    </div>
     </div>
   </div>
 

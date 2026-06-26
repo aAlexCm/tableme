@@ -2,6 +2,7 @@ import { Storage } from './storage.js';
 import { LANGS, LANG_LABELS, applyTranslations, buildLangSwitcher, t } from './i18n.js';
 import { FEATURE_FLAGS, isFeatureEnabled } from './features.js';
 import { getCountries, getRegions, getCities } from './geo.js';
+import { waitForAuthUser, signIn, signOutUser } from './auth-guard.js';
 
 const ADMIN_LANG_KEY = 'tableme_admin_lang';
 
@@ -19,6 +20,14 @@ const ICONS = {
   let currentLang = localStorage.getItem(ADMIN_LANG_KEY) || 'fr';
 
   const langMount = document.getElementById('lang-switcher-mount');
+
+  const loginEl = document.getElementById('admin-login');
+  const loginForm = document.getElementById('admin-login-form');
+  const loginEmailInput = document.getElementById('admin-login-email');
+  const loginPasswordInput = document.getElementById('admin-login-password');
+  const loginErrorEl = document.getElementById('admin-login-error');
+  const adminContentEl = document.getElementById('admin-content');
+  const logoutBtn = document.getElementById('admin-logout-btn');
 
   const weddingForm = document.getElementById('wedding-form');
   const weddingNameInput = document.getElementById('wedding-name');
@@ -86,7 +95,9 @@ const ICONS = {
     localStorage.setItem(ADMIN_LANG_KEY, lang);
     applyTranslations(lang);
     updatePageTitle();
-    renderWeddings();
+    // Logged-out visitors see the login form, not the wedding list — calling
+    // this while logged out would just throw a permissions error.
+    if (!adminContentEl.hidden) renderWeddings();
   }
 
   async function renderWeddings() {
@@ -373,9 +384,43 @@ const ICONS = {
     }
   });
 
+  function showLogin() {
+    loginEl.hidden = false;
+    adminContentEl.hidden = true;
+  }
+
+  async function showContent() {
+    loginEl.hidden = true;
+    adminContentEl.hidden = false;
+    populateWeddingLangSelect();
+    await renderWeddings();
+  }
+
+  loginForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    loginErrorEl.hidden = true;
+    const result = await signIn(loginEmailInput.value.trim(), loginPasswordInput.value);
+    if (result.ok) {
+      loginPasswordInput.value = '';
+      await showContent();
+    } else {
+      loginErrorEl.textContent = t(currentLang, 'adminLoginError');
+      loginErrorEl.hidden = false;
+    }
+  });
+
+  logoutBtn.addEventListener('click', async () => {
+    await signOutUser();
+    showLogin();
+  });
+
   langMount.appendChild(buildLangSwitcher(currentLang, setLang));
   applyTranslations(currentLang);
   updatePageTitle();
-  populateWeddingLangSelect();
-  renderWeddings();
+
+  (async function boot() {
+    const user = await waitForAuthUser();
+    if (user) await showContent();
+    else showLogin();
+  })();
 })();

@@ -2,6 +2,7 @@ import { Storage } from './storage.js';
 import { applyTranslations, buildLangSwitcher, t } from './i18n.js';
 import { PARTNER_CATEGORIES, PARTNER_ICONS, CONTACT_CHANNELS } from './partners.js';
 import { getCountries, getRegions, getCities } from './geo.js';
+import { waitForAuthUser, signIn, signOutUser } from './auth-guard.js';
 
 const ADMIN_LANG_KEY = 'tableme_admin_lang';
 const MAX_PHOTO_DIMENSION = 640;
@@ -45,6 +46,14 @@ function readAndResizeImage(file) {
   let selectedIcon = PARTNER_ICONS[0].key;
 
   const langMount = document.getElementById('lang-switcher-mount');
+
+  const loginEl = document.getElementById('partners-admin-login');
+  const loginForm = document.getElementById('partners-admin-login-form');
+  const loginEmailInput = document.getElementById('partners-admin-login-email');
+  const loginPasswordInput = document.getElementById('partners-admin-login-password');
+  const loginErrorEl = document.getElementById('partners-admin-login-error');
+  const contentEl = document.getElementById('partners-admin-content');
+  const logoutBtn = document.getElementById('partners-admin-logout-btn');
 
   const formTitleEl = document.getElementById('partner-form-title');
   const form = document.getElementById('partner-form');
@@ -124,6 +133,9 @@ function readAndResizeImage(file) {
     localStorage.setItem(ADMIN_LANG_KEY, lang);
     applyTranslations(lang);
     updatePageTitle();
+    // Logged-out visitors only see the login form (already translated above
+    // via applyTranslations) — the rest below touches the gated content.
+    if (contentEl.hidden) return;
     renderCategoryOptions();
     renderIconGrid();
     renderContactsFields();
@@ -518,11 +530,14 @@ function readAndResizeImage(file) {
     await renderPartnerList();
   });
 
-  (async function init() {
-    photoRemoveBtn.innerHTML = ICONS.trash;
-    langMount.appendChild(buildLangSwitcher(currentLang, setLang));
-    applyTranslations(currentLang);
-    updatePageTitle();
+  function showLogin() {
+    loginEl.hidden = false;
+    contentEl.hidden = true;
+  }
+
+  async function showContent() {
+    loginEl.hidden = true;
+    contentEl.hidden = false;
     renderCategoryOptions();
     renderIconGrid();
     renderContactsFields();
@@ -531,5 +546,33 @@ function readAndResizeImage(file) {
     resetGeoSelect(citySelect, t(currentLang, 'partnerGeoAnyCity'));
     await renderPartnerList();
     await renderPartnerStats();
+  }
+
+  loginForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    loginErrorEl.hidden = true;
+    const result = await signIn(loginEmailInput.value.trim(), loginPasswordInput.value);
+    if (result.ok) {
+      loginPasswordInput.value = '';
+      await showContent();
+    } else {
+      loginErrorEl.textContent = t(currentLang, 'adminLoginError');
+      loginErrorEl.hidden = false;
+    }
+  });
+
+  logoutBtn.addEventListener('click', async () => {
+    await signOutUser();
+    showLogin();
+  });
+
+  (async function init() {
+    photoRemoveBtn.innerHTML = ICONS.trash;
+    langMount.appendChild(buildLangSwitcher(currentLang, setLang));
+    applyTranslations(currentLang);
+    updatePageTitle();
+    const user = await waitForAuthUser();
+    if (user) await showContent();
+    else showLogin();
   })();
 })();

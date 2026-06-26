@@ -14,7 +14,23 @@
   <div class="page">
     <div id="lang-switcher-mount" class="lang-switcher-mount"></div>
 
-    <div id="admin-content">
+    <div id="admin-login" class="card admin-login-card" hidden>
+      <h2 data-i18n="adminLoginTitle">Connexion</h2>
+      <form id="admin-login-form" class="field-grid field-grid-single">
+        <div class="field">
+          <label for="admin-login-email" data-i18n="adminLoginEmailLabel">Email</label>
+          <input type="email" id="admin-login-email" autocomplete="username" required />
+        </div>
+        <div class="field">
+          <label for="admin-login-password" data-i18n="adminLoginPasswordLabel">Mot de passe</label>
+          <input type="password" id="admin-login-password" autocomplete="current-password" required />
+        </div>
+        <p class="form-error-text" id="admin-login-error" hidden></p>
+        <button type="submit" data-i18n="adminLoginSubmitBtn">Se connecter</button>
+      </form>
+    </div>
+
+    <div id="admin-content" hidden>
       <header class="hero">
         <p class="eyebrow" data-i18n="adminEyebrow">Administration</p>
         <h1 data-i18n="adminTitle">Gérer les mariages</h1>
@@ -24,6 +40,7 @@
 
       <div class="admin-quick-links">
         <a class="secondary" href="partners-admin.html" data-i18n="managePartnersLink">Gérer les partenaires &rarr;</a>
+        <button type="button" class="secondary" id="admin-logout-btn" data-i18n="adminLogoutBtn">Se déconnecter</button>
       </div>
 
       <div class="card">
