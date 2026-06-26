@@ -23,4 +23,31 @@ const LANG_KEY = 'tableme_landing_lang';
 
   langMount.appendChild(buildLangSwitcher(currentLang, setLang));
   applyTranslations(currentLang);
+
+  const lightbox = document.getElementById('screenshot-lightbox');
+  const lightboxImg = document.getElementById('screenshot-lightbox-img');
+  const lightboxClose = document.getElementById('screenshot-lightbox-close');
+
+  function openLightbox(src) {
+    lightboxImg.src = src;
+    lightbox.hidden = false;
+    document.body.classList.add('modal-open');
+  }
+
+  function closeLightbox() {
+    lightbox.hidden = true;
+    lightboxImg.src = '';
+    document.body.classList.remove('modal-open');
+  }
+
+  document.querySelectorAll('.landing-screenshot-btn').forEach((btn) => {
+    btn.addEventListener('click', () => openLightbox(btn.dataset.full));
+  });
+  lightboxClose.addEventListener('click', closeLightbox);
+  lightbox.addEventListener('click', (e) => {
+    if (e.target === lightbox) closeLightbox();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !lightbox.hidden) closeLightbox();
+  });
 })();

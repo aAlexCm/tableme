@@ -236,12 +236,26 @@ body.landing-theme {
   box-shadow: 0 10px 22px rgba(138, 109, 60, 0.1);
 }
 
+.landing-screenshot-btn {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
 .landing-screenshot-frame img {
   display: block;
   width: 100%;
   aspect-ratio: 16 / 10;
   object-fit: cover;
   object-position: top;
+  transition: filter 0.15s ease;
+}
+
+.landing-screenshot-btn:hover img {
+  filter: brightness(0.94);
 }
 
 .landing-screenshot-frame figcaption {

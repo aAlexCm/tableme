@@ -114,19 +114,50 @@
     <h2 data-i18n="landingScreenshotsTitle">Un aperçu de l'application</h2>
     <div class="landing-screenshots-grid">
       <figure class="landing-screenshot-frame">
-        <img src="images/screenshot-dashboard.png" alt="" loading="lazy" />
+        <button type="button" class="landing-screenshot-btn" data-full="images/screenshot-dashboard.png">
+          <img src="images/screenshot-dashboard.png" alt="" loading="lazy" />
+        </button>
         <figcaption data-i18n="landingScreenshot1Caption">Votre tableau de bord</figcaption>
       </figure>
       <figure class="landing-screenshot-frame">
-        <img src="images/screenshot-floorplan.png" alt="" loading="lazy" />
+        <button type="button" class="landing-screenshot-btn" data-full="images/screenshot-floorplan.png">
+          <img src="images/screenshot-floorplan.png" alt="" loading="lazy" />
+        </button>
         <figcaption data-i18n="landingScreenshot2Caption">Plan de salle interactif</figcaption>
       </figure>
       <figure class="landing-screenshot-frame">
-        <img src="images/screenshot-guestlist.png" alt="" loading="lazy" />
+        <button type="button" class="landing-screenshot-btn" data-full="images/screenshot-guestlist.png">
+          <img src="images/screenshot-guestlist.png" alt="" loading="lazy" />
+        </button>
         <figcaption data-i18n="landingScreenshot3Caption">Liste d'invités</figcaption>
+      </figure>
+      <figure class="landing-screenshot-frame">
+        <button type="button" class="landing-screenshot-btn" data-full="images/screenshot-import.png">
+          <img src="images/screenshot-import.png" alt="" loading="lazy" />
+        </button>
+        <figcaption data-i18n="landingScreenshot4Caption">Import de votre liste</figcaption>
+      </figure>
+      <figure class="landing-screenshot-frame">
+        <button type="button" class="landing-screenshot-btn" data-full="images/screenshot-qrcode.png">
+          <img src="images/screenshot-qrcode.png" alt="" loading="lazy" />
+        </button>
+        <figcaption data-i18n="landingScreenshot5Caption">Partage en QR code</figcaption>
+      </figure>
+      <figure class="landing-screenshot-frame">
+        <button type="button" class="landing-screenshot-btn" data-full="images/screenshot-poster.png">
+          <img src="images/screenshot-poster.png" alt="" loading="lazy" />
+        </button>
+        <figcaption data-i18n="landingScreenshot6Caption">Affiche imprimable</figcaption>
       </figure>
     </div>
   </section>
+
+  <div id="screenshot-lightbox" class="modal-overlay" hidden>
+    <div class="modal-panel photo-lightbox-panel">
+      <button type="button" class="modal-close" id="screenshot-lightbox-close" aria-label="Close">&times;</button>
+      <img id="screenshot-lightbox-img" src="" alt="" />
+    </div>
+  </div>
 
   <section class="landing-section landing-pricing" id="pricing">
     <h2 data-i18n="landingPricingTitle">Tarifs</h2>
