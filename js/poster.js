@@ -30,6 +30,18 @@ const ROTATE_ICON = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none"
 
 const QR_RENDER_SIZE = 256;
 
+const QR_BODY_PRESETS = [
+  { key: 'square', i18nKey: 'qrBodySquare', type: 'square' },
+  { key: 'dots', i18nKey: 'qrBodyDots', type: 'dots' },
+  { key: 'rounded', i18nKey: 'qrBodyRounded', type: 'rounded' },
+];
+
+const QR_CORNER_PRESETS = [
+  { key: 'square', i18nKey: 'qrCornerSquare', squareType: 'square', dotType: 'square' },
+  { key: 'rounded', i18nKey: 'qrCornerRounded', squareType: 'extra-rounded', dotType: 'square' },
+  { key: 'circle', i18nKey: 'qrCornerCircle', squareType: 'dot', dotType: 'dot' },
+];
+
 const DIVIDER_PRESETS = [
   { key: 'plain', i18nKey: 'dividerPresetPlain', ornament: '' },
   { key: 'heart', i18nKey: 'dividerPresetHeart', ornament: '♥' },
@@ -61,7 +73,13 @@ function normalizeElement(el) {
     rotation: typeof el.rotation === 'number' ? el.rotation : 0,
   };
   if (type === 'qr') {
-    return { ...base, size: typeof el.size === 'number' ? el.size : 140, color: el.color || '#2c2420' };
+    return {
+      ...base,
+      size: typeof el.size === 'number' ? el.size : 140,
+      color: el.color || '#2c2420',
+      bodyShape: QR_BODY_PRESETS.some((p) => p.key === el.bodyShape) ? el.bodyShape : QR_BODY_PRESETS[0].key,
+      cornerShape: QR_CORNER_PRESETS.some((p) => p.key === el.cornerShape) ? el.cornerShape : QR_CORNER_PRESETS[0].key,
+    };
   }
   if (type === 'divider') {
     return {
@@ -149,6 +167,8 @@ function fontFamilyFor(fontKey) {
   const fontSelect = document.getElementById('poster-font-select');
   const dividerStyleSelect = document.getElementById('poster-divider-style-select');
   const iconSymbolSelect = document.getElementById('poster-icon-symbol-select');
+  const qrBodySelect = document.getElementById('poster-qr-body-select');
+  const qrCornerSelect = document.getElementById('poster-qr-corner-select');
   const sizeInput = document.getElementById('poster-size-input');
   const dividerThicknessInput = document.getElementById('poster-divider-thickness-input');
   const dividerOrnamentSizeInput = document.getElementById('poster-divider-ornament-size-input');
@@ -223,13 +243,19 @@ function fontFamilyFor(fontKey) {
     const wrap = node.querySelector('.poster-qr-canvas');
     if (!wrap) return;
     wrap.innerHTML = '';
-    new window.QRCode(wrap, {
-      text: guestUrl,
+    const bodyPreset = QR_BODY_PRESETS.find((p) => p.key === el.bodyShape) || QR_BODY_PRESETS[0];
+    const cornerPreset = QR_CORNER_PRESETS.find((p) => p.key === el.cornerShape) || QR_CORNER_PRESETS[0];
+    new window.QRCodeStyling({
       width: QR_RENDER_SIZE,
       height: QR_RENDER_SIZE,
-      colorDark: el.color,
-      colorLight: 'rgba(0,0,0,0)',
-    });
+      data: guestUrl,
+      margin: 0,
+      qrOptions: { errorCorrectionLevel: 'M' },
+      dotsOptions: { color: el.color, type: bodyPreset.type },
+      cornersSquareOptions: { color: el.color, type: cornerPreset.squareType },
+      cornersDotOptions: { color: el.color, type: cornerPreset.dotType },
+      backgroundOptions: { color: 'transparent' },
+    }).append(wrap);
   }
 
   function applyQrStyle(node, el) {
@@ -308,6 +334,7 @@ function fontFamilyFor(fontKey) {
     const isText = el.type === 'text';
     const isDivider = el.type === 'divider';
     const isIcon = el.type === 'icon';
+    const isQr = el.type === 'qr';
 
     boldBtn.hidden = !isText;
     italicBtn.hidden = !isText;
@@ -317,6 +344,8 @@ function fontFamilyFor(fontKey) {
     fontSelect.hidden = !isText;
     dividerStyleSelect.hidden = !isDivider;
     iconSymbolSelect.hidden = !isIcon;
+    qrBodySelect.hidden = !isQr;
+    qrCornerSelect.hidden = !isQr;
     dividerThicknessInput.hidden = !isDivider;
     dividerOrnamentSizeInput.hidden = !isDivider;
     colorInput.value = el.color;
@@ -349,6 +378,13 @@ function fontFamilyFor(fontKey) {
       sizeInput.title = t(currentLang, 'posterSizeTooltip');
       sizeInput.min = '20';
       sizeInput.max = '200';
+      sizeInput.value = el.size;
+    } else if (isQr) {
+      qrBodySelect.value = el.bodyShape;
+      qrCornerSelect.value = el.cornerShape;
+      sizeInput.title = t(currentLang, 'posterSizeTooltip');
+      sizeInput.min = '60';
+      sizeInput.max = '320';
       sizeInput.value = el.size;
     } else {
       sizeInput.title = t(currentLang, 'posterSizeTooltip');
@@ -708,6 +744,8 @@ function fontFamilyFor(fontKey) {
       y: 80 + (poster.elements.length % 5) * 28,
       size: 140,
       color: '#2c2420',
+      bodyShape: QR_BODY_PRESETS[0].key,
+      cornerShape: QR_CORNER_PRESETS[0].key,
     };
     poster.elements.push(el);
     createQrNode(el);
@@ -765,6 +803,8 @@ function fontFamilyFor(fontKey) {
     if (value > 0) el.ornamentSize = value;
   }));
   iconSymbolSelect.addEventListener('change', () => updateSelected((el) => { el.symbol = iconSymbolSelect.value; }));
+  qrBodySelect.addEventListener('change', () => updateSelected((el) => { el.bodyShape = qrBodySelect.value; }));
+  qrCornerSelect.addEventListener('change', () => updateSelected((el) => { el.cornerShape = qrCornerSelect.value; }));
   sizeInput.addEventListener('input', () => updateSelected((el) => {
     const value = Number(sizeInput.value);
     if (!(value > 0)) return;
@@ -831,6 +871,14 @@ function fontFamilyFor(fontKey) {
     iconSymbolSelect.innerHTML = ICON_PRESETS.map((p) => `<option value="${p.key}">${p.symbol} ${t(currentLang, p.i18nKey)}</option>`).join('');
   }
 
+  function populateQrBodySelect() {
+    qrBodySelect.innerHTML = QR_BODY_PRESETS.map((p) => `<option value="${p.key}">${t(currentLang, p.i18nKey)}</option>`).join('');
+  }
+
+  function populateQrCornerSelect() {
+    qrCornerSelect.innerHTML = QR_CORNER_PRESETS.map((p) => `<option value="${p.key}">${t(currentLang, p.i18nKey)}</option>`).join('');
+  }
+
   downloadBtn.addEventListener('click', async () => {
     downloadBtn.disabled = true;
     try {
@@ -865,6 +913,8 @@ function fontFamilyFor(fontKey) {
     populateFontSelect();
     populateDividerStyleSelect();
     populateIconSymbolSelect();
+    populateQrBodySelect();
+    populateQrCornerSelect();
     if (selectedId) selectElement(selectedId);
     requestAnimationFrame(syncToolboxAlignment);
   }
@@ -893,6 +943,8 @@ function fontFamilyFor(fontKey) {
   populateFontSelect();
   populateDividerStyleSelect();
   populateIconSymbolSelect();
+  populateQrBodySelect();
+  populateQrCornerSelect();
   guestUrl = `${window.location.origin}${window.location.pathname.replace(/[^/]+$/, '')}index.html?id=${weddingId}`;
   poster = normalizePoster(wedding.poster);
   applySheetSize();
