@@ -4083,10 +4083,12 @@ body.admin-theme .guest-row {
 }
 
 body.admin-theme .guest-row:hover {
+  background: color-mix(in srgb, var(--gold) 6%, var(--paper));
   box-shadow: 0 3px 8px rgba(15, 23, 42, 0.08);
 }
 
 body.admin-theme .guest-row.dragging {
+  background: color-mix(in srgb, var(--gold) 6%, var(--paper));
   box-shadow: 0 6px 14px rgba(15, 23, 42, 0.15);
 }
 
@@ -4094,8 +4096,15 @@ body.admin-theme .guest-row-empty {
   border-color: color-mix(in srgb, var(--gold) 30%, transparent);
 }
 
+body.admin-theme .wedding-item {
+  background: var(--paper);
+  border: 1px solid #eef0f3;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
 body.admin-theme .wedding-item:hover {
-  background: color-mix(in srgb, var(--gold) 8%, var(--paper));
+  background: color-mix(in srgb, var(--gold) 6%, var(--paper));
+  box-shadow: 0 3px 8px rgba(15, 23, 42, 0.06);
 }
 
 body.admin-theme .modal-overlay {
