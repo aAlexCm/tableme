@@ -29,6 +29,7 @@ const DRAG_ICON = '<svg viewBox="0 0 24 24" width="13" height="13" fill="current
 const ROTATE_ICON = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 5a8 8 0 0 1 11 2"/><polyline points="17 3 18 8 13 7"/><path d="M18 19a8 8 0 0 1-11-2"/><polyline points="7 21 6 16 11 17"/></svg>';
 
 const QR_RENDER_SIZE = 256;
+const MAX_IMAGE_DIMENSION = 640;
 
 const QR_BODY_PRESETS = [
   { key: 'square', i18nKey: 'qrBodySquare', type: 'square' },
@@ -64,7 +65,7 @@ function getDefaultPoster() {
 }
 
 function normalizeElement(el) {
-  const type = ['qr', 'divider', 'icon'].includes(el.type) ? el.type : 'text';
+  const type = ['qr', 'divider', 'icon', 'image'].includes(el.type) ? el.type : 'text';
   const base = {
     id: el.id || generateId(),
     type,
@@ -97,6 +98,14 @@ function normalizeElement(el) {
       size: typeof el.size === 'number' ? el.size : 48,
       color: el.color || '#2c2420',
       symbol: ICON_PRESETS.some((p) => p.key === el.symbol) ? el.symbol : ICON_PRESETS[0].key,
+    };
+  }
+  if (type === 'image') {
+    return {
+      ...base,
+      src: typeof el.src === 'string' ? el.src : '',
+      width: typeof el.width === 'number' ? el.width : 160,
+      aspectRatio: typeof el.aspectRatio === 'number' && el.aspectRatio > 0 ? el.aspectRatio : 1,
     };
   }
   return {
@@ -155,8 +164,16 @@ function fontFamilyFor(fontKey) {
   const addQrBtn = document.getElementById('poster-add-qr-btn');
   const addDividerBtn = document.getElementById('poster-add-divider-btn');
   const addIconBtn = document.getElementById('poster-add-icon-btn');
+  const addImageBtn = document.getElementById('poster-add-image-btn');
   const downloadBtn = document.getElementById('poster-download-btn');
   const printBtn = document.getElementById('poster-print-btn');
+
+  const imageMenuEl = document.getElementById('poster-image-menu');
+  const imageUploadBtn = document.getElementById('poster-image-upload-btn');
+  const imagePasteBtn = document.getElementById('poster-image-paste-btn');
+  const imageUrlInput = document.getElementById('poster-image-url-input');
+  const imageUrlBtn = document.getElementById('poster-image-url-btn');
+  const imageFileInput = document.getElementById('poster-image-file-input');
 
   const toolbarEl = document.getElementById('poster-text-toolbar');
   const boldBtn = document.getElementById('poster-bold-btn');
@@ -311,10 +328,21 @@ function fontFamilyFor(fontKey) {
     }
   }
 
+  function applyImageStyle(node, el) {
+    node.style.left = `${el.x}px`;
+    node.style.top = `${el.y}px`;
+    applyRotation(node, el);
+    node.style.width = `${el.width}px`;
+    node.style.height = `${el.width / (el.aspectRatio || 1)}px`;
+    const img = node.querySelector('.poster-image-img');
+    if (img && img.getAttribute('src') !== el.src) img.src = el.src;
+  }
+
   function applyElementStyle(node, el) {
     if (el.type === 'qr') applyQrStyle(node, el);
     else if (el.type === 'divider') applyDividerStyle(node, el);
     else if (el.type === 'icon') applyIconStyle(node, el);
+    else if (el.type === 'image') applyImageStyle(node, el);
     else applyTextStyle(node, el);
   }
 
@@ -346,6 +374,7 @@ function fontFamilyFor(fontKey) {
     const isDivider = el.type === 'divider';
     const isIcon = el.type === 'icon';
     const isQr = el.type === 'qr';
+    const isImage = el.type === 'image';
 
     boldBtn.hidden = !isText;
     italicBtn.hidden = !isText;
@@ -359,8 +388,13 @@ function fontFamilyFor(fontKey) {
     qrCornerSelect.hidden = !isQr;
     dividerThicknessInput.hidden = !isDivider;
     dividerOrnamentSizeInput.hidden = !isDivider;
-    colorInput.value = el.color;
-    hexInput.value = el.color.toUpperCase();
+    // Images keep their own colors — no tint control for them.
+    colorInput.hidden = isImage;
+    hexInput.hidden = isImage;
+    if (!isImage) {
+      colorInput.value = el.color;
+      hexInput.value = el.color.toUpperCase();
+    }
 
     dividerThicknessInput.title = t(currentLang, 'posterThicknessTooltip');
     dividerOrnamentSizeInput.title = t(currentLang, 'posterOrnamentSizeTooltip');
@@ -397,6 +431,11 @@ function fontFamilyFor(fontKey) {
       sizeInput.min = '60';
       sizeInput.max = '320';
       sizeInput.value = el.size;
+    } else if (isImage) {
+      sizeInput.title = t(currentLang, 'posterWidthTooltip');
+      sizeInput.min = '40';
+      sizeInput.max = '500';
+      sizeInput.value = el.width;
     } else {
       sizeInput.title = t(currentLang, 'posterSizeTooltip');
       sizeInput.min = '60';
@@ -716,10 +755,54 @@ function fontFamilyFor(fontKey) {
     return node;
   }
 
+  function createImageNode(el) {
+    const node = document.createElement('div');
+    node.className = 'poster-el poster-image-el';
+    node.dataset.id = el.id;
+
+    const img = document.createElement('img');
+    img.className = 'poster-image-img';
+    img.draggable = false;
+    img.alt = '';
+    node.appendChild(img);
+
+    const handle = document.createElement('span');
+    handle.className = 'poster-text-drag-handle';
+    handle.innerHTML = DRAG_ICON;
+    node.appendChild(handle);
+
+    const resizeHandle = document.createElement('span');
+    resizeHandle.className = 'poster-resize-handle';
+    node.appendChild(resizeHandle);
+
+    const rotateHandle = document.createElement('span');
+    rotateHandle.className = 'poster-rotate-handle';
+    rotateHandle.innerHTML = ROTATE_ICON;
+    node.appendChild(rotateHandle);
+
+    wireDrag(node, node, el);
+    wireDrag(handle, node, el);
+    wireRotate(rotateHandle, node, el);
+    wireResize(resizeHandle, node, el, {
+      get: (e) => e.width,
+      set: (e, v) => { e.width = v; },
+      min: 40,
+      max: 500,
+      onChange: (n, e) => {
+        n.style.width = `${e.width}px`;
+        n.style.height = `${e.width / (e.aspectRatio || 1)}px`;
+      },
+    });
+    applyImageStyle(node, el);
+    sheetContentEl.appendChild(node);
+    return node;
+  }
+
   function createElementNode(el) {
     if (el.type === 'qr') return createQrNode(el);
     if (el.type === 'divider') return createDividerNode(el);
     if (el.type === 'icon') return createIconNode(el);
+    if (el.type === 'image') return createImageNode(el);
     return createTextNode(el);
   }
 
@@ -801,6 +884,157 @@ function fontFamilyFor(fontKey) {
     scheduleSave();
   });
 
+  function addImageElement(src, aspectRatio) {
+    const width = Math.min(200, SHEET_WIDTH - 40);
+    const el = {
+      id: generateId(),
+      type: 'image',
+      x: 60 + (poster.elements.length % 5) * 14,
+      y: 80 + (poster.elements.length % 5) * 28,
+      width,
+      aspectRatio: aspectRatio > 0 ? aspectRatio : 1,
+      src,
+    };
+    poster.elements.push(el);
+    createImageNode(el);
+    selectElement(el.id);
+    scheduleSave();
+  }
+
+  // Downscales the source image before it ever becomes a base64 string —
+  // posters are stored as a Firestore field, which has a 1MB document cap,
+  // so a few uncompressed phone photos could blow through that easily.
+  function readAndResizeImageFile(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onerror = () => reject(reader.error);
+      reader.onload = () => {
+        const img = new Image();
+        img.onerror = reject;
+        img.onload = () => {
+          const scale = Math.min(1, MAX_IMAGE_DIMENSION / Math.max(img.width, img.height));
+          const width = Math.round(img.width * scale);
+          const height = Math.round(img.height * scale);
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+          resolve({ dataUrl: canvas.toDataURL('image/jpeg', 0.85), aspectRatio: img.width / img.height });
+        };
+        img.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function openImageMenu() {
+    imageMenuEl.hidden = false;
+    if (window.matchMedia('(min-width: 761px)').matches) {
+      const toolboxRect = toolboxEl.getBoundingClientRect();
+      const btnRect = addImageBtn.getBoundingClientRect();
+      imageMenuEl.style.left = `${toolboxRect.right + 10}px`;
+      imageMenuEl.style.top = `${btnRect.top}px`;
+    } else {
+      const btnRect = addImageBtn.getBoundingClientRect();
+      imageMenuEl.style.left = `${Math.max(8, Math.min(btnRect.left, window.innerWidth - imageMenuEl.offsetWidth - 8))}px`;
+      imageMenuEl.style.top = `${btnRect.bottom + 8}px`;
+    }
+  }
+
+  function closeImageMenu() {
+    imageMenuEl.hidden = true;
+  }
+
+  addImageBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (imageMenuEl.hidden) openImageMenu();
+    else closeImageMenu();
+  });
+  imageMenuEl.addEventListener('mousedown', (e) => e.stopPropagation());
+  document.addEventListener('mousedown', (e) => {
+    if (imageMenuEl.hidden) return;
+    if (e.target.closest('.poster-image-menu') || e.target === addImageBtn || addImageBtn.contains(e.target)) return;
+    closeImageMenu();
+  });
+
+  imageUploadBtn.addEventListener('click', () => {
+    closeImageMenu();
+    imageFileInput.click();
+  });
+
+  imageFileInput.addEventListener('change', async () => {
+    const file = imageFileInput.files[0];
+    imageFileInput.value = '';
+    if (!file) return;
+    try {
+      const { dataUrl, aspectRatio } = await readAndResizeImageFile(file);
+      addImageElement(dataUrl, aspectRatio);
+    } catch (err) {
+      console.warn('poster image upload failed', err);
+    }
+  });
+
+  imagePasteBtn.addEventListener('click', async () => {
+    try {
+      const items = await navigator.clipboard.read();
+      for (const item of items) {
+        const imageType = item.types.find((ty) => ty.startsWith('image/'));
+        if (!imageType) continue;
+        const blob = await item.getType(imageType);
+        const { dataUrl, aspectRatio } = await readAndResizeImageFile(blob);
+        addImageElement(dataUrl, aspectRatio);
+        closeImageMenu();
+        return;
+      }
+      alert(t(currentLang, 'posterImagePasteEmpty'));
+    } catch (err) {
+      alert(t(currentLang, 'posterImagePasteUnsupported'));
+    }
+  });
+
+  function addImageFromUrl(url) {
+    if (!url) return;
+    const img = new Image();
+    img.onload = () => {
+      addImageElement(url, img.naturalWidth / img.naturalHeight);
+      imageUrlInput.value = '';
+      closeImageMenu();
+    };
+    img.onerror = () => {
+      alert(t(currentLang, 'posterImageUrlError'));
+    };
+    img.src = url;
+  }
+
+  imageUrlBtn.addEventListener('click', () => addImageFromUrl(imageUrlInput.value.trim()));
+  imageUrlInput.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+    addImageFromUrl(imageUrlInput.value.trim());
+  });
+  imageUrlInput.addEventListener('mousedown', (e) => e.stopPropagation());
+
+  // A plain Ctrl/Cmd+V anywhere on the page (not while typing elsewhere)
+  // also adds a pasted image directly — no need to open the image menu first.
+  document.addEventListener('paste', async (e) => {
+    if (e.target.closest('input, textarea, select, [contenteditable="true"]')) return;
+    const items = e.clipboardData && e.clipboardData.items;
+    if (!items) return;
+    for (const item of items) {
+      if (!item.type || !item.type.startsWith('image/')) continue;
+      const blob = item.getAsFile();
+      if (!blob) continue;
+      e.preventDefault();
+      try {
+        const { dataUrl, aspectRatio } = await readAndResizeImageFile(blob);
+        addImageElement(dataUrl, aspectRatio);
+      } catch (err) {
+        console.warn('poster paste image failed', err);
+      }
+      return;
+    }
+  });
+
   boldBtn.addEventListener('click', () => updateSelected((el) => { el.bold = !el.bold; }));
   italicBtn.addEventListener('click', () => updateSelected((el) => { el.italic = !el.italic; }));
   alignLeftBtn.addEventListener('click', () => updateSelected((el) => { el.align = 'left'; }));
@@ -823,7 +1057,7 @@ function fontFamilyFor(fontKey) {
     const value = Number(sizeInput.value);
     if (!(value > 0)) return;
     if (el.type === 'qr' || el.type === 'icon') el.size = value;
-    else if (el.type === 'divider') el.width = value;
+    else if (el.type === 'divider' || el.type === 'image') el.width = value;
     else el.fontSize = value;
   }));
   colorInput.addEventListener('input', () => updateSelected((el) => { el.color = colorInput.value; }));
@@ -974,6 +1208,9 @@ function fontFamilyFor(fontKey) {
   let resizeTimer = null;
   window.addEventListener('resize', () => {
     clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(syncToolboxAlignment, 150);
+    resizeTimer = setTimeout(() => {
+      syncToolboxAlignment();
+      if (!imageMenuEl.hidden) openImageMenu();
+    }, 150);
   });
 })();
