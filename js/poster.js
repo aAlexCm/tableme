@@ -67,6 +67,8 @@ function normalizeElement(el) {
     return {
       ...base,
       width: typeof el.width === 'number' ? el.width : 200,
+      thickness: typeof el.thickness === 'number' ? el.thickness : 1,
+      ornamentSize: typeof el.ornamentSize === 'number' ? el.ornamentSize : 16,
       color: el.color || '#2c2420',
       style: DIVIDER_PRESETS.some((p) => p.key === el.style) ? el.style : DIVIDER_PRESETS[0].key,
     };
@@ -148,6 +150,8 @@ function fontFamilyFor(fontKey) {
   const dividerStyleSelect = document.getElementById('poster-divider-style-select');
   const iconSymbolSelect = document.getElementById('poster-icon-symbol-select');
   const sizeInput = document.getElementById('poster-size-input');
+  const dividerThicknessInput = document.getElementById('poster-divider-thickness-input');
+  const dividerOrnamentSizeInput = document.getElementById('poster-divider-ornament-size-input');
   const colorInput = document.getElementById('poster-color-input');
   const hexInput = document.getElementById('poster-hex-input');
   const duplicateBtn = document.getElementById('poster-duplicate-btn');
@@ -243,11 +247,15 @@ function fontFamilyFor(fontKey) {
     applyRotation(node, el);
     node.style.width = `${el.width}px`;
     node.style.color = el.color;
+    node.querySelectorAll('.poster-divider-line').forEach((line) => {
+      line.style.height = `${el.thickness}px`;
+    });
     const ornamentEl = node.querySelector('.poster-divider-ornament');
     if (ornamentEl) {
       const preset = DIVIDER_PRESETS.find((p) => p.key === el.style) || DIVIDER_PRESETS[0];
       ornamentEl.textContent = preset.ornament;
       ornamentEl.hidden = !preset.ornament;
+      ornamentEl.style.fontSize = `${el.ornamentSize}px`;
     }
   }
 
@@ -309,6 +317,8 @@ function fontFamilyFor(fontKey) {
     fontSelect.hidden = !isText;
     dividerStyleSelect.hidden = !isDivider;
     iconSymbolSelect.hidden = !isIcon;
+    dividerThicknessInput.hidden = !isDivider;
+    dividerOrnamentSizeInput.hidden = !isDivider;
     colorInput.value = el.color;
     hexInput.value = el.color.toUpperCase();
 
@@ -327,6 +337,8 @@ function fontFamilyFor(fontKey) {
       sizeInput.min = '60';
       sizeInput.max = '320';
       sizeInput.value = el.width;
+      dividerThicknessInput.value = el.thickness;
+      dividerOrnamentSizeInput.value = el.ornamentSize;
     } else if (isIcon) {
       iconSymbolSelect.value = el.symbol;
       sizeInput.min = '20';
@@ -703,6 +715,8 @@ function fontFamilyFor(fontKey) {
       x: 60 + (poster.elements.length % 5) * 14,
       y: 80 + (poster.elements.length % 5) * 28,
       width: 200,
+      thickness: 1,
+      ornamentSize: 16,
       color: '#2c2420',
       style: DIVIDER_PRESETS[0].key,
     };
@@ -735,6 +749,14 @@ function fontFamilyFor(fontKey) {
   alignRightBtn.addEventListener('click', () => updateSelected((el) => { el.align = 'right'; }));
   fontSelect.addEventListener('change', () => updateSelected((el) => { el.fontKey = fontSelect.value; }));
   dividerStyleSelect.addEventListener('change', () => updateSelected((el) => { el.style = dividerStyleSelect.value; }));
+  dividerThicknessInput.addEventListener('input', () => updateSelected((el) => {
+    const value = Number(dividerThicknessInput.value);
+    if (value > 0) el.thickness = value;
+  }));
+  dividerOrnamentSizeInput.addEventListener('input', () => updateSelected((el) => {
+    const value = Number(dividerOrnamentSizeInput.value);
+    if (value > 0) el.ornamentSize = value;
+  }));
   iconSymbolSelect.addEventListener('change', () => updateSelected((el) => { el.symbol = iconSymbolSelect.value; }));
   sizeInput.addEventListener('input', () => updateSelected((el) => {
     const value = Number(sizeInput.value);
