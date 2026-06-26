@@ -1246,6 +1246,45 @@ nav.admin-nav.admin-nav-stacked {
   box-shadow: 0 16px 30px color-mix(in srgb, var(--accent-teal-deep) 32%, transparent);
 }
 
+/* On phones, 7 tall tiles with title+description meant a lot of vertical
+   scroll just to get past the tools section — shrink to a dense icon grid
+   (icon + one truncated line of label, no description, no badge) instead. */
+@media (max-width: 600px) {
+  body.admin-theme .admin-tools-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+
+  body.admin-theme .admin-tool-tile {
+    height: auto;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 10px 4px;
+    border-radius: 14px;
+    gap: 4px;
+  }
+
+  body.admin-theme .admin-tool-tile-icon {
+    margin-bottom: 0;
+  }
+
+  body.admin-theme .admin-tool-tile-label {
+    max-width: 100%;
+    font-size: 0.6rem;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  body.admin-theme .admin-tool-tile-desc,
+  body.admin-theme .admin-tool-tile-badge {
+    display: none;
+  }
+}
+
 .partners-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
