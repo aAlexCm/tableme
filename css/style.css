@@ -4299,8 +4299,8 @@ body.admin-theme .admin-nav-actions .admin-nav-chip:hover {
 body.admin-theme .wedding-countdown {
   background: var(--admin-banner);
   border-radius: var(--radius);
-  padding: 14px 18px;
-  margin-bottom: 20px;
+  padding: 8px 16px;
+  margin-bottom: 16px;
 }
 
 body.admin-theme .wedding-countdown-units {
