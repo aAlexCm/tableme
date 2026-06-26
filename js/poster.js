@@ -1,6 +1,7 @@
 import { Storage, generateId } from './storage.js';
 import { applyTranslations, buildLangSwitcher, t } from './i18n.js';
 import { wireColorHexPair } from './color-hex.js';
+import { isFeatureEnabled } from './features.js';
 
 const LANG_KEY = 'tableme_wedding_admin_lang';
 
@@ -1179,6 +1180,11 @@ function fontFamilyFor(fontKey) {
     notFoundEl.hidden = false;
     applyTranslations(currentLang);
     langMount.appendChild(buildLangSwitcher(currentLang, setLang));
+    return;
+  }
+
+  if (!isFeatureEnabled(wedding, 'poster')) {
+    window.location.replace(`wedding-admin.html?id=${weddingId}`);
     return;
   }
 

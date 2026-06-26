@@ -162,6 +162,20 @@ function parseSheetRows(rows) {
     if (partnersTile) partnersTile.hidden = !isFeatureEnabled(wedding, 'sponsorPartners');
 
     floorPlanTabLink.hidden = !isFeatureEnabled(wedding, 'floorPlan');
+
+    // Unlike the other gated tiles (which vanish when off), the poster tile
+    // stays visible but grayed-out with a contact-us badge — it's a feature
+    // the couple can be upsold on, not one that should look like it doesn't exist.
+    const posterTile = document.getElementById('poster-tile');
+    const posterTileBadge = document.getElementById('poster-tile-badge');
+    if (posterTile) {
+      const posterEnabled = isFeatureEnabled(wedding, 'poster');
+      posterTile.classList.toggle('is-disabled', !posterEnabled);
+      posterTile.setAttribute('aria-disabled', String(!posterEnabled));
+      if (posterTileBadge) posterTileBadge.hidden = posterEnabled;
+      if (posterEnabled) posterTile.href = `poster.html?id=${weddingId}`;
+      else posterTile.removeAttribute('href');
+    }
   }
 
   function setLang(lang) {
@@ -772,8 +786,6 @@ function parseSheetRows(rows) {
   floorPlanTabLink.href = `floor-plan.html?id=${weddingId}`;
   const partnersTile = document.getElementById('partners-tile');
   if (partnersTile) partnersTile.href = `partenaires.html?id=${weddingId}`;
-  const posterTile = document.getElementById('poster-tile');
-  if (posterTile) posterTile.href = `poster.html?id=${weddingId}`;
   shareControls.init(weddingId);
   themeSettings.init();
   updatePageTitle();

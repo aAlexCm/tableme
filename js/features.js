@@ -9,6 +9,7 @@ export const FEATURE_FLAGS = [
   { key: 'qrShare', labelKey: 'featureQrShare', default: true },
   { key: 'wayfindingGps', labelKey: 'featureWayfindingGps', default: true },
   { key: 'sponsorPartners', labelKey: 'featureSponsorPartners', default: true },
+  { key: 'poster', labelKey: 'featurePoster', default: true },
 ];
 
 export function isFeatureEnabled(wedding, key) {
