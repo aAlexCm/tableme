@@ -56,6 +56,19 @@ body.landing-theme {
   background: var(--gold);
 }
 
+.landing-nav-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--charcoal);
+  cursor: pointer;
+}
+
 .landing-hero {
   max-width: 720px;
   margin: 40px auto 0;
@@ -389,12 +402,51 @@ body.landing-theme {
 
 @media (max-width: 760px) {
   .landing-nav {
-    padding: 16px 110px 16px 18px;
+    padding: 14px 18px;
+    position: relative;
+  }
+
+  .landing-nav-toggle {
+    display: flex;
   }
 
   .landing-nav-links {
-    gap: 14px;
-    font-size: 0.78rem;
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    padding: 8px 18px 16px;
+    background: var(--cream);
+    border-bottom: 1px solid var(--gold-light);
+    box-shadow: 0 12px 20px rgba(33, 31, 26, 0.08);
+  }
+
+  .landing-nav-links.is-open {
+    display: flex;
+  }
+
+  .landing-nav-links a {
+    padding: 12px 0;
+    border-bottom: 1px solid var(--gold-light);
+  }
+
+  .landing-nav-links a:last-child {
+    border-bottom: none;
+  }
+
+  .landing-nav-cta {
+    margin-top: 10px;
+    text-align: center;
+  }
+
+  body.landing-theme .lang-switcher-mount {
+    top: auto;
+    bottom: 18px;
+    right: 18px;
   }
 
   .landing-hero h1 {

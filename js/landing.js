@@ -24,6 +24,22 @@ const LANG_KEY = 'tableme_landing_lang';
   langMount.appendChild(buildLangSwitcher(currentLang, setLang));
   applyTranslations(currentLang);
 
+  const navToggle = document.getElementById('landing-nav-toggle');
+  const navLinks = document.getElementById('landing-nav-links');
+
+  function closeNav() {
+    navLinks.classList.remove('is-open');
+    navToggle.setAttribute('aria-expanded', 'false');
+  }
+
+  navToggle.addEventListener('click', () => {
+    const isOpen = navLinks.classList.toggle('is-open');
+    navToggle.setAttribute('aria-expanded', String(isOpen));
+  });
+  navLinks.querySelectorAll('a').forEach((link) => {
+    link.addEventListener('click', closeNav);
+  });
+
   const lightbox = document.getElementById('screenshot-lightbox');
   const lightboxImg = document.getElementById('screenshot-lightbox-img');
   const lightboxClose = document.getElementById('screenshot-lightbox-close');
