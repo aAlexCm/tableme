@@ -3033,10 +3033,7 @@ body.admin-theme .theme-decoration-position-arrow {
 
 .floor-plan-card.fullscreen-active .floor-canvas-viewport {
   position: absolute;
-  top: 90px;
-  right: 0;
-  bottom: 0;
-  left: 0;
+  inset: 0;
   height: auto;
   min-height: 0;
   max-height: none;
@@ -3914,10 +3911,6 @@ body.admin-theme .theme-decoration-position-arrow {
     top: 8px;
     left: 8px;
     max-width: calc(100vw - 16px);
-  }
-
-  .floor-plan-card.fullscreen-active .floor-canvas-viewport {
-    top: 64px;
   }
 
   .floor-plan-card.fullscreen-active .floor-plan-toolbar {
