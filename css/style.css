@@ -1378,6 +1378,9 @@ nav.admin-nav.admin-nav-stacked {
 
 .photo-lightbox-panel img {
   display: block;
+  align-self: center;
+  width: auto;
+  height: auto;
   max-width: 90vw;
   max-height: 90vh;
   border-radius: var(--radius-sm);
