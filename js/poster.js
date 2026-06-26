@@ -774,13 +774,25 @@ function fontFamilyFor(fontKey) {
   }));
   colorInput.addEventListener('input', () => updateSelected((el) => { el.color = colorInput.value; }));
 
-  deleteBtn.addEventListener('click', () => {
+  function deleteSelected() {
     if (!selectedId) return;
     poster.elements = poster.elements.filter((e) => e.id !== selectedId);
     const node = sheetContentEl.querySelector(`[data-id="${selectedId}"]`);
     if (node) node.remove();
     deselect();
     scheduleSave();
+  }
+
+  deleteBtn.addEventListener('click', deleteSelected);
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Delete' && e.key !== 'Backspace') return;
+    if (!selectedId) return;
+    // Don't hijack Backspace/Delete while the user is typing — only delete
+    // the whole widget when focus isn't inside a text/contenteditable field.
+    if (e.target.closest('input, textarea, select, [contenteditable="true"]')) return;
+    e.preventDefault();
+    deleteSelected();
   });
 
   duplicateBtn.addEventListener('click', () => {
