@@ -3980,6 +3980,12 @@ body.admin-theme {
   --accent-teal: #2e3a59;
   --accent-teal-deep: #1b2440;
   --accent-teal-light: #e7e9f0;
+  /* mariages.net-inspired tokens: soft lavender banner backdrop + a softer
+     dual-layer card elevation, layered on top of the teal accent above
+     instead of swapping it out. */
+  --admin-banner: #eef1fb;
+  --card-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 10px 28px rgba(15, 23, 42, 0.08);
+  --radius: 22px;
 }
 
 /* Admin theme uses Inter instead of the guest theme's wedding-style Playfair
@@ -4007,9 +4013,11 @@ body.admin-theme .divider span::after {
 }
 
 body.admin-theme .card {
-  background: rgba(245, 248, 249, 0.92);
+  background: var(--paper);
   border-color: transparent;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+  border-radius: var(--radius);
+  padding: 36px;
+  box-shadow: var(--card-shadow);
 }
 
 body.admin-theme .card::before {
@@ -4020,8 +4028,8 @@ body.admin-theme input,
 body.admin-theme select,
 body.admin-theme textarea {
   background: var(--paper);
-  border-color: transparent;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+  border: 1px solid #e2e5ea;
+  box-shadow: none;
 }
 
 body.admin-theme input:focus,
@@ -4032,19 +4040,24 @@ body.admin-theme textarea:focus {
 }
 
 body.admin-theme button:not([class]) {
-  background: linear-gradient(135deg, var(--gold), var(--gold-deep));
-  box-shadow: 0 4px 12px color-mix(in srgb, var(--gold-deep) 35%, transparent);
+  background: var(--gold-deep);
+  box-shadow: 0 4px 10px color-mix(in srgb, var(--gold-deep) 28%, transparent);
 }
 
 body.admin-theme button:not([class]):hover {
-  background: linear-gradient(135deg, var(--gold-deep), color-mix(in srgb, var(--gold-deep) 75%, black));
-  box-shadow: 0 6px 16px color-mix(in srgb, var(--gold-deep) 45%, transparent);
+  background: color-mix(in srgb, var(--gold-deep) 85%, black);
+  box-shadow: 0 6px 14px color-mix(in srgb, var(--gold-deep) 38%, transparent);
   filter: none;
 }
 
 body.admin-theme button.secondary,
 body.admin-theme a.secondary {
-  text-decoration-color: color-mix(in srgb, var(--gold-deep) 50%, transparent);
+  text-decoration: none;
+}
+
+body.admin-theme .icon-btn {
+  border-color: rgba(15, 23, 42, 0.08);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
 }
 
 body.admin-theme .mode-btn.active,
@@ -4090,9 +4103,10 @@ body.admin-theme .modal-overlay {
 }
 
 body.admin-theme .modal-panel:not(.photo-lightbox-panel) {
-  background: rgba(245, 248, 249, 0.92);
+  background: var(--paper);
   border-color: transparent;
-  box-shadow: 0 14px 40px rgba(15, 23, 42, 0.25);
+  border-radius: var(--radius);
+  box-shadow: var(--card-shadow), 0 14px 40px rgba(15, 23, 42, 0.18);
 }
 
 body.admin-theme .lang-switcher-trigger {
@@ -4141,9 +4155,14 @@ body.admin-theme .lang-switcher-trigger {
 
 body.admin-theme button.secondary,
 body.admin-theme a.secondary {
-  color: var(--charcoal);
-  border-color: var(--charcoal);
-  text-decoration-color: color-mix(in srgb, var(--charcoal) 50%, transparent);
+  color: var(--gold-deep);
+  border-color: var(--gold-deep);
+}
+
+body.admin-theme button.secondary:hover,
+body.admin-theme a.secondary:hover {
+  background: var(--gold-light);
+  color: var(--gold-deep);
 }
 
 body.admin-theme input::placeholder,
@@ -4214,6 +4233,98 @@ body.admin-theme .table-modal-divider {
 
 body.admin-theme .shape-option {
   border-color: color-mix(in srgb, var(--gold) 25%, transparent);
+}
+
+/* mariages.net-inspired restyle: nav bar as a white card-like strip, a soft
+   icon badge on each tool tile instead of a big bleeding watermark icon,
+   a pale banner backdrop behind the countdown, and editorial serif headings
+   against the otherwise clean sans-serif UI — accent color stays teal. */
+body.admin-theme nav.admin-nav {
+  background: var(--paper);
+  border-radius: var(--radius);
+  padding: 14px 20px;
+  box-shadow: var(--card-shadow);
+}
+
+body.admin-theme .admin-nav-actions .admin-nav-chip {
+  background: transparent;
+  color: var(--gold-deep);
+}
+
+body.admin-theme .admin-nav-actions .admin-nav-chip:hover {
+  background: var(--gold-light);
+  color: var(--gold-deep);
+  box-shadow: none;
+}
+
+body.admin-theme .wedding-countdown {
+  background: var(--admin-banner);
+  border-radius: var(--radius);
+  padding: 24px 20px;
+}
+
+body.admin-theme .admin-tool-tile {
+  background: var(--paper);
+  box-shadow: var(--card-shadow);
+  border-radius: var(--radius);
+  color: var(--charcoal);
+}
+
+body.admin-theme .admin-tool-tile:hover {
+  box-shadow: var(--card-shadow), 0 4px 10px color-mix(in srgb, var(--gold-deep) 18%, transparent);
+}
+
+body.admin-theme .admin-tool-tile.is-disabled:hover {
+  box-shadow: var(--card-shadow);
+}
+
+body.admin-theme .admin-tool-tile-icon {
+  position: static;
+  width: 40px;
+  height: 40px;
+  margin-bottom: 8px;
+  border-radius: 50%;
+  background: var(--gold-light);
+  color: var(--gold-deep);
+}
+
+body.admin-theme .admin-tool-tile-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+body.admin-theme .admin-tool-tile-label {
+  color: var(--charcoal);
+}
+
+body.admin-theme .admin-tool-tile-desc {
+  color: var(--ink);
+}
+
+body.admin-theme .admin-tool-tile-badge {
+  color: var(--gold-deep);
+  background: var(--gold-light);
+}
+
+body.admin-theme .admin-tool-tile.tile-accent-blue .admin-tool-tile-icon {
+  background: var(--sage-light);
+  color: var(--sage-deep);
+}
+
+body.admin-theme .admin-tool-tile.tile-accent-teal .admin-tool-tile-icon {
+  background: var(--accent-teal-light);
+  color: var(--accent-teal-deep);
+}
+
+body.admin-theme .view-switch,
+body.admin-theme .mode-switch {
+  background: #eef1f4;
+}
+
+body.admin-theme h1,
+body.admin-theme h2,
+body.admin-theme h3 {
+  font-family: 'Playfair Display', serif !important;
 }
 
 /* Guest theme: index.html reads colors from the --guest-* variables (set above, and
