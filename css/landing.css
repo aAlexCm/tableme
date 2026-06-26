@@ -228,18 +228,28 @@ body.landing-theme {
 }
 
 .landing-screenshot-frame {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  aspect-ratio: 9 / 16;
+  margin: 0;
   border-radius: var(--radius);
-  background: var(--sage-light);
-  border: 1.5px dashed var(--sage-deep);
-  color: var(--sage-deep);
+  overflow: hidden;
+  background: var(--paper);
+  border: 1px solid var(--gold-light);
+  box-shadow: 0 10px 22px rgba(138, 109, 60, 0.1);
+}
+
+.landing-screenshot-frame img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  object-position: top;
+}
+
+.landing-screenshot-frame figcaption {
+  padding: 12px 14px;
   font-size: 0.85rem;
   font-weight: 600;
+  color: var(--charcoal);
   text-align: center;
-  padding: 16px;
 }
 
 .landing-pricing {
