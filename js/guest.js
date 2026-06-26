@@ -1,5 +1,5 @@
 import { Storage, normalize } from './storage.js';
-import { applyTranslations, buildLangSwitcher, t } from './i18n.js';
+import { applyTranslations, buildLangSwitcher, t, LANGS } from './i18n.js';
 import { DEFAULT_SEATS, getRectShapeSize, buildChairs } from './table-shape.js';
 import { getLandmarkType } from './landmarks.js';
 import { applyGuestTheme, applyGuestFonts, getDefaultTheme } from './guest-themes.js';
@@ -7,6 +7,11 @@ import { applyGuestDecoration } from './guest-decorations.js';
 import { isFeatureEnabled } from './features.js';
 
 const LANG_KEY = 'tableme_lang';
+// /guest/fr, /guest/en, /guest/ro override everything else (localStorage,
+// the wedding's configured default) — a link shared in a specific language
+// must always open in that language.
+const PATH_LANG_MATCH = location.pathname.match(/^\/guest\/(fr|en|ro)\/?$/);
+const PATH_LANG = PATH_LANG_MATCH && LANGS.includes(PATH_LANG_MATCH[1]) ? PATH_LANG_MATCH[1] : null;
 const WAYFINDING_VIEWBOX_W = 100;
 const WAYFINDING_VIEWBOX_H = 60;
 const WAYFINDING_OBSTACLE_HALF_W = 8;
@@ -199,7 +204,7 @@ function trimRouteEnds(points, startRetreat, endRetreat) {
   const langMount = document.getElementById('lang-switcher-mount');
   const decorationEl = document.getElementById('guest-decoration');
 
-  let currentLang = localStorage.getItem(LANG_KEY) || 'fr';
+  let currentLang = PATH_LANG || localStorage.getItem(LANG_KEY) || 'fr';
   let currentWedding = null;
   let outsideClickHandler = null;
 
@@ -612,7 +617,7 @@ function trimRouteEnds(points, startRetreat, endRetreat) {
   }
 
   currentWedding = wedding;
-  if (!localStorage.getItem(LANG_KEY)) {
+  if (!PATH_LANG && !localStorage.getItem(LANG_KEY)) {
     currentLang = wedding.lang || 'fr';
   }
   applyGuestTheme((wedding.theme && wedding.theme.colors) || getDefaultTheme().colors);
