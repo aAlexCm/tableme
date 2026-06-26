@@ -61,6 +61,11 @@ function reconcileTables(wedding) {
   let currentLang = localStorage.getItem(LANG_KEY) || 'fr';
   let wedding = null;
   let zoom = 1;
+  // Tracks in-progress chair/table/landmark drags so a re-render triggered
+  // mid-gesture (e.g. the move this same drag just saved) can force them to
+  // clean up instead of orphaning their ghost/picked state when the DOM
+  // node they're bound to gets wiped out from under the active pointer.
+  const activeDragCleanups = new Set();
 
   const langMount = document.getElementById('lang-switcher-mount');
   const notFoundEl = document.getElementById('not-found');
@@ -282,6 +287,7 @@ function reconcileTables(wedding) {
       shapeEl.removeEventListener('pointercancel', onPointerCancel);
       shapeEl.classList.remove('dragging-table');
       pointerId = null;
+      activeDragCleanups.delete(cleanup);
     }
 
     async function onPointerUp(e) {
@@ -314,6 +320,7 @@ function reconcileTables(wedding) {
       shapeEl.addEventListener('pointermove', onPointerMove);
       shapeEl.addEventListener('pointercancel', onPointerCancel);
       shapeEl.addEventListener('pointerup', onPointerUp);
+      activeDragCleanups.add(cleanup);
     });
   }
 
@@ -454,6 +461,7 @@ function reconcileTables(wedding) {
         ghostEl.remove();
         ghostEl = null;
       }
+      activeDragCleanups.delete(cleanup);
     }
 
     async function onPointerUp(e) {
@@ -486,6 +494,7 @@ function reconcileTables(wedding) {
       chairEl.addEventListener('pointermove', onPointerMove);
       chairEl.addEventListener('pointerup', onPointerUp);
       chairEl.addEventListener('pointercancel', onPointerCancel);
+      activeDragCleanups.add(cleanup);
     });
   }
 
@@ -503,6 +512,12 @@ function reconcileTables(wedding) {
 
   function renderCanvas() {
     hideChairTooltip();
+    // A drag in progress is bound to DOM nodes about to be wiped below — if
+    // it doesn't get a pointerup/pointercancel before that happens (e.g. this
+    // very re-render was triggered by the move this drag just saved), it
+    // would otherwise leave its ghost/picked state stuck on screen forever.
+    activeDragCleanups.forEach((cleanup) => cleanup());
+    activeDragCleanups.clear();
     floorCanvasEl.innerHTML = '';
     (wedding.tables || []).forEach((table) => {
       const tableGuests = wedding.guests.filter((g) => g.table === table.label);
@@ -601,6 +616,7 @@ function reconcileTables(wedding) {
       shapeEl.removeEventListener('pointercancel', onPointerCancel);
       shapeEl.classList.remove('dragging-landmark');
       pointerId = null;
+      activeDragCleanups.delete(cleanup);
     }
 
     async function onPointerUp(e) {
@@ -630,6 +646,7 @@ function reconcileTables(wedding) {
       shapeEl.addEventListener('pointermove', onPointerMove);
       shapeEl.addEventListener('pointercancel', onPointerCancel);
       shapeEl.addEventListener('pointerup', onPointerUp);
+      activeDragCleanups.add(cleanup);
     });
   }
 
