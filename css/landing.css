@@ -258,9 +258,94 @@ body.landing-theme {
 
 .landing-pricing-desc {
   max-width: 480px;
-  margin: 0 auto 26px;
+  margin: 0 auto 40px;
   font-size: 0.98rem;
   opacity: 0.85;
+}
+
+.landing-pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 22px;
+  align-items: stretch;
+  text-align: left;
+}
+
+.landing-pricing-card {
+  display: flex;
+  flex-direction: column;
+  padding: 28px 24px;
+  border-radius: var(--radius);
+  background: var(--paper);
+  border: 1px solid var(--gold-light);
+  box-shadow: 0 10px 22px rgba(138, 109, 60, 0.08);
+}
+
+.landing-pricing-card-featured {
+  border: 2px solid var(--gold-deep);
+  box-shadow: 0 14px 30px rgba(138, 109, 60, 0.18);
+  transform: translateY(-6px);
+}
+
+.landing-pricing-badge {
+  display: inline-block;
+  margin-bottom: 10px;
+  padding: 5px 12px;
+  border-radius: var(--radius-pill);
+  background: var(--gold-deep);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  align-self: flex-start;
+}
+
+.landing-pricing-card h3 {
+  margin: 0 0 6px;
+  font-family: 'Playfair Display', serif;
+  font-size: 1.2rem;
+  color: var(--charcoal);
+}
+
+.landing-pricing-price {
+  margin: 0 0 20px;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--gold-deep);
+}
+
+.landing-pricing-features {
+  flex: 1;
+  margin: 0 0 24px;
+  padding: 0;
+  list-style: none;
+}
+
+.landing-pricing-features li {
+  position: relative;
+  margin-bottom: 12px;
+  padding-left: 24px;
+  font-size: 0.9rem;
+  color: var(--ink);
+  line-height: 1.4;
+}
+
+.landing-pricing-features li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: var(--sage-deep);
+  font-weight: 700;
+}
+
+.landing-pricing-features li.landing-pricing-bonus {
+  font-style: italic;
+  opacity: 0.85;
+}
+
+.landing-pricing-card .landing-btn-primary,
+.landing-pricing-card .landing-btn-secondary {
+  align-self: stretch;
 }
 
 .landing-contact {
@@ -304,7 +389,12 @@ body.landing-theme {
 
   .landing-steps,
   .landing-features-grid,
-  .landing-screenshots-grid {
+  .landing-screenshots-grid,
+  .landing-pricing-grid {
     grid-template-columns: 1fr;
+  }
+
+  .landing-pricing-card-featured {
+    transform: none;
   }
 }
