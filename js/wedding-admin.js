@@ -144,7 +144,7 @@ function parseSheetRows(rows) {
   }
 
   function updatePageTitle() {
-    document.title = `TableMe · ${t(currentLang, 'weddingAdminPageTitle')}`;
+    document.title = 'TableMe · Guests';
   }
 
   function applyFeatureGating(wedding) {

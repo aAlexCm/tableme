@@ -85,7 +85,7 @@ const ICONS = {
   }
 
   function updatePageTitle() {
-    document.title = `TableMe · ${t(currentLang, 'adminTitle')}`;
+    document.title = 'TableMe · Manage weddings';
   }
 
   function setLang(lang) {

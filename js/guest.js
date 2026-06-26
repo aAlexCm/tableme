@@ -214,7 +214,7 @@ function trimRouteEnds(points, startRetreat, endRetreat) {
       handleSearch(inputEl.value, currentWedding.guests);
     } else {
       titleEl.textContent = t(lang, 'guestHeroTitle');
-      document.title = `TableMe · ${t(lang, 'guestHeroTitle')}`;
+      document.title = 'TableMe · Find my table';
     }
   }
 
@@ -596,7 +596,7 @@ function trimRouteEnds(points, startRetreat, endRetreat) {
     langMount.appendChild(buildLangSwitcher(currentLang, setLang));
     applyTranslations(currentLang);
     titleEl.textContent = t(currentLang, 'guestHeroTitle');
-    document.title = `TableMe · ${t(currentLang, 'guestHeroTitle')}`;
+    document.title = 'TableMe · Find my table';
     showInvalidLink();
     return;
   }
@@ -606,7 +606,7 @@ function trimRouteEnds(points, startRetreat, endRetreat) {
     langMount.appendChild(buildLangSwitcher(currentLang, setLang));
     applyTranslations(currentLang);
     titleEl.textContent = t(currentLang, 'guestHeroTitle');
-    document.title = `TableMe · ${t(currentLang, 'guestHeroTitle')}`;
+    document.title = 'TableMe · Find my table';
     showInvalidLink();
     return;
   }

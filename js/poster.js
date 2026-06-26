@@ -1191,7 +1191,7 @@ function fontFamilyFor(fontKey) {
   contentEl.hidden = false;
   weddingNameEl.textContent = wedding.name;
   backLinkEl.href = `wedding-admin.html?id=${weddingId}`;
-  document.title = `TableMe · ${t(currentLang, 'posterToolTitle')}`;
+  document.title = 'TableMe · Printable poster';
 
   deleteBtn.innerHTML = TRASH_ICON;
   populateFontSelect();

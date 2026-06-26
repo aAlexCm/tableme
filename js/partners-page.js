@@ -147,7 +147,7 @@ function escapeHtml(value) {
   contentEl.hidden = false;
   weddingNameEl.textContent = wedding.name;
   backLinkEl.href = `wedding-admin.html?id=${weddingId}`;
-  document.title = `TableMe · ${t(currentLang, 'partnersPageTitle')}`;
+  document.title = 'TableMe · Partners';
 
   const allPartners = await Storage.getPartners();
   matchingPartners = allPartners

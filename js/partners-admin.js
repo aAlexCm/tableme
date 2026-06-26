@@ -123,7 +123,7 @@ function readAndResizeImage(file) {
   }
 
   function updatePageTitle() {
-    document.title = `TableMe · ${t(currentLang, 'partnersAdminTitle')}`;
+    document.title = 'TableMe · Manage partners';
   }
 
   async function setLang(lang) {

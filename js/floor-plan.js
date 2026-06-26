@@ -178,7 +178,7 @@ function reconcileTables(wedding) {
   }
 
   function updatePageTitle() {
-    document.title = `TableMe · ${t(currentLang, 'floorPlanTitle')}`;
+    document.title = 'TableMe · Floor plan';
   }
 
   function setLang(lang) {
