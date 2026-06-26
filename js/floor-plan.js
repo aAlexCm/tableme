@@ -271,18 +271,33 @@ function reconcileTables(wedding) {
       unitEl.style.top = `${table.y}%`;
     }
 
-    async function onPointerUp(e) {
-      if (e.pointerId !== pointerId) return;
-      shapeEl.releasePointerCapture(pointerId);
+    function cleanup() {
+      try {
+        shapeEl.releasePointerCapture(pointerId);
+      } catch (_) {
+        // pointer capture may already be lost (e.g. after a cancel) — ignore
+      }
       shapeEl.removeEventListener('pointermove', onPointerMove);
       shapeEl.removeEventListener('pointerup', onPointerUp);
+      shapeEl.removeEventListener('pointercancel', onPointerCancel);
       shapeEl.classList.remove('dragging-table');
       pointerId = null;
-      if (moved) {
+    }
+
+    async function onPointerUp(e) {
+      if (e.pointerId !== pointerId) return;
+      const wasMoved = moved;
+      cleanup();
+      if (wasMoved) {
         await Storage.setTables(weddingId, wedding.tables);
       } else {
         await tableModalApi.open(table.id);
       }
+    }
+
+    function onPointerCancel(e) {
+      if (e.pointerId !== pointerId) return;
+      cleanup();
     }
 
     shapeEl.addEventListener('pointerdown', (e) => {
@@ -297,6 +312,7 @@ function reconcileTables(wedding) {
       shapeEl.classList.add('dragging-table');
       shapeEl.setPointerCapture(pointerId);
       shapeEl.addEventListener('pointermove', onPointerMove);
+      shapeEl.addEventListener('pointercancel', onPointerCancel);
       shapeEl.addEventListener('pointerup', onPointerUp);
     });
   }
@@ -422,21 +438,31 @@ function reconcileTables(wedding) {
       }
     }
 
-    async function onPointerUp(e) {
-      if (e.pointerId !== pointerId) return;
-      chairEl.releasePointerCapture(pointerId);
+    function cleanup() {
+      try {
+        chairEl.releasePointerCapture(pointerId);
+      } catch (_) {
+        // pointer capture may already be lost (e.g. after a cancel) — ignore
+      }
       chairEl.removeEventListener('pointermove', onPointerMove);
       chairEl.removeEventListener('pointerup', onPointerUp);
+      chairEl.removeEventListener('pointercancel', onPointerCancel);
       pointerId = null;
       chairEl.classList.remove('picked');
-      const dropTarget = lastDropTarget;
       clearDropHighlight();
       if (ghostEl) {
         ghostEl.remove();
         ghostEl = null;
       }
+    }
 
-      if (!moved) {
+    async function onPointerUp(e) {
+      if (e.pointerId !== pointerId) return;
+      const dropTarget = lastDropTarget;
+      const wasMoved = moved;
+      cleanup();
+
+      if (!wasMoved) {
         showChairTooltip(chairEl);
         return;
       }
@@ -444,6 +470,11 @@ function reconcileTables(wedding) {
       if (dropTarget) {
         await moveGuestToChairContainer(chairEl, dropTarget);
       }
+    }
+
+    function onPointerCancel(e) {
+      if (e.pointerId !== pointerId) return;
+      cleanup();
     }
 
     chairEl.addEventListener('pointerdown', (e) => {
@@ -454,6 +485,7 @@ function reconcileTables(wedding) {
       chairEl.setPointerCapture(pointerId);
       chairEl.addEventListener('pointermove', onPointerMove);
       chairEl.addEventListener('pointerup', onPointerUp);
+      chairEl.addEventListener('pointercancel', onPointerCancel);
     });
   }
 
@@ -558,16 +590,31 @@ function reconcileTables(wedding) {
       unitEl.style.top = `${landmark.y}%`;
     }
 
-    async function onPointerUp(e) {
-      if (e.pointerId !== pointerId) return;
-      shapeEl.releasePointerCapture(pointerId);
+    function cleanup() {
+      try {
+        shapeEl.releasePointerCapture(pointerId);
+      } catch (_) {
+        // pointer capture may already be lost (e.g. after a cancel) — ignore
+      }
       shapeEl.removeEventListener('pointermove', onPointerMove);
       shapeEl.removeEventListener('pointerup', onPointerUp);
+      shapeEl.removeEventListener('pointercancel', onPointerCancel);
       shapeEl.classList.remove('dragging-landmark');
       pointerId = null;
-      if (moved) {
+    }
+
+    async function onPointerUp(e) {
+      if (e.pointerId !== pointerId) return;
+      const wasMoved = moved;
+      cleanup();
+      if (wasMoved) {
         await Storage.setLandmarks(weddingId, wedding.landmarks);
       }
+    }
+
+    function onPointerCancel(e) {
+      if (e.pointerId !== pointerId) return;
+      cleanup();
     }
 
     shapeEl.addEventListener('pointerdown', (e) => {
@@ -581,6 +628,7 @@ function reconcileTables(wedding) {
       shapeEl.classList.add('dragging-landmark');
       shapeEl.setPointerCapture(pointerId);
       shapeEl.addEventListener('pointermove', onPointerMove);
+      shapeEl.addEventListener('pointercancel', onPointerCancel);
       shapeEl.addEventListener('pointerup', onPointerUp);
     });
   }
