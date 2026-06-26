@@ -1327,14 +1327,24 @@ nav.admin-nav.admin-nav-stacked {
   height: 13px;
 }
 
+/* Hardcoded pastel hues (not --sage/--accent-teal) so these stay genuinely
+   colored regardless of theme-token changes elsewhere — js/partners.js
+   assigns "blue"/"teal"/"violet" per category to give the partner grid the
+   same scattered-pastel-colors feel as mariages.net, rather than one flat
+   accent everywhere. */
 .partner-card-category.cat-blue {
-  color: var(--sage-deep);
-  background: var(--sage-light);
+  color: #3f66b3;
+  background: #e3edfd;
 }
 
 .partner-card-category.cat-teal {
-  color: var(--accent-teal-deep);
-  background: var(--accent-teal-light);
+  color: #2f8a5c;
+  background: #e1f5ea;
+}
+
+.partner-card-category.cat-violet {
+  color: #7c52b3;
+  background: #ede3fb;
 }
 
 .partner-card-name {
@@ -4329,14 +4339,28 @@ body.admin-theme .admin-tool-tile-badge {
   background: var(--gold-light);
 }
 
+/* Each tool tile gets its own pastel hue (hardcoded, not routed through
+   --sage/--accent-teal, so a future token change can't silently flatten
+   these back to gray again) — mariages.net scatters a few soft colors
+   across its dashboard icons instead of using one accent everywhere. */
+body.admin-theme #theme-settings-btn .admin-tool-tile-icon {
+  background: #fde2ec;
+  color: #c2487a;
+}
+
 body.admin-theme .admin-tool-tile.tile-accent-blue .admin-tool-tile-icon {
-  background: var(--sage-light);
-  color: var(--sage-deep);
+  background: #e3edfd;
+  color: #3f66b3;
 }
 
 body.admin-theme .admin-tool-tile.tile-accent-teal .admin-tool-tile-icon {
-  background: var(--accent-teal-light);
-  color: var(--accent-teal-deep);
+  background: #e1f5ea;
+  color: #2f8a5c;
+}
+
+body.admin-theme #poster-tile .admin-tool-tile-icon {
+  background: #ede3fb;
+  color: #7c52b3;
 }
 
 body.admin-theme .view-switch,
