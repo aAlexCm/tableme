@@ -26,6 +26,7 @@ const FONT_OPTIONS = [
 
 const TRASH_ICON = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>';
 const DRAG_ICON = '<svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><circle cx="8" cy="6" r="1.5"/><circle cx="16" cy="6" r="1.5"/><circle cx="8" cy="12" r="1.5"/><circle cx="16" cy="12" r="1.5"/><circle cx="8" cy="18" r="1.5"/><circle cx="16" cy="18" r="1.5"/></svg>';
+const ROTATE_ICON = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 5a8 8 0 0 1 11 2"/><polyline points="17 3 18 8 13 7"/><path d="M18 19a8 8 0 0 1-11-2"/><polyline points="7 21 6 16 11 17"/></svg>';
 
 const QR_RENDER_SIZE = 256;
 
@@ -57,6 +58,7 @@ function normalizeElement(el) {
     type,
     x: typeof el.x === 'number' ? el.x : 80,
     y: typeof el.y === 'number' ? el.y : 80,
+    rotation: typeof el.rotation === 'number' ? el.rotation : 0,
   };
   if (type === 'qr') {
     return { ...base, size: typeof el.size === 'number' ? el.size : 140, color: el.color || '#2c2420' };
@@ -191,9 +193,14 @@ function fontFamilyFor(fontKey) {
     toolboxEl.style.marginTop = `${Math.max(0, sheetTop - workspaceTop)}px`;
   }
 
+  function applyRotation(node, el) {
+    node.style.transform = `rotate(${el.rotation || 0}deg)`;
+  }
+
   function applyTextStyle(node, el) {
     node.style.left = `${el.x}px`;
     node.style.top = `${el.y}px`;
+    applyRotation(node, el);
     const content = node.querySelector('.poster-text-content');
     if (!content) return;
     // body.admin-theme * matches .poster-text-content directly (it's a `*`
@@ -224,6 +231,7 @@ function fontFamilyFor(fontKey) {
   function applyQrStyle(node, el) {
     node.style.left = `${el.x}px`;
     node.style.top = `${el.y}px`;
+    applyRotation(node, el);
     node.style.width = `${el.size}px`;
     node.style.height = `${el.size}px`;
     renderQrCanvas(node, el);
@@ -232,6 +240,7 @@ function fontFamilyFor(fontKey) {
   function applyDividerStyle(node, el) {
     node.style.left = `${el.x}px`;
     node.style.top = `${el.y}px`;
+    applyRotation(node, el);
     node.style.width = `${el.width}px`;
     node.style.color = el.color;
     const ornamentEl = node.querySelector('.poster-divider-ornament');
@@ -245,6 +254,7 @@ function fontFamilyFor(fontKey) {
   function applyIconStyle(node, el) {
     node.style.left = `${el.x}px`;
     node.style.top = `${el.y}px`;
+    applyRotation(node, el);
     node.style.width = `${el.size}px`;
     node.style.height = `${el.size}px`;
     node.style.color = el.color;
@@ -423,6 +433,33 @@ function fontFamilyFor(fontKey) {
     });
   }
 
+  function wireRotate(handle, node, el) {
+    handle.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      selectElement(el.id);
+      const rect = node.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      const startAngle = Math.atan2(e.clientY - centerY, e.clientX - centerX) * (180 / Math.PI);
+      const startRotation = el.rotation || 0;
+
+      function onMove(ev) {
+        const angle = Math.atan2(ev.clientY - centerY, ev.clientX - centerX) * (180 / Math.PI);
+        el.rotation = Math.round(startRotation + (angle - startAngle));
+        node.style.transform = `rotate(${el.rotation}deg)`;
+        positionToolbar(node);
+      }
+      function onUp() {
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onUp);
+        scheduleSave();
+      }
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
+    });
+  }
+
   function createQrNode(el) {
     const node = document.createElement('div');
     node.className = 'poster-el poster-qr-el';
@@ -441,8 +478,14 @@ function fontFamilyFor(fontKey) {
     resizeHandle.className = 'poster-resize-handle';
     node.appendChild(resizeHandle);
 
+    const rotateHandle = document.createElement('span');
+    rotateHandle.className = 'poster-rotate-handle';
+    rotateHandle.innerHTML = ROTATE_ICON;
+    node.appendChild(rotateHandle);
+
     wireDrag(node, node, el);
     wireDrag(handle, node, el);
+    wireRotate(rotateHandle, node, el);
     wireResize(resizeHandle, node, el, {
       get: (e) => e.size,
       set: (e, v) => { e.size = v; },
@@ -482,8 +525,14 @@ function fontFamilyFor(fontKey) {
     resizeHandle.className = 'poster-divider-resize-handle';
     node.appendChild(resizeHandle);
 
+    const rotateHandle = document.createElement('span');
+    rotateHandle.className = 'poster-rotate-handle';
+    rotateHandle.innerHTML = ROTATE_ICON;
+    node.appendChild(rotateHandle);
+
     wireDrag(node, node, el);
     wireDrag(handle, node, el);
+    wireRotate(rotateHandle, node, el);
     wireResize(resizeHandle, node, el, {
       get: (e) => e.width,
       set: (e, v) => { e.width = v; },
@@ -514,8 +563,14 @@ function fontFamilyFor(fontKey) {
     resizeHandle.className = 'poster-resize-handle';
     node.appendChild(resizeHandle);
 
+    const rotateHandle = document.createElement('span');
+    rotateHandle.className = 'poster-rotate-handle';
+    rotateHandle.innerHTML = ROTATE_ICON;
+    node.appendChild(rotateHandle);
+
     wireDrag(node, node, el);
     wireDrag(handle, node, el);
+    wireRotate(rotateHandle, node, el);
     wireResize(resizeHandle, node, el, {
       get: (e) => e.size,
       set: (e, v) => { e.size = v; },
@@ -558,6 +613,11 @@ function fontFamilyFor(fontKey) {
     resizeHandle.className = 'poster-resize-handle';
     node.appendChild(resizeHandle);
 
+    const rotateHandle = document.createElement('span');
+    rotateHandle.className = 'poster-rotate-handle';
+    rotateHandle.innerHTML = ROTATE_ICON;
+    node.appendChild(rotateHandle);
+
     node.addEventListener('mousedown', () => selectElement(el.id));
     textContentEl.addEventListener('input', () => {
       el.text = textContentEl.textContent;
@@ -569,6 +629,7 @@ function fontFamilyFor(fontKey) {
     });
 
     wireDrag(handle, node, el);
+    wireRotate(rotateHandle, node, el);
     wireResize(resizeHandle, node, el, {
       get: (e) => e.fontSize,
       set: (e, v) => { e.fontSize = v; },

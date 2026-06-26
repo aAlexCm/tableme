@@ -797,6 +797,26 @@ nav.admin-nav.admin-nav-stacked {
   display: block;
 }
 
+.poster-rotate-handle {
+  position: absolute;
+  left: -6px;
+  bottom: -6px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--gold-deep);
+  color: #fff;
+  cursor: grab;
+  user-select: none;
+}
+
+.poster-el.selected .poster-rotate-handle {
+  display: flex;
+}
+
 .poster-divider-resize-handle {
   position: absolute;
   top: 50%;
@@ -934,7 +954,8 @@ nav.admin-nav.admin-nav-stacked {
 
   .poster-text-drag-handle,
   .poster-resize-handle,
-  .poster-divider-resize-handle {
+  .poster-divider-resize-handle,
+  .poster-rotate-handle {
     display: none !important;
   }
 
