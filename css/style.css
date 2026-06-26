@@ -481,8 +481,10 @@ button.secondary:hover, a.secondary:hover {
 
 nav.admin-nav {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
+  gap: 10px;
   margin-bottom: 36px;
   font-size: 0.85rem;
 }
@@ -507,6 +509,7 @@ nav.admin-nav a:hover {
 
 .admin-nav-actions {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 12px;
 }
@@ -4294,19 +4297,11 @@ body.admin-theme nav.admin-nav {
   box-shadow: var(--card-shadow);
 }
 
-/* When the nav sits inside .admin-header (wedding-admin.html, floor-plan.html)
-   it's followed immediately by the countdown card — a small gap instead of
-   nav's standalone 36px bottom margin keeps the two reading as one related
-   header group instead of two unrelated blocks. partenaires.html/poster.html
-   use nav.admin-nav on its own and keep the original spacing. */
-body.admin-theme .admin-header {
-  margin-bottom: 28px;
-}
-
-body.admin-theme .admin-header nav.admin-nav {
-  margin-bottom: 10px;
-}
-
+/* On wedding-admin.html/floor-plan.html, the countdown sits inline as a
+   middle flex item of nav.admin-nav itself (name -- countdown -- actions),
+   instead of stacking below it — this keeps the whole header a single thin
+   row/banner rather than a taller two-row card. poster.html/partenaires.html
+   don't have a countdown, so their nav.admin-nav is unaffected. */
 body.admin-theme .admin-nav-actions .admin-nav-chip {
   background: transparent;
   color: var(--gold-deep);
@@ -4318,42 +4313,35 @@ body.admin-theme .admin-nav-actions .admin-nav-chip:hover {
   box-shadow: none;
 }
 
-/* Countdown now lives right under the nav as its own compact card, instead
-   of a separate lavender banner lower on the page — matches nav's white
-   card recipe so the two read as one header group. */
-body.admin-theme .wedding-countdown {
-  background: var(--paper);
-  border-radius: var(--radius);
-  box-shadow: var(--card-shadow);
-  padding: 12px 20px;
+body.admin-theme nav.admin-nav .wedding-countdown {
   margin-bottom: 0;
-  text-align: center;
 }
 
 body.admin-theme .wedding-countdown-units {
-  gap: 10px;
+  gap: 8px;
 }
 
 /* Chips get a neutral gray fill (not white) so they stay visible against
-   the now-white countdown card instead of disappearing into it. */
+   the white nav bar instead of disappearing into it. */
 body.admin-theme .wedding-countdown-unit {
-  min-width: 50px;
-  padding: 6px 10px;
-  border-radius: 12px;
+  min-width: 42px;
+  padding: 4px 8px;
+  border-radius: 10px;
   background: #f4f5f7;
 }
 
 body.admin-theme .wedding-countdown-value {
-  font-size: 1.2rem;
+  font-size: 1rem;
 }
 
 body.admin-theme .wedding-countdown-label {
-  font-size: 0.58rem;
+  font-size: 0.55rem;
 }
 
-body.admin-theme .wedding-countdown-caption {
-  margin-top: 4px;
-  font-size: 0.68rem;
+/* No room for a full caption sentence inline in the nav row — the numbers
+   alone are self-explanatory next to the wedding name. */
+body.admin-theme nav.admin-nav .wedding-countdown-caption {
+  display: none;
 }
 
 body.admin-theme .admin-tool-tile {
