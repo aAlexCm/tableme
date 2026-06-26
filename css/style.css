@@ -988,6 +988,7 @@ nav.admin-nav.admin-nav-stacked {
 @media (max-width: 760px) {
   .poster-workspace {
     flex-direction: column;
+    align-items: center;
   }
 
   .poster-toolbox {
