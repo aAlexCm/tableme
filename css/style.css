@@ -511,6 +511,12 @@ nav.admin-nav a:hover {
   gap: 12px;
 }
 
+.admin-nav-contact-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
 nav.admin-nav:not(.admin-nav-stacked) .admin-nav-actions {
   margin-top: 14px;
 }
