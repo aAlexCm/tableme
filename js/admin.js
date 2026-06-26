@@ -399,7 +399,8 @@ const ICONS = {
     const result = await signInWithGoogle();
     if (!result.ok) {
       if (result.code !== 'auth/popup-closed-by-user') {
-        loginErrorEl.textContent = t(currentLang, 'adminLoginError');
+        console.warn('Google sign-in failed', result.code);
+        loginErrorEl.textContent = `${t(currentLang, 'adminLoginError')} (${result.code})`;
         loginErrorEl.hidden = false;
       }
       return;
