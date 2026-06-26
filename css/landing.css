@@ -303,6 +303,7 @@ body.landing-theme {
 .landing-screenshot-btn {
   display: block;
   width: 100%;
+  height: auto;
   padding: 0;
   border: none;
   background: none;
