@@ -511,10 +511,30 @@ nav.admin-nav a:hover {
   gap: 12px;
 }
 
-.admin-nav-contact-link {
+/* Specificity note: `nav.admin-nav a` (element+class+element) already sets a
+   plain text color with no background, and would otherwise win over a bare
+   `.admin-nav-chip` rule — scoping through the parent class here is what lets
+   this pill styling actually take effect instead of looking like plain text. */
+.admin-nav-actions .admin-nav-chip {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  height: 32px;
+  padding: 0 14px;
+  border-radius: var(--radius-pill);
+  background: var(--accent-teal-light);
+  color: var(--accent-teal-deep);
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.admin-nav-actions .admin-nav-chip:hover {
+  color: var(--accent-teal-deep);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(27, 36, 64, 0.18);
 }
 
 nav.admin-nav:not(.admin-nav-stacked) .admin-nav-actions {

@@ -23,7 +23,14 @@
       <nav class="admin-nav">
         <strong id="floor-plan-wedding-name"></strong>
         <div class="admin-nav-actions">
-          <a href="index.html" id="guest-page-link" data-i18n="adminNavGuestLink">Voir la page invité &rarr;</a>
+          <a class="admin-nav-chip" href="index.html" id="guest-page-link">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+            <span data-i18n="adminNavGuestLink">Page invité</span>
+          </a>
+          <a class="admin-nav-chip" id="contact-link" href="https://docs.google.com/forms/d/e/1FAIpQLSftDL9S73uFKMD87wDGL4NMfIa3VIJ_GVOEkFeHzTbPqzlZWA/viewform?usp=publish-editor" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+            <span data-i18n="contactUsLink">Contact</span>
+          </a>
           <input type="text" id="guest-link" hidden />
         </div>
       </nav>
