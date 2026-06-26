@@ -1246,9 +1246,19 @@ nav.admin-nav.admin-nav-stacked {
   box-shadow: 0 16px 30px color-mix(in srgb, var(--accent-teal-deep) 32%, transparent);
 }
 
+/* Mobile-only label/badge text — shorter wording (eg. "Personnaliser"
+   instead of "Personnaliser la page invité") so the compact mobile tile
+   never has to truncate. Hidden on desktop, where the full label/badge
+   above is used instead. */
+.admin-tool-tile-label-mobile,
+.admin-tool-tile-badge-mobile {
+  display: none;
+}
+
 /* On phones, 7 tall tiles with title+description meant a lot of vertical
    scroll just to get past the tools section — shrink to a dense icon grid
-   (icon + one truncated line of label, no description, no badge) instead. */
+   (icon + one short label line, no description) instead. Disabled tiles
+   keep a tiny "soon" corner badge rather than losing the signal entirely. */
 @media (max-width: 600px) {
   body.admin-theme .admin-tools-grid {
     grid-template-columns: repeat(4, 1fr);
@@ -1271,17 +1281,35 @@ nav.admin-nav.admin-nav-stacked {
   }
 
   body.admin-theme .admin-tool-tile-label {
+    display: none;
+  }
+
+  body.admin-theme .admin-tool-tile-label-mobile {
+    display: block;
     max-width: 100%;
     font-size: 0.6rem;
     line-height: 1.2;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
   }
 
   body.admin-theme .admin-tool-tile-desc,
   body.admin-theme .admin-tool-tile-badge {
     display: none;
+  }
+
+  body.admin-theme .admin-tool-tile-badge-mobile {
+    display: block;
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    padding: 1px 6px;
+    font-size: 0.5rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+    color: var(--gold-deep);
+    background: var(--gold-light);
+    border-radius: var(--radius-pill);
+    line-height: 1.4;
   }
 }
 
