@@ -3897,6 +3897,16 @@ body.admin-theme .theme-decoration-position-arrow {
     flex-direction: column;
     gap: 10px;
   }
+
+  .floor-plan-card.fullscreen-active .card-header-row {
+    top: 8px;
+    left: 8px;
+    max-width: calc(100vw - 16px);
+  }
+
+  .floor-plan-card.fullscreen-active .floor-plan-toolbar {
+    border-radius: var(--radius);
+  }
 }
 
 /* Admin theme: repurposes the shared --gold/--sage slots as a violet (primary) +
