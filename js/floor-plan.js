@@ -282,9 +282,9 @@ function reconcileTables(wedding) {
       } catch (_) {
         // pointer capture may already be lost (e.g. after a cancel) — ignore
       }
-      shapeEl.removeEventListener('pointermove', onPointerMove);
-      shapeEl.removeEventListener('pointerup', onPointerUp);
-      shapeEl.removeEventListener('pointercancel', onPointerCancel);
+      document.removeEventListener('pointermove', onPointerMove);
+      document.removeEventListener('pointerup', onPointerUp);
+      document.removeEventListener('pointercancel', onPointerCancel);
       shapeEl.classList.remove('dragging-table');
       pointerId = null;
       activeDragCleanups.delete(cleanup);
@@ -316,10 +316,15 @@ function reconcileTables(wedding) {
       startY = table.y;
       moved = false;
       shapeEl.classList.add('dragging-table');
-      shapeEl.setPointerCapture(pointerId);
-      shapeEl.addEventListener('pointermove', onPointerMove);
-      shapeEl.addEventListener('pointercancel', onPointerCancel);
-      shapeEl.addEventListener('pointerup', onPointerUp);
+      try {
+        shapeEl.setPointerCapture(pointerId);
+      } catch (_) {
+        // best-effort only — move/up/cancel are tracked via document below
+        // regardless, so a flaky capture implementation can't strand the drag
+      }
+      document.addEventListener('pointermove', onPointerMove);
+      document.addEventListener('pointercancel', onPointerCancel);
+      document.addEventListener('pointerup', onPointerUp);
       activeDragCleanups.add(cleanup);
     });
   }
@@ -451,9 +456,9 @@ function reconcileTables(wedding) {
       } catch (_) {
         // pointer capture may already be lost (e.g. after a cancel) — ignore
       }
-      chairEl.removeEventListener('pointermove', onPointerMove);
-      chairEl.removeEventListener('pointerup', onPointerUp);
-      chairEl.removeEventListener('pointercancel', onPointerCancel);
+      document.removeEventListener('pointermove', onPointerMove);
+      document.removeEventListener('pointerup', onPointerUp);
+      document.removeEventListener('pointercancel', onPointerCancel);
       pointerId = null;
       chairEl.classList.remove('picked');
       clearDropHighlight();
@@ -490,10 +495,15 @@ function reconcileTables(wedding) {
       startClientX = e.clientX;
       startClientY = e.clientY;
       moved = false;
-      chairEl.setPointerCapture(pointerId);
-      chairEl.addEventListener('pointermove', onPointerMove);
-      chairEl.addEventListener('pointerup', onPointerUp);
-      chairEl.addEventListener('pointercancel', onPointerCancel);
+      try {
+        chairEl.setPointerCapture(pointerId);
+      } catch (_) {
+        // best-effort only — move/up/cancel are tracked via document below
+        // regardless, so a flaky capture implementation can't strand the drag
+      }
+      document.addEventListener('pointermove', onPointerMove);
+      document.addEventListener('pointerup', onPointerUp);
+      document.addEventListener('pointercancel', onPointerCancel);
       activeDragCleanups.add(cleanup);
     });
   }
@@ -611,9 +621,9 @@ function reconcileTables(wedding) {
       } catch (_) {
         // pointer capture may already be lost (e.g. after a cancel) — ignore
       }
-      shapeEl.removeEventListener('pointermove', onPointerMove);
-      shapeEl.removeEventListener('pointerup', onPointerUp);
-      shapeEl.removeEventListener('pointercancel', onPointerCancel);
+      document.removeEventListener('pointermove', onPointerMove);
+      document.removeEventListener('pointerup', onPointerUp);
+      document.removeEventListener('pointercancel', onPointerCancel);
       shapeEl.classList.remove('dragging-landmark');
       pointerId = null;
       activeDragCleanups.delete(cleanup);
@@ -642,10 +652,15 @@ function reconcileTables(wedding) {
       startY = landmark.y;
       moved = false;
       shapeEl.classList.add('dragging-landmark');
-      shapeEl.setPointerCapture(pointerId);
-      shapeEl.addEventListener('pointermove', onPointerMove);
-      shapeEl.addEventListener('pointercancel', onPointerCancel);
-      shapeEl.addEventListener('pointerup', onPointerUp);
+      try {
+        shapeEl.setPointerCapture(pointerId);
+      } catch (_) {
+        // best-effort only — move/up/cancel are tracked via document below
+        // regardless, so a flaky capture implementation can't strand the drag
+      }
+      document.addEventListener('pointermove', onPointerMove);
+      document.addEventListener('pointercancel', onPointerCancel);
+      document.addEventListener('pointerup', onPointerUp);
       activeDragCleanups.add(cleanup);
     });
   }
