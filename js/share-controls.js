@@ -19,7 +19,17 @@ export function createShareControls({ getLang, weddingNameEl }) {
   const qrDownloadBtn = document.getElementById('qr-download-btn');
   const qrShareBtn = document.getElementById('qr-share-btn');
 
+  let currentWeddingId = null;
+
+  function refreshLinks() {
+    if (!currentWeddingId) return;
+    const lang = getLang();
+    guestPageLink.href = `guest/${lang}?id=${currentWeddingId}`;
+    guestLinkInput.value = `${window.location.origin}${window.location.pathname.replace(/[^/]+$/, '')}guest/${lang}?id=${currentWeddingId}`;
+  }
+
   function updateLabels() {
+    refreshLinks();
     const lang = getLang();
     const copyLabel = t(lang, 'copyGuestLinkBtn');
     copyLinkBtn.title = copyLabel;
@@ -101,8 +111,7 @@ export function createShareControls({ getLang, weddingNameEl }) {
   });
 
   function init(weddingId) {
-    guestPageLink.href = `guest.html?id=${weddingId}`;
-    guestLinkInput.value = `${window.location.origin}${window.location.pathname.replace(/[^/]+$/, '')}guest.html?id=${weddingId}`;
+    currentWeddingId = weddingId;
     copyLinkBtn.innerHTML = ICONS.link;
     document.getElementById('qr-code-icon').innerHTML = ICONS.qrcode;
     updateLabels();
