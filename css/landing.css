@@ -148,6 +148,10 @@ body.landing-theme {
   padding: 60px 24px;
 }
 
+.landing-screenshots {
+  max-width: 1240px;
+}
+
 .landing-section h2 {
   margin: 0 0 36px;
   font-family: 'Playfair Display', serif;
@@ -286,7 +290,7 @@ body.landing-theme {
 }
 
 .landing-screenshot-frame {
-  flex: 0 0 calc((100% - 44px) / 3);
+  flex: 0 0 calc((100% - 22px) / 2);
   scroll-snap-align: start;
   margin: 0;
   border-radius: var(--radius);
@@ -308,7 +312,7 @@ body.landing-theme {
 .landing-screenshot-frame img {
   display: block;
   width: 100%;
-  aspect-ratio: 16 / 10;
+  aspect-ratio: 16 / 9;
   object-fit: cover;
   object-position: top;
   transition: filter 0.15s ease;
@@ -319,8 +323,9 @@ body.landing-theme {
 }
 
 .landing-screenshot-frame figcaption {
-  padding: 12px 14px;
-  font-size: 0.85rem;
+  padding: 16px 16px;
+  border-top: 1px solid var(--gold-light);
+  font-size: 0.95rem;
   font-weight: 600;
   color: var(--charcoal);
   text-align: center;
@@ -517,11 +522,5 @@ body.landing-theme {
   .landing-carousel-arrow {
     width: 34px;
     height: 34px;
-  }
-}
-
-@media (min-width: 761px) and (max-width: 900px) {
-  .landing-screenshot-frame {
-    flex-basis: calc((100% - 22px) / 2);
   }
 }
