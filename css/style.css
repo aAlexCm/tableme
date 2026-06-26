@@ -4026,6 +4026,15 @@ body.admin-theme * {
   font-family: 'Inter', sans-serif !important;
 }
 
+/* Font-picker buttons preview the actual font they offer, so the blanket
+   Inter override above must not apply to them. The family is passed in via
+   a custom property (set inline per-button in theme-settings.js) rather
+   than a plain inline font-family, since only a custom property can win
+   against the equally-`!important`, higher-specificity rule above. */
+body.admin-theme .theme-font-option {
+  font-family: var(--font-preview) !important;
+}
+
 body.admin-theme header.hero::before,
 body.admin-theme header.hero::after {
   display: none;

@@ -117,13 +117,13 @@ export function createThemeSettings({ weddingId, getLang }) {
     }).join('');
 
     themeFontTitleGridEl.innerHTML = GUEST_FONT_TITLE_OPTIONS.map((opt) => `
-      <button type="button" class="theme-font-option${fonts.title === opt.id ? ' active' : ''}" data-font-title="${opt.id}" style="font-family:${opt.family}">
+      <button type="button" class="theme-font-option${fonts.title === opt.id ? ' active' : ''}" data-font-title="${opt.id}" style="--font-preview:${opt.family}">
         ${escapeHtml(t(lang, opt.labelKey))}
       </button>
     `).join('');
 
     themeFontBodyGridEl.innerHTML = GUEST_FONT_BODY_OPTIONS.map((opt) => `
-      <button type="button" class="theme-font-option${fonts.body === opt.id ? ' active' : ''}" data-font-body="${opt.id}" style="font-family:${opt.family}">
+      <button type="button" class="theme-font-option${fonts.body === opt.id ? ' active' : ''}" data-font-body="${opt.id}" style="--font-preview:${opt.family}">
         ${escapeHtml(t(lang, opt.labelKey))}
       </button>
     `).join('');
