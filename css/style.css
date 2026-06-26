@@ -3117,6 +3117,9 @@ body.admin-theme .theme-decoration-position-arrow {
   display: flex;
   align-items: center;
   justify-content: center;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .chair.occupied {
@@ -3211,6 +3214,8 @@ body.admin-theme .theme-decoration-position-arrow {
   line-height: 1;
   color: #fff;
   text-transform: uppercase;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
   user-select: none;
   transform: rotate(var(--chair-counter-angle, 0deg));
 }
