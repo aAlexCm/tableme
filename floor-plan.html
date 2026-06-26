@@ -103,10 +103,16 @@
             </div>
             <button type="button" class="icon-btn" id="fullscreen-btn"></button>
             <div class="landmark-picker-wrap">
-              <button type="button" class="secondary" id="add-landmark-btn" data-i18n="addLandmarkBtn">+ Ajouter un repère</button>
+              <button type="button" class="secondary" id="add-landmark-btn">
+                <svg class="btn-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.1 7-11a7 7 0 1 0-14 0c0 4.9 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
+                <span class="btn-label" data-i18n="addLandmarkBtn">+ Ajouter un repère</span>
+              </button>
               <div class="landmark-picker" id="landmark-picker" hidden></div>
             </div>
-            <button type="button" id="add-table-btn" data-i18n="addTableBtn">+ Ajouter une table</button>
+            <button type="button" id="add-table-btn">
+              <svg class="btn-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3"/></svg>
+              <span class="btn-label" data-i18n="addTableBtn">+ Ajouter une table</span>
+            </button>
           </div>
         </div>
         <p class="muted small" data-i18n="floorPlanHint">Glissez les tables pour composer votre salle. Faites glisser un espace vide pour vous déplacer, et utilisez le zoom pour voir plus de tables.</p>

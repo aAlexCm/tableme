@@ -2955,6 +2955,15 @@ body.admin-theme .theme-decoration-position-arrow {
   flex-wrap: wrap;
 }
 
+#add-landmark-btn,
+#add-table-btn {
+  gap: 6px;
+}
+
+.btn-icon {
+  flex-shrink: 0;
+}
+
 .zoom-controls {
   display: flex;
   align-items: center;
@@ -3905,7 +3914,33 @@ body.admin-theme .theme-decoration-position-arrow {
   }
 
   .floor-plan-card.fullscreen-active .floor-plan-toolbar {
-    border-radius: var(--radius);
+    border-radius: var(--radius-pill);
+    gap: 6px;
+    padding: 4px;
+    flex-wrap: nowrap;
+  }
+
+  .floor-plan-card.fullscreen-active .zoom-controls .icon-btn {
+    width: 24px;
+    height: 24px;
+  }
+
+  .floor-plan-card.fullscreen-active .zoom-reset-btn {
+    min-width: 32px;
+    font-size: 0.66rem;
+    padding: 2px;
+  }
+
+  .floor-plan-card.fullscreen-active #fullscreen-btn,
+  .floor-plan-card.fullscreen-active #add-landmark-btn,
+  .floor-plan-card.fullscreen-active #add-table-btn {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+  }
+
+  .floor-plan-card.fullscreen-active .btn-label {
+    display: none;
   }
 }
 
