@@ -1,6 +1,7 @@
 import { Storage, generateId } from './storage.js';
 import { applyTranslations, buildLangSwitcher, t } from './i18n.js';
 import { createTableModal } from './table-modal.js';
+import { createGuestModal } from './guest-modal.js';
 import { createShareControls } from './share-controls.js';
 import { createThemeSettings } from './theme-settings.js';
 import { isFeatureEnabled } from './features.js';
@@ -118,6 +119,12 @@ function parseSheetRows(rows) {
   const fileAddFeedbackEl = document.getElementById('file-add-feedback');
 
   const tableModalApi = createTableModal({
+    weddingId,
+    getLang: () => currentLang,
+    onChange: renderGuests,
+  });
+
+  const guestModalApi = createGuestModal({
     weddingId,
     getLang: () => currentLang,
     onChange: renderGuests,
@@ -721,6 +728,11 @@ function parseSheetRows(rows) {
 
     const row = e.target.closest('.guest-row');
     if (!row) return;
+
+    if (e.target.closest('.guest-row-name')) {
+      await guestModalApi.open(row.dataset.id);
+      return;
+    }
 
     const interactive = e.target.closest('button, a, input, select');
     if (!interactive) {

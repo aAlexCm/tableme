@@ -307,6 +307,28 @@
     </div>
   </div>
 
+  <div id="guest-modal" class="modal-overlay" hidden>
+    <div class="modal-panel">
+      <button type="button" class="modal-close" id="guest-modal-close" aria-label="Close">&times;</button>
+      <div class="modal-scroll">
+        <div class="table-modal-top-row">
+          <div class="field table-name-field">
+            <label for="guest-modal-name-input" data-i18n="guestNameLabel">Nom et prénom</label>
+            <input type="text" id="guest-modal-name-input" class="table-label-input" />
+          </div>
+          <button type="button" class="icon-btn icon-btn-danger" id="guest-modal-delete-btn"></button>
+        </div>
+
+        <div class="table-modal-divider"></div>
+
+        <div class="field">
+          <label for="guest-modal-table-select" data-i18n="guestTableLabel">Table</label>
+          <select id="guest-modal-table-select"></select>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script type="module" src="js/wedding-admin.js"></script>

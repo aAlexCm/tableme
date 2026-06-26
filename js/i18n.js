@@ -332,6 +332,9 @@ const dict = {
       count > 0
         ? `Supprimer cette table ? ${count} invité(s) deviendront non assignés.`
         : 'Supprimer cette table ?',
+    editGuestModalTitle: "Modifier l'invité",
+    guestNameEmptyError: 'Le nom ne peut pas être vide.',
+    confirmDeleteGuest: (name) => `Supprimer "${name}" ?`,
     tableLabelDuplicateError: 'Une table porte déjà ce nom.',
     tableLabelEmptyError: 'Le nom de la table ne peut pas être vide.',
     landingNavFeatures: 'Fonctionnalités',
@@ -716,6 +719,9 @@ const dict = {
     unassignedOption: '— Unassigned —',
     confirmDeleteTable: (count) =>
       count > 0 ? `Delete this table? ${count} guest(s) will become unassigned.` : 'Delete this table?',
+    editGuestModalTitle: 'Edit guest',
+    guestNameEmptyError: 'The name cannot be empty.',
+    confirmDeleteGuest: (name) => `Delete "${name}"?`,
     tableLabelDuplicateError: 'A table already has this name.',
     tableLabelEmptyError: 'The table name cannot be empty.',
     landingNavFeatures: 'Features',
@@ -1100,6 +1106,9 @@ const dict = {
     unassignedOption: '— Neasignat —',
     confirmDeleteTable: (count) =>
       count > 0 ? `Ștergi această masă? ${count} invitat(i) vor deveni neasignați.` : 'Ștergi această masă?',
+    editGuestModalTitle: 'Editează invitatul',
+    guestNameEmptyError: 'Numele nu poate fi gol.',
+    confirmDeleteGuest: (name) => `Ștergi "${name}"?`,
     tableLabelDuplicateError: 'Există deja o masă cu acest nume.',
     tableLabelEmptyError: 'Numele mesei nu poate fi gol.',
     landingNavFeatures: 'Funcționalități',

@@ -2305,6 +2305,15 @@ body.admin-theme .guest-row-drop-target {
   font-size: 1.05rem;
   font-weight: 700;
   color: var(--charcoal);
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 3px;
+  transition: text-decoration-color 0.15s ease;
+}
+
+.guest-row-name:hover {
+  text-decoration-color: color-mix(in srgb, var(--charcoal) 35%, transparent);
 }
 
 .guest-row-actions {
