@@ -4299,7 +4299,12 @@ body.admin-theme .admin-nav-actions .admin-nav-chip:hover {
 body.admin-theme .wedding-countdown {
   background: var(--admin-banner);
   border-radius: var(--radius);
-  padding: 24px 20px;
+  padding: 14px 18px;
+  margin-bottom: 20px;
+}
+
+body.admin-theme .wedding-countdown-units {
+  gap: 10px;
 }
 
 /* The unit chips' default pale-teal-on-transparent fill all but disappears
@@ -4307,8 +4312,24 @@ body.admin-theme .wedding-countdown {
    makes each one read as its own card, like mariages.net's stat cards
    sitting on its welcome banner. */
 body.admin-theme .wedding-countdown-unit {
+  min-width: 50px;
+  padding: 6px 10px;
+  border-radius: 12px;
   background: var(--paper);
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+}
+
+body.admin-theme .wedding-countdown-value {
+  font-size: 1.25rem;
+}
+
+body.admin-theme .wedding-countdown-label {
+  font-size: 0.58rem;
+}
+
+body.admin-theme .wedding-countdown-caption {
+  margin-top: 4px;
+  font-size: 0.68rem;
 }
 
 body.admin-theme .admin-tool-tile {
