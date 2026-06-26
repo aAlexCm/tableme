@@ -1190,6 +1190,15 @@ nav.admin-nav.admin-nav-stacked {
   border-radius: var(--radius-pill);
 }
 
+/* Defensive cap only — with the shortened "contact us" wording this badge
+   is normally as narrow as the existing coming-soon one, but very tight
+   tile widths (small screens) could still force it onto two lines. */
+#poster-tile-badge {
+  max-width: 62%;
+  text-align: right;
+  line-height: 1.3;
+}
+
 .admin-tool-tile.tile-accent-blue {
   background: linear-gradient(135deg, var(--sage), var(--sage-deep));
   box-shadow: 0 10px 22px color-mix(in srgb, var(--sage-deep) 25%, transparent);
