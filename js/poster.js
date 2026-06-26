@@ -1199,7 +1199,7 @@ function fontFamilyFor(fontKey) {
   populateIconSymbolSelect();
   populateQrBodySelect();
   populateQrCornerSelect();
-  guestUrl = `${window.location.origin}${window.location.pathname.replace(/[^/]+$/, '')}index.html?id=${weddingId}`;
+  guestUrl = `${window.location.origin}${window.location.pathname.replace(/[^/]+$/, '')}guest.html?id=${weddingId}`;
   poster = normalizePoster(wedding.poster);
   applySheetSize();
   applyBackground();
