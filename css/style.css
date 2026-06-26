@@ -4177,6 +4177,21 @@ body.admin-theme .lang-switcher-trigger {
   color: var(--charcoal);
 }
 
+/* Mode-switch icons (Un par un / Plusieurs / Fichier) get their own pastel
+   hue, same idea as the tool-tile badges — the icon glyph itself recolors
+   via currentColor regardless of the button's active/inactive text color. */
+body.admin-theme .mode-btn[data-mode='single'] svg {
+  color: #c2487a;
+}
+
+body.admin-theme .mode-btn[data-mode='bulk'] svg {
+  color: #3f66b3;
+}
+
+body.admin-theme .mode-btn[data-mode='file'] svg {
+  color: #2f8a5c;
+}
+
 body.admin-theme button.secondary,
 body.admin-theme a.secondary {
   color: var(--gold-deep);
