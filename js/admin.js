@@ -203,7 +203,10 @@ const ICONS = {
       const li = document.createElement('li');
       li.className = 'feature-toggle-item';
       li.innerHTML = `
-        <span class="feature-toggle-label">${escapeHtml(t(currentLang, flag.labelKey))}</span>
+        <span class="feature-toggle-info">
+          <span class="feature-toggle-icon">${flag.icon || ''}</span>
+          <span class="feature-toggle-label">${escapeHtml(t(currentLang, flag.labelKey))}</span>
+        </span>
         <label class="toggle-switch">
           <input type="checkbox" data-feature-key="${flag.key}" ${enabled ? 'checked' : ''} />
           <span class="toggle-switch-track"></span>

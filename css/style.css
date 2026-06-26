@@ -1922,9 +1922,25 @@ body.modal-open {
   border-bottom: none;
 }
 
+.feature-toggle-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+}
+
+.feature-toggle-icon {
+  display: inline-flex;
+  flex: 0 0 auto;
+  color: var(--gold-deep);
+}
+
 .feature-toggle-label {
   font-size: 0.92rem;
   color: var(--charcoal);
+  text-align: left;
 }
 
 .toggle-switch {
