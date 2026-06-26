@@ -322,6 +322,9 @@ function fontFamilyFor(fontKey) {
     colorInput.value = el.color;
     hexInput.value = el.color.toUpperCase();
 
+    dividerThicknessInput.title = t(currentLang, 'posterThicknessTooltip');
+    dividerOrnamentSizeInput.title = t(currentLang, 'posterOrnamentSizeTooltip');
+
     if (isText) {
       boldBtn.classList.toggle('active', el.bold);
       italicBtn.classList.toggle('active', el.italic);
@@ -329,11 +332,13 @@ function fontFamilyFor(fontKey) {
       alignCenterBtn.classList.toggle('active', el.align === 'center');
       alignRightBtn.classList.toggle('active', el.align === 'right');
       fontSelect.value = el.fontKey;
+      sizeInput.title = t(currentLang, 'posterFontSizeTooltip');
       sizeInput.min = '8';
       sizeInput.max = '200';
       sizeInput.value = el.fontSize;
     } else if (isDivider) {
       dividerStyleSelect.value = el.style;
+      sizeInput.title = t(currentLang, 'posterWidthTooltip');
       sizeInput.min = '60';
       sizeInput.max = '320';
       sizeInput.value = el.width;
@@ -341,10 +346,12 @@ function fontFamilyFor(fontKey) {
       dividerOrnamentSizeInput.value = el.ornamentSize;
     } else if (isIcon) {
       iconSymbolSelect.value = el.symbol;
+      sizeInput.title = t(currentLang, 'posterSizeTooltip');
       sizeInput.min = '20';
       sizeInput.max = '200';
       sizeInput.value = el.size;
     } else {
+      sizeInput.title = t(currentLang, 'posterSizeTooltip');
       sizeInput.min = '60';
       sizeInput.max = '320';
       sizeInput.value = el.size;

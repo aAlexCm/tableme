@@ -92,9 +92,18 @@
     <select id="poster-font-select"></select>
     <select id="poster-divider-style-select"></select>
     <select id="poster-icon-symbol-select"></select>
-    <input type="number" id="poster-size-input" min="8" max="200" />
-    <input type="number" id="poster-divider-thickness-input" min="1" max="12" />
-    <input type="number" id="poster-divider-ornament-size-input" min="8" max="60" />
+    <span class="icon-number-field">
+      <span class="icon-number-field-icon"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="12" x2="20" y2="12"/><polyline points="8 8 4 12 8 16"/><polyline points="16 8 20 12 16 16"/></svg></span>
+      <input type="number" id="poster-size-input" min="8" max="200" />
+    </span>
+    <span class="icon-number-field">
+      <span class="icon-number-field-icon"><svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><rect x="3" y="10" width="18" height="4" rx="1.5"/></svg></span>
+      <input type="number" id="poster-divider-thickness-input" min="1" max="12" />
+    </span>
+    <span class="icon-number-field">
+      <span class="icon-number-field-icon"><svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><circle cx="7" cy="15" r="2.6"/><circle cx="16" cy="10" r="4.6"/></svg></span>
+      <input type="number" id="poster-divider-ornament-size-input" min="8" max="60" />
+    </span>
     <input type="color" id="poster-color-input" />
     <input type="text" id="poster-hex-input" class="color-hex-input" maxlength="7" spellcheck="false" />
     <button type="button" class="icon-btn" id="poster-duplicate-btn"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>

@@ -642,6 +642,27 @@ nav.admin-nav.admin-nav-stacked {
   letter-spacing: 0.4px;
 }
 
+.icon-number-field {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.icon-number-field-icon {
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  pointer-events: none;
+  color: var(--ink);
+  opacity: 0.6;
+}
+
+.poster-text-toolbar .icon-number-field input[type='number'] {
+  padding-left: 26px;
+}
+
 .poster-toolbox-tools {
   display: flex;
   flex-direction: column;
