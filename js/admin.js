@@ -2,7 +2,7 @@ import { Storage } from './storage.js';
 import { LANGS, LANG_LABELS, applyTranslations, buildLangSwitcher, t } from './i18n.js';
 import { FEATURE_FLAGS, isFeatureEnabled } from './features.js';
 import { getCountries, getRegions, getCities } from './geo.js';
-import { waitForAuthUser, signIn, signOutUser } from './auth-guard.js';
+import { waitForAuthUser, signInWithGoogle, signOutUser } from './auth-guard.js';
 
 const ADMIN_LANG_KEY = 'tableme_admin_lang';
 
@@ -22,9 +22,7 @@ const ICONS = {
   const langMount = document.getElementById('lang-switcher-mount');
 
   const loginEl = document.getElementById('admin-login');
-  const loginForm = document.getElementById('admin-login-form');
-  const loginEmailInput = document.getElementById('admin-login-email');
-  const loginPasswordInput = document.getElementById('admin-login-password');
+  const loginGoogleBtn = document.getElementById('admin-login-google-btn');
   const loginErrorEl = document.getElementById('admin-login-error');
   const adminContentEl = document.getElementById('admin-content');
   const logoutBtn = document.getElementById('admin-logout-btn');
@@ -396,15 +394,25 @@ const ICONS = {
     await renderWeddings();
   }
 
-  loginForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
+  loginGoogleBtn.addEventListener('click', async () => {
     loginErrorEl.hidden = true;
-    const result = await signIn(loginEmailInput.value.trim(), loginPasswordInput.value);
-    if (result.ok) {
-      loginPasswordInput.value = '';
+    const result = await signInWithGoogle();
+    if (!result.ok) {
+      if (result.code !== 'auth/popup-closed-by-user') {
+        loginErrorEl.textContent = t(currentLang, 'adminLoginError');
+        loginErrorEl.hidden = false;
+      }
+      return;
+    }
+    try {
       await showContent();
-    } else {
-      loginErrorEl.textContent = t(currentLang, 'adminLoginError');
+    } catch (err) {
+      // Signing in with Google only proves it's *a* Google account — the
+      // Firestore rules' email allow-list is what actually gates access, so
+      // a successful popup login can still be rejected at the data layer.
+      await signOutUser();
+      showLogin();
+      loginErrorEl.textContent = t(currentLang, 'adminLoginUnauthorized');
       loginErrorEl.hidden = false;
     }
   });
@@ -420,7 +428,15 @@ const ICONS = {
 
   (async function boot() {
     const user = await waitForAuthUser();
-    if (user) await showContent();
-    else showLogin();
+    if (!user) {
+      showLogin();
+      return;
+    }
+    try {
+      await showContent();
+    } catch (err) {
+      await signOutUser();
+      showLogin();
+    }
   })();
 })();

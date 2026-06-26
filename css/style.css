@@ -1410,6 +1410,22 @@ nav.admin-nav.admin-nav-stacked {
   color: var(--error);
 }
 
+.google-signin-btn {
+  width: 100%;
+  gap: 10px;
+  background: #fff;
+  color: #3c4043;
+  border: 1px solid rgba(60, 64, 67, 0.3);
+  box-shadow: none;
+}
+
+.google-signin-btn:hover {
+  background: #f7f7f7;
+  filter: none;
+  box-shadow: none;
+  transform: none;
+}
+
 .partner-icon-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(44px, 1fr));

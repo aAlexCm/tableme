@@ -2,7 +2,7 @@ import { Storage } from './storage.js';
 import { applyTranslations, buildLangSwitcher, t } from './i18n.js';
 import { PARTNER_CATEGORIES, PARTNER_ICONS, CONTACT_CHANNELS } from './partners.js';
 import { getCountries, getRegions, getCities } from './geo.js';
-import { waitForAuthUser, signIn, signOutUser } from './auth-guard.js';
+import { waitForAuthUser, signInWithGoogle, signOutUser } from './auth-guard.js';
 
 const ADMIN_LANG_KEY = 'tableme_admin_lang';
 const MAX_PHOTO_DIMENSION = 640;
@@ -48,9 +48,7 @@ function readAndResizeImage(file) {
   const langMount = document.getElementById('lang-switcher-mount');
 
   const loginEl = document.getElementById('partners-admin-login');
-  const loginForm = document.getElementById('partners-admin-login-form');
-  const loginEmailInput = document.getElementById('partners-admin-login-email');
-  const loginPasswordInput = document.getElementById('partners-admin-login-password');
+  const loginGoogleBtn = document.getElementById('partners-admin-login-google-btn');
   const loginErrorEl = document.getElementById('partners-admin-login-error');
   const contentEl = document.getElementById('partners-admin-content');
   const logoutBtn = document.getElementById('partners-admin-logout-btn');
@@ -548,15 +546,22 @@ function readAndResizeImage(file) {
     await renderPartnerStats();
   }
 
-  loginForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
+  loginGoogleBtn.addEventListener('click', async () => {
     loginErrorEl.hidden = true;
-    const result = await signIn(loginEmailInput.value.trim(), loginPasswordInput.value);
-    if (result.ok) {
-      loginPasswordInput.value = '';
+    const result = await signInWithGoogle();
+    if (!result.ok) {
+      if (result.code !== 'auth/popup-closed-by-user') {
+        loginErrorEl.textContent = t(currentLang, 'adminLoginError');
+        loginErrorEl.hidden = false;
+      }
+      return;
+    }
+    try {
       await showContent();
-    } else {
-      loginErrorEl.textContent = t(currentLang, 'adminLoginError');
+    } catch (err) {
+      await signOutUser();
+      showLogin();
+      loginErrorEl.textContent = t(currentLang, 'adminLoginUnauthorized');
       loginErrorEl.hidden = false;
     }
   });
@@ -572,7 +577,15 @@ function readAndResizeImage(file) {
     applyTranslations(currentLang);
     updatePageTitle();
     const user = await waitForAuthUser();
-    if (user) await showContent();
-    else showLogin();
+    if (!user) {
+      showLogin();
+      return;
+    }
+    try {
+      await showContent();
+    } catch (err) {
+      await signOutUser();
+      showLogin();
+    }
   })();
 })();
