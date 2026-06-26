@@ -3970,9 +3970,14 @@ body.admin-theme {
   --gold: #1aafaa;
   --gold-deep: #0e7c78;
   --gold-light: #dff6f5;
-  --sage: #f4a261;
-  --sage-deep: #e07b39;
-  --sage-light: #fdeedd;
+  /* Repurposed as a neutral gray (not the orange "peach" it used to be) —
+     mariages.net's UI has exactly one accent color (its red, our teal); every
+     "secondary"/muted role across the admin theme borrows --sage for that,
+     so retargeting these three tokens removes peach everywhere in one place
+     instead of hunting down each of its ~70 consumers individually. */
+  --sage: #8a93a3;
+  --sage-deep: #586273;
+  --sage-light: #eef1f4;
   --ink: #6b7280;
   --charcoal: #2c4363;
   --cream: #f0f4f6;
