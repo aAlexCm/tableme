@@ -3040,6 +3040,8 @@ body.admin-theme .theme-decoration-position-arrow {
   margin-top: 0;
   border: none;
   border-radius: 0;
+  background-image: radial-gradient(circle, rgba(138, 109, 60, 0.16) 1px, transparent 1px);
+  background-size: 22px 22px;
 }
 
 .floor-plan-card.fullscreen-active .card-header-row h2,
@@ -3066,6 +3068,14 @@ body.admin-theme .theme-decoration-position-arrow {
   padding: 6px 8px;
   border-radius: var(--radius-pill);
   box-shadow: 0 6px 16px rgba(138, 109, 60, 0.18);
+}
+
+.floor-plan-card.fullscreen-active .floor-canvas-sizer {
+  margin-top: 90px;
+}
+
+.floor-plan-card.fullscreen-active .floor-canvas {
+  background-image: none;
 }
 
 .floor-canvas-viewport.panning {
@@ -3920,6 +3930,10 @@ body.admin-theme .theme-decoration-position-arrow {
     flex-wrap: nowrap;
   }
 
+  .floor-plan-card.fullscreen-active .floor-canvas-sizer {
+    margin-top: 64px;
+  }
+
   .floor-plan-card.fullscreen-active .zoom-controls .icon-btn {
     width: 24px;
     height: 24px;
@@ -4161,6 +4175,10 @@ body.admin-theme .floor-canvas-viewport {
 }
 
 body.admin-theme .floor-canvas {
+  background-image: radial-gradient(circle, color-mix(in srgb, var(--gold) 18%, transparent) 1px, transparent 1px);
+}
+
+body.admin-theme .floor-plan-card.fullscreen-active .floor-canvas-viewport {
   background-image: radial-gradient(circle, color-mix(in srgb, var(--gold) 18%, transparent) 1px, transparent 1px);
 }
 
