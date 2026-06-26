@@ -185,6 +185,17 @@ function fontFamilyFor(fontKey) {
   let selectedId = null;
   let saveTimer = null;
   let guestUrl = '';
+  // Remembers the most recently used text style so the next "Add text"
+  // click starts from it instead of fixed defaults — duplicating an
+  // existing widget remains the way to copy its text/position too.
+  let lastTextStyle = {
+    fontKey: FONT_OPTIONS[0].key,
+    fontSize: 28,
+    bold: false,
+    italic: false,
+    align: 'left',
+    color: '#2c2420',
+  };
 
   function scheduleSave() {
     clearTimeout(saveTimer);
@@ -409,6 +420,14 @@ function fontFamilyFor(fontKey) {
       alignLeftBtn.classList.toggle('active', el.align === 'left');
       alignCenterBtn.classList.toggle('active', el.align === 'center');
       alignRightBtn.classList.toggle('active', el.align === 'right');
+      lastTextStyle = {
+        fontKey: el.fontKey,
+        fontSize: el.fontSize,
+        bold: el.bold,
+        italic: el.italic,
+        align: el.align,
+        color: el.color,
+      };
     }
     scheduleSave();
   }
@@ -716,12 +735,7 @@ function fontFamilyFor(fontKey) {
       text: t(currentLang, 'posterDefaultText'),
       x: 80 + (poster.elements.length % 5) * 14,
       y: 80 + (poster.elements.length % 5) * 28,
-      fontKey: FONT_OPTIONS[0].key,
-      fontSize: 28,
-      bold: false,
-      italic: false,
-      align: 'left',
-      color: '#2c2420',
+      ...lastTextStyle,
     };
     poster.elements.push(el);
     const node = createTextNode(el);
