@@ -73,6 +73,35 @@ function reconcileTables(wedding) {
   const weddingNameEl = document.getElementById('floor-plan-wedding-name');
   const listTabLink = document.getElementById('view-tab-list');
 
+  const countdownEl = document.getElementById('wedding-countdown');
+  const countdownCaptionEl = document.getElementById('wedding-countdown-caption');
+  const countdownDaysEl = document.getElementById('countdown-days');
+  const countdownHoursEl = document.getElementById('countdown-hours');
+  const countdownMinutesEl = document.getElementById('countdown-minutes');
+  const countdownSecondsEl = document.getElementById('countdown-seconds');
+
+  // Mirrors wedding-admin.js's countdown: counts down to the wedding date,
+  // then keeps counting up elapsed time past it instead of stopping.
+  function initCountdown(dateStr) {
+    if (!countdownEl || !dateStr) return;
+    const target = new Date(`${dateStr}T00:00:00`).getTime();
+    if (Number.isNaN(target)) return;
+
+    function tick() {
+      const diff = target - Date.now();
+      const totalSeconds = Math.floor(Math.abs(diff) / 1000);
+      countdownDaysEl.textContent = Math.floor(totalSeconds / 86400);
+      countdownHoursEl.textContent = String(Math.floor((totalSeconds % 86400) / 3600)).padStart(2, '0');
+      countdownMinutesEl.textContent = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
+      countdownSecondsEl.textContent = String(totalSeconds % 60).padStart(2, '0');
+      countdownCaptionEl.textContent = t(currentLang, diff <= 0 ? 'countdownMarriedCaption' : 'countdownUntilCaption');
+    }
+
+    countdownEl.hidden = false;
+    tick();
+    setInterval(tick, 1000);
+  }
+
   const floorPlanCardEl = document.getElementById('floor-plan-card');
   const fullscreenBtn = document.getElementById('fullscreen-btn');
   const fullscreenCloseBtn = document.getElementById('fullscreen-close-btn');
@@ -879,6 +908,7 @@ function reconcileTables(wedding) {
 
   contentEl.hidden = false;
   weddingNameEl.textContent = wedding.name;
+  initCountdown(wedding.date);
   listTabLink.href = `wedding-admin.html?id=${weddingId}`;
   shareControls.init(weddingId);
   themeSettings.init();
