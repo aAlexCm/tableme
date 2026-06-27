@@ -923,6 +923,8 @@ function reconcileTables(wedding) {
   }
   const posterTile = document.getElementById('poster-tile');
   if (posterTile) posterTile.href = `poster.html?id=${weddingId}`;
+  const todoTile = document.getElementById('todo-tile');
+  if (todoTile) todoTile.href = `todo.html?id=${weddingId}`;
   tableModalApi.updateLabels();
   updateFullscreenLabel();
   updatePageTitle();

@@ -1320,6 +1320,159 @@ nav.admin-nav.admin-nav-stacked {
   }
 }
 
+.todo-card h2 {
+  margin: 0 0 18px;
+}
+
+.todo-progress {
+  margin-bottom: 22px;
+}
+
+.todo-progress-label {
+  margin: 0 0 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--charcoal);
+}
+
+.todo-progress-bar {
+  height: 8px;
+  border-radius: var(--radius-pill);
+  background: var(--sage-light);
+  overflow: hidden;
+}
+
+.todo-progress-fill {
+  height: 100%;
+  width: 0%;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(135deg, var(--gold), var(--gold-deep));
+  transition: width 0.2s ease;
+}
+
+.todo-add-form {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px;
+  margin-bottom: 18px;
+  border-radius: var(--radius-pill);
+  border: 1.5px dashed color-mix(in srgb, var(--gold-deep) 40%, transparent);
+}
+
+.todo-add-icon {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border-radius: 50%;
+  border: none;
+  background: var(--gold-light);
+  color: var(--gold-deep);
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.todo-add-icon:hover {
+  background: var(--gold);
+  color: var(--paper);
+}
+
+.todo-add-form input {
+  flex: 1;
+  border: none;
+  box-shadow: none;
+  background: transparent;
+  padding: 8px 4px;
+  font-size: 0.9rem;
+}
+
+.todo-add-form input:focus {
+  box-shadow: none;
+}
+
+.todo-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.todo-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  border-radius: var(--radius);
+  background: var(--paper);
+  border: 1px solid rgba(176, 141, 79, 0.18);
+  box-shadow: 0 6px 16px rgba(138, 109, 60, 0.06);
+  transition: background 0.15s ease;
+}
+
+.todo-row:last-child {
+  margin-bottom: 0;
+}
+
+.todo-row-check {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border-radius: 50%;
+  border: 2px solid color-mix(in srgb, var(--gold-deep) 50%, transparent);
+  background: transparent;
+  color: var(--paper);
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.todo-row.done .todo-row-check {
+  background: var(--gold);
+  border-color: var(--gold);
+}
+
+.todo-row-text {
+  flex: 1;
+  font-size: 0.92rem;
+  color: var(--charcoal);
+}
+
+.todo-row.done .todo-row-text {
+  color: var(--ink);
+  text-decoration: line-through;
+}
+
+.todo-row-delete {
+  flex: 0 0 auto;
+  width: 30px;
+  height: 30px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+
+.todo-row:hover .todo-row-delete,
+.todo-row:focus-within .todo-row-delete {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+body.admin-theme .todo-add-form {
+  border-color: color-mix(in srgb, var(--gold-deep) 35%, transparent);
+}
+
+body.admin-theme .todo-row {
+  border-color: transparent;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
 .partners-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

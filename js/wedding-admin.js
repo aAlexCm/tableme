@@ -798,6 +798,8 @@ function parseSheetRows(rows) {
   floorPlanTabLink.href = `floor-plan.html?id=${weddingId}`;
   const partnersTile = document.getElementById('partners-tile');
   if (partnersTile) partnersTile.href = `partenaires.html?id=${weddingId}`;
+  const todoTile = document.getElementById('todo-tile');
+  if (todoTile) todoTile.href = `todo.html?id=${weddingId}`;
   shareControls.init(weddingId);
   themeSettings.init();
   updatePageTitle();
