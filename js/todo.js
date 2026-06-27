@@ -325,15 +325,55 @@ const DEFAULT_TASKS = {
   },
 };
 
+// Default tasks are stored as a (category, templateIndex) reference rather
+// than literal text, so switching language re-resolves them live against
+// DEFAULT_TASKS instead of being frozen in whichever language they were
+// seeded in. Custom tasks the couple types themselves have no templateIndex
+// and just keep their literal `text` forever, like a guest's name would.
 function buildDefaultTasks(lang) {
-  const templates = DEFAULT_TASKS[lang] || DEFAULT_TASKS.fr;
+  const templates = DEFAULT_TASKS.fr;
   const tasks = [];
   CATEGORIES.forEach((cat) => {
-    (templates[cat.id] || []).forEach((text) => {
-      tasks.push({ id: generateId(), text, category: cat.id, done: false });
+    (templates[cat.id] || []).forEach((_, index) => {
+      tasks.push({
+        id: generateId(),
+        category: cat.id,
+        templateIndex: index,
+        isDefault: true,
+        text: resolveDefaultText(cat.id, index, lang),
+        done: false,
+      });
     });
   });
   return tasks;
+}
+
+function resolveDefaultText(category, templateIndex, lang) {
+  const templates = (DEFAULT_TASKS[lang] || DEFAULT_TASKS.fr)[category] || [];
+  return templates[templateIndex];
+}
+
+function taskText(task, lang) {
+  if (task.isDefault && task.templateIndex !== undefined) {
+    const resolved = resolveDefaultText(task.category, task.templateIndex, lang);
+    if (resolved !== undefined) return resolved;
+  }
+  return task.text || '';
+}
+
+// One-time upgrade for tasks seeded before this (category, templateIndex)
+// reference existed — matches the stored literal text against any of the
+// three template lists for its category and, if found, promotes it to a
+// live-translating default task. Custom tasks (no match) are untouched.
+function migrateLegacyDefaultTask(task) {
+  if (task.isDefault || !task.category) return task;
+  for (const lang of Object.keys(DEFAULT_TASKS)) {
+    const index = (DEFAULT_TASKS[lang][task.category] || []).indexOf(task.text);
+    if (index !== -1) {
+      return { ...task, isDefault: true, templateIndex: index };
+    }
+  }
+  return task;
 }
 
 function escapeHtml(value) {
@@ -464,7 +504,7 @@ function escapeHtml(value) {
       <li class="todo-row${task.done ? ' done' : ''}" data-id="${task.id}">
         <button type="button" class="todo-row-check" aria-label="${escapeHtml(t(currentLang, 'todoCheckBtnLabel'))}">${task.done ? CHECK_ICON : ''}</button>
         <span class="todo-row-main">
-          <span class="todo-row-text">${escapeHtml(task.text)}</span>
+          <span class="todo-row-text">${escapeHtml(taskText(task, currentLang))}</span>
           <span class="todo-row-category">${escapeHtml(categoryLabel(task.category))}</span>
         </span>
         <button type="button" class="icon-btn icon-btn-danger todo-row-delete" aria-label="${escapeHtml(t(currentLang, 'todoDeleteBtnLabel'))}">${TRASH_ICON}</button>
@@ -523,7 +563,7 @@ function escapeHtml(value) {
 
     if (e.target.closest('.todo-row-delete')) {
       const task = (wedding.tasks || []).find((task) => task.id === taskId);
-      if (!task || !confirm(t(currentLang, 'confirmDeleteTask', task.text))) return;
+      if (!task || !confirm(t(currentLang, 'confirmDeleteTask', taskText(task, currentLang)))) return;
       const tasks = (wedding.tasks || []).filter((task) => task.id !== taskId);
       wedding.tasks = tasks;
       render();
@@ -561,6 +601,12 @@ function escapeHtml(value) {
     wedding.tasks = buildDefaultTasks(wedding.lang || 'fr');
     wedding.tasksSeeded = true;
     await Storage.seedTasks(weddingId, wedding.tasks);
+  } else {
+    const migrated = (wedding.tasks || []).map(migrateLegacyDefaultTask);
+    if (migrated.some((task, i) => task !== wedding.tasks[i])) {
+      wedding.tasks = migrated;
+      await Storage.setTasks(weddingId, migrated);
+    }
   }
 
   contentEl.hidden = false;
