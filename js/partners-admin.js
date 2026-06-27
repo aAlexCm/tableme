@@ -548,21 +548,13 @@ function readAndResizeImage(file) {
 
   loginGoogleBtn.addEventListener('click', async () => {
     loginErrorEl.hidden = true;
+    // Redirects to Google immediately on success, so there is nothing to
+    // chain after it here — the post-login flow resumes in init() once the
+    // user is redirected back to this page.
     const result = await signInWithGoogle();
     if (!result.ok) {
-      if (result.code !== 'auth/popup-closed-by-user') {
-        console.warn('Google sign-in failed', result.code);
-        loginErrorEl.textContent = `${t(currentLang, 'adminLoginError')} (${result.code})`;
-        loginErrorEl.hidden = false;
-      }
-      return;
-    }
-    try {
-      await showContent();
-    } catch (err) {
-      await signOutUser();
-      showLogin();
-      loginErrorEl.textContent = t(currentLang, 'adminLoginUnauthorized');
+      console.warn('Google sign-in failed', result.code);
+      loginErrorEl.textContent = `${t(currentLang, 'adminLoginError')} (${result.code})`;
       loginErrorEl.hidden = false;
     }
   });
@@ -585,8 +577,13 @@ function readAndResizeImage(file) {
     try {
       await showContent();
     } catch (err) {
+      // Signing in with Google only proves it's *a* Google account — the
+      // Firestore rules' email allow-list is what actually gates access, so
+      // a successful sign-in can still be rejected at the data layer.
       await signOutUser();
       showLogin();
+      loginErrorEl.textContent = t(currentLang, 'adminLoginUnauthorized');
+      loginErrorEl.hidden = false;
     }
   })();
 })();
