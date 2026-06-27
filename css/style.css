@@ -1280,6 +1280,12 @@ nav.admin-nav.admin-nav-stacked {
     margin-bottom: 0;
   }
 
+  /* Extra headroom so the corner "soon" badge doesn't sit right on top of
+     the icon below it. */
+  body.admin-theme .admin-tool-tile.is-disabled {
+    padding-top: 22px;
+  }
+
   body.admin-theme .admin-tool-tile-label {
     display: none;
   }
@@ -1288,6 +1294,7 @@ nav.admin-nav.admin-nav-stacked {
     display: block;
     max-width: 100%;
     font-size: 0.6rem;
+    font-weight: 700;
     line-height: 1.2;
   }
 
