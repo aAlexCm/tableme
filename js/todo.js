@@ -418,6 +418,7 @@ function escapeHtml(value) {
   let wedding = null;
   let statusFilter = 'all';
   let categoryFilter = 'all';
+  let typeFilter = 'all';
   let customCategories = [];
   let editingTaskId = null;
 
@@ -436,8 +437,10 @@ function escapeHtml(value) {
   const emptyStateEl = document.getElementById('todo-empty-state');
   const statusFiltersEl = document.getElementById('todo-status-filters');
   const categoryFiltersEl = document.getElementById('todo-category-filters');
+  const typeFiltersEl = document.getElementById('todo-type-filters');
   const statusFilterSelectEl = document.getElementById('todo-status-filter-select');
   const categoryFilterSelectEl = document.getElementById('todo-category-filter-select');
+  const typeFilterSelectEl = document.getElementById('todo-type-filter-select');
 
   const categoriesModalEl = document.getElementById('todo-categories-modal');
   const categoriesModalCloseEl = document.getElementById('todo-categories-modal-close');
@@ -473,6 +476,8 @@ function escapeHtml(value) {
     if (statusFilter === 'done' && !task.done) return false;
     if (statusFilter === 'todo' && task.done) return false;
     if (categoryFilter !== 'all' && task.category !== categoryFilter) return false;
+    if (typeFilter === 'default' && !task.isDefault) return false;
+    if (typeFilter === 'custom' && task.isDefault) return false;
     return true;
   }
 
@@ -506,6 +511,21 @@ function escapeHtml(value) {
     categoryFiltersEl.innerHTML = `${rowsHtml}<button type="button" class="todo-category-add-btn" id="todo-manage-categories-btn">${escapeHtml(t(currentLang, 'todoAddCategoryBtn'))}</button>`;
   }
 
+  function renderTypeFilters(tasks) {
+    const defaultCount = tasks.filter((task) => task.isDefault).length;
+    const groups = [
+      { id: 'all', label: t(currentLang, 'todoFilterAll'), count: tasks.length },
+      { id: 'default', label: t(currentLang, 'todoFilterTypeDefault'), count: defaultCount },
+      { id: 'custom', label: t(currentLang, 'todoFilterTypeCustom'), count: tasks.length - defaultCount },
+    ];
+    typeFiltersEl.innerHTML = groups.map((g) => `
+      <button type="button" class="todo-filter-link${typeFilter === g.id ? ' active' : ''}" data-type="${g.id}">
+        <span>${escapeHtml(g.label)}</span>
+        <span class="todo-filter-count">${g.count}</span>
+      </button>
+    `).join('');
+  }
+
   function renderAddCategoryOptions() {
     const defaultCat = categoryFilter !== 'all' ? categoryFilter : CATEGORIES[0].id;
     addCategoryEl.innerHTML = categoryOptionsHtml(defaultCat);
@@ -535,6 +555,15 @@ function escapeHtml(value) {
     categoryFilterSelectEl.innerHTML = categoryOptions.map((g) => `<option value="${g.id}">${escapeHtml(g.label)} (${g.count})</option>`).join('')
       + `<option value="__add__">${escapeHtml(t(currentLang, 'todoAddCategorySelectOption'))}</option>`;
     categoryFilterSelectEl.value = categoryFilter;
+
+    const defaultCount = tasks.filter((task) => task.isDefault).length;
+    const typeOptions = [
+      { id: 'all', label: t(currentLang, 'todoFilterAll'), count: tasks.length },
+      { id: 'default', label: t(currentLang, 'todoFilterTypeDefault'), count: defaultCount },
+      { id: 'custom', label: t(currentLang, 'todoFilterTypeCustom'), count: tasks.length - defaultCount },
+    ];
+    typeFilterSelectEl.innerHTML = typeOptions.map((g) => `<option value="${g.id}">${escapeHtml(g.label)} (${g.count})</option>`).join('');
+    typeFilterSelectEl.value = typeFilter;
   }
 
   function render() {
@@ -547,6 +576,7 @@ function escapeHtml(value) {
 
     renderStatusFilters(tasks);
     renderCategoryFilters(tasks);
+    renderTypeFilters(tasks);
     renderMobileFilterSelects(tasks);
     renderAddCategoryOptions();
 
@@ -767,6 +797,18 @@ function escapeHtml(value) {
     render();
   });
 
+  typeFiltersEl.addEventListener('click', (e) => {
+    const btn = e.target.closest('.todo-filter-link');
+    if (!btn) return;
+    typeFilter = btn.dataset.type;
+    render();
+  });
+
+  typeFilterSelectEl.addEventListener('change', () => {
+    typeFilter = typeFilterSelectEl.value;
+    render();
+  });
+
   listEl.addEventListener('click', async (e) => {
     const row = e.target.closest('.todo-row');
     if (!row) return;
@@ -822,6 +864,7 @@ function escapeHtml(value) {
     addCategoryEl.setAttribute('aria-label', t(lang, 'todoAddCategoryAriaLabel'));
     statusFilterSelectEl.setAttribute('aria-label', t(lang, 'todoFilterByStatus'));
     categoryFilterSelectEl.setAttribute('aria-label', t(lang, 'todoFilterByCategory'));
+    typeFilterSelectEl.setAttribute('aria-label', t(lang, 'todoFilterByType'));
     render();
     if (!categoriesModalEl.hidden) renderCategoriesModalList();
   }
@@ -863,6 +906,7 @@ function escapeHtml(value) {
   addCategoryEl.setAttribute('aria-label', t(currentLang, 'todoAddCategoryAriaLabel'));
   statusFilterSelectEl.setAttribute('aria-label', t(currentLang, 'todoFilterByStatus'));
   categoryFilterSelectEl.setAttribute('aria-label', t(currentLang, 'todoFilterByCategory'));
+  typeFilterSelectEl.setAttribute('aria-label', t(currentLang, 'todoFilterByType'));
 
   langMount.appendChild(buildLangSwitcher(currentLang, setLang));
   applyTranslations(currentLang);
