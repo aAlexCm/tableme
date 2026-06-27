@@ -36,26 +36,40 @@
         </div>
       </nav>
 
-      <div class="card todo-card">
-        <h2 data-i18n="todoPageTitle">Liste des tâches</h2>
-
-        <div class="todo-progress">
-          <p class="todo-progress-label" id="todo-progress-label"></p>
-          <div class="todo-progress-bar">
-            <div class="todo-progress-fill" id="todo-progress-fill"></div>
+      <div class="todo-layout">
+        <aside class="todo-sidebar">
+          <div class="todo-filter-group">
+            <p class="todo-filter-heading" data-i18n="todoFilterByStatus">Par état</p>
+            <div class="todo-filter-list" id="todo-status-filters"></div>
           </div>
+          <div class="todo-filter-group">
+            <p class="todo-filter-heading" data-i18n="todoFilterByCategory">Par catégorie</p>
+            <div class="todo-filter-list" id="todo-category-filters"></div>
+          </div>
+        </aside>
+
+        <div class="card todo-card">
+          <h2 data-i18n="todoPageTitle">Liste des tâches</h2>
+
+          <div class="todo-progress">
+            <p class="todo-progress-label" id="todo-progress-label"></p>
+            <div class="todo-progress-bar">
+              <div class="todo-progress-fill" id="todo-progress-fill"></div>
+            </div>
+          </div>
+
+          <form id="todo-add-form" class="todo-add-form">
+            <button type="submit" class="todo-add-icon" id="todo-add-btn" aria-label="Ajouter une tâche">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+            </button>
+            <input type="text" id="todo-add-input" data-i18n-placeholder="todoAddPlaceholder" placeholder="Créer une nouvelle tâche..." />
+            <select id="todo-add-category" aria-label="Catégorie de la tâche"></select>
+          </form>
+
+          <ul class="todo-list" id="todo-list"></ul>
+
+          <p class="empty-state todo-empty-state" id="todo-empty-state" data-i18n="todoEmptyState" hidden>Aucune tâche pour l'instant. Ajoutez-en une ci-dessus !</p>
         </div>
-
-        <form id="todo-add-form" class="todo-add-form">
-          <button type="submit" class="todo-add-icon" id="todo-add-btn" aria-label="Ajouter une tâche">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
-          </button>
-          <input type="text" id="todo-add-input" data-i18n-placeholder="todoAddPlaceholder" placeholder="Créer une nouvelle tâche..." />
-        </form>
-
-        <ul class="todo-list" id="todo-list"></ul>
-
-        <p class="empty-state todo-empty-state" id="todo-empty-state" data-i18n="todoEmptyState" hidden>Aucune tâche pour l'instant. Ajoutez-en une ci-dessus !</p>
       </div>
     </div>
   </div>

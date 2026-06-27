@@ -1394,6 +1394,101 @@ nav.admin-nav.admin-nav-stacked {
   box-shadow: none;
 }
 
+.todo-add-form select {
+  flex: 0 0 auto;
+  width: auto;
+  height: 32px;
+  padding: 0 10px;
+  border: none;
+  border-radius: var(--radius-pill);
+  background: var(--sage-light);
+  color: var(--ink);
+  font-size: 0.78rem;
+}
+
+.todo-add-form select:focus {
+  box-shadow: none;
+}
+
+.todo-layout {
+  display: flex;
+  align-items: flex-start;
+  gap: 28px;
+}
+
+.todo-sidebar {
+  flex: 0 0 200px;
+  padding-top: 6px;
+}
+
+.todo-filter-group {
+  margin-bottom: 26px;
+}
+
+.todo-filter-group:last-child {
+  margin-bottom: 0;
+}
+
+.todo-filter-heading {
+  margin: 0 0 8px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--sage-deep);
+}
+
+.todo-filter-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.todo-filter-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 7px 10px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--charcoal);
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  height: auto;
+  white-space: normal;
+  box-shadow: none;
+}
+
+.todo-filter-link:hover {
+  background: var(--sage-light);
+  transform: none;
+  box-shadow: none;
+}
+
+.todo-filter-link.active {
+  background: var(--gold-light);
+  color: var(--gold-deep);
+  font-weight: 700;
+}
+
+.todo-filter-count {
+  font-size: 0.75rem;
+  color: var(--ink);
+}
+
+.todo-filter-link.active .todo-filter-count {
+  color: var(--gold-deep);
+}
+
+.todo-card {
+  flex: 1;
+  min-width: 0;
+}
+
 .todo-list {
   list-style: none;
   margin: 0;
@@ -1438,8 +1533,15 @@ nav.admin-nav.admin-nav-stacked {
   border-color: var(--gold);
 }
 
-.todo-row-text {
+.todo-row-main {
   flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.todo-row-text {
   font-size: 0.92rem;
   color: var(--charcoal);
 }
@@ -1447,6 +1549,16 @@ nav.admin-nav.admin-nav-stacked {
 .todo-row.done .todo-row-text {
   color: var(--ink);
   text-decoration: line-through;
+}
+
+.todo-row-category {
+  align-self: flex-start;
+  padding: 1px 9px;
+  border-radius: var(--radius-pill);
+  background: var(--sage-light);
+  color: var(--sage-deep);
+  font-size: 0.68rem;
+  font-weight: 600;
 }
 
 .todo-row-delete {
@@ -1471,6 +1583,26 @@ body.admin-theme .todo-add-form {
 body.admin-theme .todo-row {
   border-color: transparent;
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+@media (max-width: 760px) {
+  .todo-layout {
+    flex-direction: column;
+  }
+
+  .todo-sidebar {
+    flex: 1 1 auto;
+    width: 100%;
+    padding-top: 0;
+    display: flex;
+    gap: 24px;
+    overflow-x: auto;
+  }
+
+  .todo-filter-group {
+    margin-bottom: 0;
+    flex: 0 0 auto;
+  }
 }
 
 .partners-grid {
