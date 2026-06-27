@@ -79,6 +79,34 @@
     </div>
   </div>
 
+  <div id="todo-categories-modal" class="modal-overlay" hidden>
+    <div class="modal-panel">
+      <button type="button" class="modal-close" id="todo-categories-modal-close" aria-label="Close">&times;</button>
+      <div class="modal-scroll">
+        <h3 data-i18n="todoManageCategoriesTitle">Catégories</h3>
+        <ul class="todo-category-modal-list" id="todo-category-modal-list"></ul>
+        <form id="todo-category-modal-form" class="todo-category-modal-form">
+          <input type="text" id="todo-category-modal-input" data-i18n-placeholder="todoAddCategoryPrompt" placeholder="Nom de la nouvelle catégorie" />
+          <button type="submit" data-i18n="addBtn">Ajouter</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div id="todo-confirm-modal" class="modal-overlay" hidden>
+    <div class="modal-panel">
+      <button type="button" class="modal-close" id="todo-confirm-modal-close" aria-label="Close">&times;</button>
+      <div class="modal-scroll">
+        <h3 id="todo-confirm-modal-title" data-i18n="todoConfirmDeleteTitle">Confirmer la suppression</h3>
+        <p class="muted" id="todo-confirm-modal-message"></p>
+        <div class="todo-confirm-modal-actions">
+          <button type="button" class="secondary" id="todo-confirm-modal-cancel" data-i18n="cancelBtn">Annuler</button>
+          <button type="button" class="todo-confirm-modal-confirm" id="todo-confirm-modal-confirm" data-i18n="deleteBtn">Supprimer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script type="module" src="js/todo.js"></script>
 </body>
 </html>

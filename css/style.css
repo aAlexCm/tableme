@@ -1484,17 +1484,6 @@ nav.admin-nav.admin-nav-stacked {
   color: var(--gold-deep);
 }
 
-.todo-filter-row {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-}
-
-.todo-filter-row .todo-filter-link {
-  flex: 1;
-  min-width: 0;
-}
-
 .todo-category-custom-tag {
   margin-left: 6px;
   padding: 0 6px;
@@ -1506,21 +1495,6 @@ nav.admin-nav.admin-nav-stacked {
   text-transform: uppercase;
   letter-spacing: 0.3px;
   vertical-align: middle;
-}
-
-.todo-category-delete {
-  flex: 0 0 auto;
-  width: 26px;
-  height: 26px;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.15s ease;
-}
-
-.todo-filter-row:hover .todo-category-delete,
-.todo-filter-row:focus-within .todo-category-delete {
-  opacity: 1;
-  pointer-events: auto;
 }
 
 .todo-category-add-btn {
@@ -1542,6 +1516,57 @@ nav.admin-nav.admin-nav-stacked {
 
 .todo-category-add-btn:hover {
   background: var(--gold-light);
+  transform: none;
+  box-shadow: none;
+}
+
+.todo-category-modal-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 18px;
+  max-height: 320px;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.todo-category-modal-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--cream);
+  font-size: 0.9rem;
+  color: var(--charcoal);
+}
+
+.todo-category-modal-form {
+  display: flex;
+  gap: 8px;
+}
+
+.todo-category-modal-form input {
+  flex: 1;
+  min-width: 0;
+}
+
+.todo-confirm-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.todo-confirm-modal-confirm {
+  background: var(--error);
+  color: #fff;
+  box-shadow: none;
+}
+
+.todo-confirm-modal-confirm:hover {
+  filter: brightness(0.93);
   transform: none;
   box-shadow: none;
 }

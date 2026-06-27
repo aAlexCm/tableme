@@ -415,6 +415,18 @@ function escapeHtml(value) {
   const statusFilterSelectEl = document.getElementById('todo-status-filter-select');
   const categoryFilterSelectEl = document.getElementById('todo-category-filter-select');
 
+  const categoriesModalEl = document.getElementById('todo-categories-modal');
+  const categoriesModalCloseEl = document.getElementById('todo-categories-modal-close');
+  const categoriesModalListEl = document.getElementById('todo-category-modal-list');
+  const categoriesModalFormEl = document.getElementById('todo-category-modal-form');
+  const categoriesModalInputEl = document.getElementById('todo-category-modal-input');
+
+  const confirmModalEl = document.getElementById('todo-confirm-modal');
+  const confirmModalCloseEl = document.getElementById('todo-confirm-modal-close');
+  const confirmModalMessageEl = document.getElementById('todo-confirm-modal-message');
+  const confirmModalCancelEl = document.getElementById('todo-confirm-modal-cancel');
+  const confirmModalConfirmEl = document.getElementById('todo-confirm-modal-confirm');
+
   function categoryLabel(catId) {
     const cat = CATEGORIES.find((c) => c.id === catId);
     if (cat) return t(currentLang, cat.key);
@@ -462,15 +474,12 @@ function escapeHtml(value) {
       count: tasks.filter((task) => task.category === cat.id).length,
     }))];
     const rowsHtml = groups.map((g) => `
-      <div class="todo-filter-row">
-        <button type="button" class="todo-filter-link${categoryFilter === g.id ? ' active' : ''}" data-category="${g.id}">
-          <span>${escapeHtml(g.label)}${g.custom ? `<span class="todo-category-custom-tag">${escapeHtml(t(currentLang, 'todoCustomCategoryTag'))}</span>` : ''}</span>
-          <span class="todo-filter-count">${g.count}</span>
-        </button>
-        ${g.custom ? `<button type="button" class="icon-btn icon-btn-danger todo-category-delete" data-category-delete="${g.id}" aria-label="${escapeHtml(t(currentLang, 'todoDeleteCategoryBtnLabel'))}">${TRASH_ICON}</button>` : ''}
-      </div>
+      <button type="button" class="todo-filter-link${categoryFilter === g.id ? ' active' : ''}" data-category="${g.id}">
+        <span>${escapeHtml(g.label)}${g.custom ? `<span class="todo-category-custom-tag">${escapeHtml(t(currentLang, 'todoCustomCategoryTag'))}</span>` : ''}</span>
+        <span class="todo-filter-count">${g.count}</span>
+      </button>
     `).join('');
-    categoryFiltersEl.innerHTML = `${rowsHtml}<button type="button" class="todo-category-add-btn" id="todo-category-add-btn">${escapeHtml(t(currentLang, 'todoAddCategoryBtn'))}</button>`;
+    categoryFiltersEl.innerHTML = `${rowsHtml}<button type="button" class="todo-category-add-btn" id="todo-manage-categories-btn">${escapeHtml(t(currentLang, 'todoAddCategoryBtn'))}</button>`;
   }
 
   function renderAddCategoryOptions() {
@@ -551,12 +560,88 @@ function escapeHtml(value) {
     `;
   }
 
-  async function addCategory() {
-    const name = prompt(t(currentLang, 'todoAddCategoryPrompt'));
+  // Self-contained per-call Promise: adds its own listeners and tears them
+  // down on resolve, so concurrent/repeated calls never leak handlers onto
+  // the same shared modal markup.
+  function showConfirmModal(message) {
+    return new Promise((resolve) => {
+      confirmModalMessageEl.textContent = message;
+      confirmModalEl.hidden = false;
+
+      function settle(result) {
+        confirmModalEl.hidden = true;
+        confirmModalCloseEl.removeEventListener('click', onCancel);
+        confirmModalCancelEl.removeEventListener('click', onCancel);
+        confirmModalConfirmEl.removeEventListener('click', onConfirm);
+        confirmModalEl.removeEventListener('click', onOverlayClick);
+        document.removeEventListener('keydown', onKeydown);
+        resolve(result);
+      }
+      function onCancel() { settle(false); }
+      function onConfirm() { settle(true); }
+      function onOverlayClick(e) { if (e.target === confirmModalEl) settle(false); }
+      function onKeydown(e) { if (e.key === 'Escape') settle(false); }
+
+      confirmModalCloseEl.addEventListener('click', onCancel);
+      confirmModalCancelEl.addEventListener('click', onCancel);
+      confirmModalConfirmEl.addEventListener('click', onConfirm);
+      confirmModalEl.addEventListener('click', onOverlayClick);
+      document.addEventListener('keydown', onKeydown);
+    });
+  }
+
+  function renderCategoriesModalList() {
+    const rows = CATEGORIES.map((cat) => `
+      <li class="todo-category-modal-row">
+        <span>${escapeHtml(t(currentLang, cat.key))}</span>
+      </li>
+    `).join('') + customCategories.map((cat) => `
+      <li class="todo-category-modal-row">
+        <span>${escapeHtml(cat.label)}<span class="todo-category-custom-tag">${escapeHtml(t(currentLang, 'todoCustomCategoryTag'))}</span></span>
+        <button type="button" class="icon-btn icon-btn-danger todo-category-modal-delete" data-category="${cat.id}" aria-label="${escapeHtml(t(currentLang, 'todoDeleteCategoryBtnLabel'))}">${TRASH_ICON}</button>
+      </li>
+    `).join('');
+    categoriesModalListEl.innerHTML = rows;
+  }
+
+  function openCategoriesModal() {
+    renderCategoriesModalList();
+    categoriesModalInputEl.value = '';
+    categoriesModalEl.hidden = false;
+  }
+
+  function closeCategoriesModal() {
+    categoriesModalEl.hidden = true;
+  }
+
+  categoriesModalCloseEl.addEventListener('click', closeCategoriesModal);
+  categoriesModalEl.addEventListener('click', (e) => {
+    if (e.target === categoriesModalEl) closeCategoriesModal();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !categoriesModalEl.hidden) closeCategoriesModal();
+  });
+
+  categoriesModalListEl.addEventListener('click', async (e) => {
+    const btn = e.target.closest('.todo-category-modal-delete');
+    if (!btn) return;
+    await deleteCategory(btn.dataset.category);
+  });
+
+  categoriesModalFormEl.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name = categoriesModalInputEl.value.trim();
+    if (!name) return;
+    categoriesModalInputEl.value = '';
+    await addCategory(name);
+  });
+
+  async function addCategory(name) {
     if (!name || !name.trim()) return;
     customCategories = [...customCategories, { id: generateId(), label: name.trim() }];
     wedding.customCategories = customCategories;
     render();
+    renderCategoriesModalList();
     await Storage.setCustomCategories(weddingId, customCategories);
   }
 
@@ -567,13 +652,14 @@ function escapeHtml(value) {
     const message = count > 0
       ? t(currentLang, 'confirmDeleteCategoryWithTasks', cat.label, count)
       : t(currentLang, 'confirmDeleteCategory', cat.label);
-    if (!confirm(message)) return;
+    if (!(await showConfirmModal(message))) return;
     customCategories = customCategories.filter((c) => c.id !== catId);
     wedding.customCategories = customCategories;
     const tasks = (wedding.tasks || []).filter((task) => task.category !== catId);
     wedding.tasks = tasks;
     if (categoryFilter === catId) categoryFilter = 'all';
     render();
+    renderCategoriesModalList();
     await Promise.all([
       Storage.setCustomCategories(weddingId, customCategories),
       Storage.setTasks(weddingId, tasks),
@@ -628,14 +714,9 @@ function escapeHtml(value) {
     render();
   });
 
-  categoryFiltersEl.addEventListener('click', async (e) => {
-    if (e.target.closest('#todo-category-add-btn')) {
-      await addCategory();
-      return;
-    }
-    const deleteBtn = e.target.closest('.todo-category-delete');
-    if (deleteBtn) {
-      await deleteCategory(deleteBtn.dataset.categoryDelete);
+  categoryFiltersEl.addEventListener('click', (e) => {
+    if (e.target.closest('#todo-manage-categories-btn')) {
+      openCategoriesModal();
       return;
     }
     const btn = e.target.closest('.todo-filter-link');
@@ -649,9 +730,10 @@ function escapeHtml(value) {
     render();
   });
 
-  categoryFilterSelectEl.addEventListener('change', async () => {
+  categoryFilterSelectEl.addEventListener('change', () => {
     if (categoryFilterSelectEl.value === '__add__') {
-      await addCategory();
+      categoryFilterSelectEl.value = categoryFilter;
+      openCategoriesModal();
       return;
     }
     categoryFilter = categoryFilterSelectEl.value;
@@ -673,7 +755,7 @@ function escapeHtml(value) {
 
     if (e.target.closest('.todo-row-delete')) {
       const task = (wedding.tasks || []).find((task) => task.id === taskId);
-      if (!task || !confirm(t(currentLang, 'confirmDeleteTask', taskText(task, currentLang)))) return;
+      if (!task || !(await showConfirmModal(t(currentLang, 'confirmDeleteTask', taskText(task, currentLang))))) return;
       const tasks = (wedding.tasks || []).filter((task) => task.id !== taskId);
       wedding.tasks = tasks;
       render();
@@ -714,6 +796,7 @@ function escapeHtml(value) {
     statusFilterSelectEl.setAttribute('aria-label', t(lang, 'todoFilterByStatus'));
     categoryFilterSelectEl.setAttribute('aria-label', t(lang, 'todoFilterByCategory'));
     render();
+    if (!categoriesModalEl.hidden) renderCategoriesModalList();
   }
 
   if (!weddingId) {
