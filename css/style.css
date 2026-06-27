@@ -1484,6 +1484,68 @@ nav.admin-nav.admin-nav-stacked {
   color: var(--gold-deep);
 }
 
+.todo-filter-row {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.todo-filter-row .todo-filter-link {
+  flex: 1;
+  min-width: 0;
+}
+
+.todo-category-custom-tag {
+  margin-left: 6px;
+  padding: 0 6px;
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--gold-deep) 12%, transparent);
+  color: var(--gold-deep);
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  vertical-align: middle;
+}
+
+.todo-category-delete {
+  flex: 0 0 auto;
+  width: 26px;
+  height: 26px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+
+.todo-filter-row:hover .todo-category-delete,
+.todo-filter-row:focus-within .todo-category-delete {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.todo-category-add-btn {
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+  padding: 7px 10px;
+  border: 1.5px dashed color-mix(in srgb, var(--gold-deep) 35%, transparent);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--gold-deep);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  height: auto;
+  box-shadow: none;
+}
+
+.todo-category-add-btn:hover {
+  background: var(--gold-light);
+  transform: none;
+  box-shadow: none;
+}
+
 .todo-card {
   flex: 1;
   min-width: 0;
@@ -1546,6 +1608,16 @@ nav.admin-nav.admin-nav-stacked {
   color: var(--charcoal);
 }
 
+.todo-row-text[data-action='edit'],
+.todo-row-category[data-action='edit'] {
+  cursor: pointer;
+}
+
+.todo-row:hover .todo-row-text[data-action='edit'] {
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--gold-deep) 40%, transparent);
+}
+
 .todo-row.done .todo-row-text {
   color: var(--ink);
   text-decoration: line-through;
@@ -1559,6 +1631,32 @@ nav.admin-nav.admin-nav-stacked {
   color: var(--sage-deep);
   font-size: 0.68rem;
   font-weight: 600;
+}
+
+.todo-row-edit-main {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+
+.todo-row-edit-input {
+  flex: 1;
+  min-width: 0;
+  height: 32px;
+  padding: 0 8px;
+  font-size: 0.9rem;
+}
+
+.todo-row-edit-category {
+  flex: 0 0 auto;
+  width: auto;
+  height: 32px;
+  padding: 0 8px;
+  font-size: 0.78rem;
+}
+
+.todo-row.editing {
+  background: var(--sage-light);
 }
 
 .todo-row-delete {

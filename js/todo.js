@@ -394,6 +394,8 @@ function escapeHtml(value) {
   let wedding = null;
   let statusFilter = 'all';
   let categoryFilter = 'all';
+  let customCategories = [];
+  let editingTaskId = null;
 
   const langMount = document.getElementById('lang-switcher-mount');
   const notFoundEl = document.getElementById('not-found');
@@ -415,7 +417,20 @@ function escapeHtml(value) {
 
   function categoryLabel(catId) {
     const cat = CATEGORIES.find((c) => c.id === catId);
-    return cat ? t(currentLang, cat.key) : '';
+    if (cat) return t(currentLang, cat.key);
+    const custom = customCategories.find((c) => c.id === catId);
+    return custom ? custom.label : '';
+  }
+
+  function allCategoryOptions() {
+    return [
+      ...CATEGORIES.map((cat) => ({ id: cat.id, label: t(currentLang, cat.key), custom: false })),
+      ...customCategories.map((cat) => ({ id: cat.id, label: cat.label, custom: true })),
+    ];
+  }
+
+  function categoryOptionsHtml(selectedId) {
+    return allCategoryOptions().map((cat) => `<option value="${cat.id}" ${cat.id === selectedId ? 'selected' : ''}>${escapeHtml(cat.label)}</option>`).join('');
   }
 
   function matchesFilters(task) {
@@ -441,23 +456,26 @@ function escapeHtml(value) {
   }
 
   function renderCategoryFilters(tasks) {
-    const allOption = { id: 'all', label: t(currentLang, 'todoFilterAll'), count: tasks.length };
-    const catOptions = CATEGORIES.map((cat) => ({
-      id: cat.id,
-      label: t(currentLang, cat.key),
+    const allOption = { id: 'all', label: t(currentLang, 'todoFilterAll'), count: tasks.length, custom: false };
+    const groups = [allOption, ...allCategoryOptions().map((cat) => ({
+      ...cat,
       count: tasks.filter((task) => task.category === cat.id).length,
-    }));
-    categoryFiltersEl.innerHTML = [allOption, ...catOptions].map((g) => `
-      <button type="button" class="todo-filter-link${categoryFilter === g.id ? ' active' : ''}" data-category="${g.id}">
-        <span>${escapeHtml(g.label)}</span>
-        <span class="todo-filter-count">${g.count}</span>
-      </button>
+    }))];
+    const rowsHtml = groups.map((g) => `
+      <div class="todo-filter-row">
+        <button type="button" class="todo-filter-link${categoryFilter === g.id ? ' active' : ''}" data-category="${g.id}">
+          <span>${escapeHtml(g.label)}${g.custom ? `<span class="todo-category-custom-tag">${escapeHtml(t(currentLang, 'todoCustomCategoryTag'))}</span>` : ''}</span>
+          <span class="todo-filter-count">${g.count}</span>
+        </button>
+        ${g.custom ? `<button type="button" class="icon-btn icon-btn-danger todo-category-delete" data-category-delete="${g.id}" aria-label="${escapeHtml(t(currentLang, 'todoDeleteCategoryBtnLabel'))}">${TRASH_ICON}</button>` : ''}
+      </div>
     `).join('');
+    categoryFiltersEl.innerHTML = `${rowsHtml}<button type="button" class="todo-category-add-btn" id="todo-category-add-btn">${escapeHtml(t(currentLang, 'todoAddCategoryBtn'))}</button>`;
   }
 
   function renderAddCategoryOptions() {
-    addCategoryEl.innerHTML = CATEGORIES.map((cat) => `<option value="${cat.id}">${escapeHtml(t(currentLang, cat.key))}</option>`).join('');
-    addCategoryEl.value = categoryFilter !== 'all' ? categoryFilter : CATEGORIES[0].id;
+    const defaultCat = categoryFilter !== 'all' ? categoryFilter : CATEGORIES[0].id;
+    addCategoryEl.innerHTML = categoryOptionsHtml(defaultCat);
   }
 
   // Same two filters as the sidebar, as native <select> dropdowns instead —
@@ -475,13 +493,14 @@ function escapeHtml(value) {
 
     const categoryOptions = [
       { id: 'all', label: t(currentLang, 'todoFilterAll'), count: tasks.length },
-      ...CATEGORIES.map((cat) => ({
+      ...allCategoryOptions().map((cat) => ({
         id: cat.id,
-        label: t(currentLang, cat.key),
+        label: cat.custom ? `${cat.label} (${t(currentLang, 'todoCustomCategoryTag')})` : cat.label,
         count: tasks.filter((task) => task.category === cat.id).length,
       })),
     ];
-    categoryFilterSelectEl.innerHTML = categoryOptions.map((g) => `<option value="${g.id}">${escapeHtml(g.label)} (${g.count})</option>`).join('');
+    categoryFilterSelectEl.innerHTML = categoryOptions.map((g) => `<option value="${g.id}">${escapeHtml(g.label)} (${g.count})</option>`).join('')
+      + `<option value="__add__">${escapeHtml(t(currentLang, 'todoAddCategorySelectOption'))}</option>`;
     categoryFilterSelectEl.value = categoryFilter;
   }
 
@@ -500,16 +519,94 @@ function escapeHtml(value) {
 
     const filtered = tasks.filter(matchesFilters);
     emptyStateEl.hidden = filtered.length > 0;
-    listEl.innerHTML = filtered.map((task) => `
+    listEl.innerHTML = filtered.map((task) => renderTaskRow(task)).join('');
+  }
+
+  function renderTaskRow(task) {
+    const checkBtn = `<button type="button" class="todo-row-check" aria-label="${escapeHtml(t(currentLang, 'todoCheckBtnLabel'))}">${task.done ? CHECK_ICON : ''}</button>`;
+    const deleteBtn = `<button type="button" class="icon-btn icon-btn-danger todo-row-delete" aria-label="${escapeHtml(t(currentLang, 'todoDeleteBtnLabel'))}">${TRASH_ICON}</button>`;
+
+    if (task.id === editingTaskId) {
+      return `
+        <li class="todo-row editing" data-id="${task.id}">
+          ${checkBtn}
+          <span class="todo-row-main todo-row-edit-main">
+            <input type="text" class="todo-row-edit-input" aria-label="${escapeHtml(t(currentLang, 'todoEditInputAriaLabel'))}" value="${escapeHtml(taskText(task, currentLang))}" />
+            <select class="todo-row-edit-category" aria-label="${escapeHtml(t(currentLang, 'todoAddCategoryAriaLabel'))}">${categoryOptionsHtml(task.category)}</select>
+          </span>
+          ${deleteBtn}
+        </li>
+      `;
+    }
+
+    return `
       <li class="todo-row${task.done ? ' done' : ''}" data-id="${task.id}">
-        <button type="button" class="todo-row-check" aria-label="${escapeHtml(t(currentLang, 'todoCheckBtnLabel'))}">${task.done ? CHECK_ICON : ''}</button>
+        ${checkBtn}
         <span class="todo-row-main">
-          <span class="todo-row-text">${escapeHtml(taskText(task, currentLang))}</span>
-          <span class="todo-row-category">${escapeHtml(categoryLabel(task.category))}</span>
+          <span class="todo-row-text" data-action="edit">${escapeHtml(taskText(task, currentLang))}</span>
+          <span class="todo-row-category" data-action="edit">${escapeHtml(categoryLabel(task.category))}</span>
         </span>
-        <button type="button" class="icon-btn icon-btn-danger todo-row-delete" aria-label="${escapeHtml(t(currentLang, 'todoDeleteBtnLabel'))}">${TRASH_ICON}</button>
+        ${deleteBtn}
       </li>
-    `).join('');
+    `;
+  }
+
+  async function addCategory() {
+    const name = prompt(t(currentLang, 'todoAddCategoryPrompt'));
+    if (!name || !name.trim()) return;
+    customCategories = [...customCategories, { id: generateId(), label: name.trim() }];
+    wedding.customCategories = customCategories;
+    render();
+    await Storage.setCustomCategories(weddingId, customCategories);
+  }
+
+  async function deleteCategory(catId) {
+    const cat = customCategories.find((c) => c.id === catId);
+    if (!cat) return;
+    const count = (wedding.tasks || []).filter((task) => task.category === catId).length;
+    const message = count > 0
+      ? t(currentLang, 'confirmDeleteCategoryWithTasks', cat.label, count)
+      : t(currentLang, 'confirmDeleteCategory', cat.label);
+    if (!confirm(message)) return;
+    customCategories = customCategories.filter((c) => c.id !== catId);
+    wedding.customCategories = customCategories;
+    const tasks = (wedding.tasks || []).filter((task) => task.category !== catId);
+    wedding.tasks = tasks;
+    if (categoryFilter === catId) categoryFilter = 'all';
+    render();
+    await Promise.all([
+      Storage.setCustomCategories(weddingId, customCategories),
+      Storage.setTasks(weddingId, tasks),
+    ]);
+  }
+
+  async function commitTaskEdit(taskId, rowEl) {
+    const input = rowEl.querySelector('.todo-row-edit-input');
+    const select = rowEl.querySelector('.todo-row-edit-category');
+    editingTaskId = null;
+    if (!input) {
+      render();
+      return;
+    }
+    const newText = input.value.trim();
+    const newCategory = select ? select.value : null;
+    if (!newText) {
+      render();
+      return;
+    }
+    const tasks = (wedding.tasks || []).map((task) => {
+      if (task.id !== taskId) return task;
+      const updated = { ...task, category: newCategory || task.category };
+      if (newText !== taskText(task, currentLang)) {
+        updated.text = newText;
+        updated.isDefault = false;
+        delete updated.templateIndex;
+      }
+      return updated;
+    });
+    wedding.tasks = tasks;
+    render();
+    await Storage.setTasks(weddingId, tasks);
   }
 
   addFormEl.addEventListener('submit', async (e) => {
@@ -531,7 +628,16 @@ function escapeHtml(value) {
     render();
   });
 
-  categoryFiltersEl.addEventListener('click', (e) => {
+  categoryFiltersEl.addEventListener('click', async (e) => {
+    if (e.target.closest('#todo-category-add-btn')) {
+      await addCategory();
+      return;
+    }
+    const deleteBtn = e.target.closest('.todo-category-delete');
+    if (deleteBtn) {
+      await deleteCategory(deleteBtn.dataset.categoryDelete);
+      return;
+    }
     const btn = e.target.closest('.todo-filter-link');
     if (!btn) return;
     categoryFilter = btn.dataset.category;
@@ -543,7 +649,11 @@ function escapeHtml(value) {
     render();
   });
 
-  categoryFilterSelectEl.addEventListener('change', () => {
+  categoryFilterSelectEl.addEventListener('change', async () => {
+    if (categoryFilterSelectEl.value === '__add__') {
+      await addCategory();
+      return;
+    }
     categoryFilter = categoryFilterSelectEl.value;
     render();
   });
@@ -568,6 +678,30 @@ function escapeHtml(value) {
       wedding.tasks = tasks;
       render();
       await Storage.setTasks(weddingId, tasks);
+      return;
+    }
+
+    if (e.target.closest('[data-action="edit"]')) {
+      editingTaskId = taskId;
+      render();
+      const input = listEl.querySelector(`.todo-row[data-id="${taskId}"] .todo-row-edit-input`);
+      if (input) {
+        input.focus();
+        input.select();
+      }
+    }
+  });
+
+  listEl.addEventListener('focusout', async (e) => {
+    const row = e.target.closest('.todo-row.editing');
+    if (!row) return;
+    if (row.contains(e.relatedTarget)) return;
+    await commitTaskEdit(row.dataset.id, row);
+  });
+
+  listEl.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && e.target.classList.contains('todo-row-edit-input')) {
+      e.target.blur();
     }
   });
 
@@ -596,6 +730,8 @@ function escapeHtml(value) {
     langMount.appendChild(buildLangSwitcher(currentLang, setLang));
     return;
   }
+
+  customCategories = wedding.customCategories || [];
 
   if (!wedding.tasksSeeded) {
     wedding.tasks = buildDefaultTasks(wedding.lang || 'fr');

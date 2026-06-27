@@ -101,6 +101,10 @@ export const Storage = {
     await updateDoc(doc(db, 'weddings', weddingId), { tasks });
   },
 
+  async setCustomCategories(weddingId, customCategories) {
+    await updateDoc(doc(db, 'weddings', weddingId), { customCategories });
+  },
+
   // Separate from setTasks: marks the wedding as having received its
   // one-time default checklist, so an empty list later (the couple cleared
   // everything) is never confused with "never seeded" again.
