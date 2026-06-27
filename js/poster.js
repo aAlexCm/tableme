@@ -168,6 +168,7 @@ function fontFamilyFor(fontKey) {
   const addImageBtn = document.getElementById('poster-add-image-btn');
   const downloadBtn = document.getElementById('poster-download-btn');
   const printBtn = document.getElementById('poster-print-btn');
+  const printMountImg = document.getElementById('poster-print-img');
 
   const imageMenuEl = document.getElementById('poster-image-menu');
   const imageUploadBtn = document.getElementById('poster-image-upload-btn');
@@ -1148,19 +1149,35 @@ function fontFamilyFor(fontKey) {
     }
   });
 
+  // A site added to the iOS home screen runs standalone, with no browser
+  // chrome to host the print UI — window.print() is a silent no-op there.
+  // Every ordinary browser tab (the vast majority of visits) can print in
+  // place via #poster-print-mount, which is what the couple actually asked
+  // for: no detour through a new tab they can't navigate back from.
+  function isStandaloneApp() {
+    return window.navigator.standalone === true
+      || window.matchMedia('(display-mode: standalone)').matches;
+  }
+
   printBtn.addEventListener('click', async () => {
-    // window.print() on the editor tab itself is a silent no-op on many
-    // mobile browsers (most notably an iOS site installed to the home
-    // screen, which runs without any browser chrome to host the print UI).
-    // Opening a fresh, ordinary browser tab restores that chrome, so this
-    // builds a minimal printable page there and calls print() inside IT
-    // instead. The tab must be opened synchronously, right on the click, or
-    // mobile browsers block it as an unsolicited popup once the async PNG
-    // capture below finishes.
-    const printWindow = window.open('', '_blank');
+    const standalone = isStandaloneApp();
+    // Must open synchronously, right on the click, or mobile browsers block
+    // it as an unsolicited popup once the async PNG capture below finishes.
+    const printWindow = standalone ? window.open('', '_blank') : null;
     printBtn.disabled = true;
     try {
       const imgData = await capturePosterPng();
+
+      if (!standalone) {
+        printMountImg.src = imgData;
+        if (printMountImg.complete) {
+          window.print();
+        } else {
+          printMountImg.addEventListener('load', () => window.print(), { once: true });
+        }
+        return;
+      }
+
       if (!printWindow) {
         const { jsPDF } = window.jspdf;
         const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
@@ -1187,6 +1204,10 @@ function fontFamilyFor(fontKey) {
       const triggerPrint = () => {
         printWindow.focus();
         printWindow.print();
+        // No browser chrome of its own to navigate back from on mobile, so
+        // close this detour tab as soon as the print sheet is dismissed
+        // (printed or cancelled) instead of stranding the couple on it.
+        printWindow.onafterprint = () => printWindow.close();
       };
       if (img.complete) {
         triggerPrint();
