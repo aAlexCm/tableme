@@ -471,48 +471,91 @@ function fontFamilyFor(fontKey) {
     scheduleSave();
   }
 
-  function wireDrag(handle, node, el) {
-    handle.addEventListener('mousedown', (e) => {
+  // Pointer Events (not mouse events) so dragging/resizing/rotating works
+  // with touch input too — plain mousemove/mouseup never fire during a
+  // touch-drag on mobile, only the initial tap-equivalent mousedown does.
+  function wirePointerDrag(handle, onStart) {
+    handle.addEventListener('pointerdown', (e) => {
       e.preventDefault();
       e.stopPropagation();
+      const pointerId = e.pointerId;
+      const { onMove, onEnd } = onStart(e);
+
+      function cleanup() {
+        try {
+          handle.releasePointerCapture(pointerId);
+        } catch (_) {
+          // pointer capture may already be lost (e.g. after a cancel) — ignore
+        }
+        document.removeEventListener('pointermove', onPointerMove);
+        document.removeEventListener('pointerup', onPointerUp);
+        document.removeEventListener('pointercancel', onPointerCancel);
+      }
+      function onPointerMove(ev) {
+        if (ev.pointerId !== pointerId) return;
+        onMove(ev);
+      }
+      function onPointerUp(ev) {
+        if (ev.pointerId !== pointerId) return;
+        cleanup();
+        onEnd();
+      }
+      function onPointerCancel(ev) {
+        if (ev.pointerId !== pointerId) return;
+        cleanup();
+        onEnd();
+      }
+
+      try {
+        handle.setPointerCapture(pointerId);
+      } catch (_) {
+        // best-effort only — move/up/cancel are tracked via document below
+        // regardless, so a flaky capture implementation can't strand the drag
+      }
+      document.addEventListener('pointermove', onPointerMove);
+      document.addEventListener('pointerup', onPointerUp);
+      document.addEventListener('pointercancel', onPointerCancel);
+    });
+  }
+
+  function wireDrag(handle, node, el) {
+    wirePointerDrag(handle, (e) => {
       selectElement(el.id);
       const startX = e.clientX;
       const startY = e.clientY;
       const startLeft = el.x;
       const startTop = el.y;
 
-      function onMove(ev) {
-        const dx = ev.clientX - startX;
-        const dy = ev.clientY - startY;
-        let nextX = Math.max(0, startLeft + dx);
-        let nextY = Math.max(0, startTop + dy);
+      return {
+        onMove(ev) {
+          const dx = ev.clientX - startX;
+          const dy = ev.clientY - startY;
+          let nextX = Math.max(0, startLeft + dx);
+          let nextY = Math.max(0, startTop + dy);
 
-        const width = node.offsetWidth;
-        const height = node.offsetHeight;
-        const centerX = nextX + width / 2;
-        const centerY = nextY + height / 2;
-        const snapV = Math.abs(centerX - SHEET_WIDTH / 2) < SNAP_THRESHOLD;
-        const snapH = Math.abs(centerY - SHEET_HEIGHT / 2) < SNAP_THRESHOLD;
-        if (snapV) nextX = SHEET_WIDTH / 2 - width / 2;
-        if (snapH) nextY = SHEET_HEIGHT / 2 - height / 2;
-        guideV.hidden = !snapV;
-        guideH.hidden = !snapH;
+          const width = node.offsetWidth;
+          const height = node.offsetHeight;
+          const centerX = nextX + width / 2;
+          const centerY = nextY + height / 2;
+          const snapV = Math.abs(centerX - SHEET_WIDTH / 2) < SNAP_THRESHOLD;
+          const snapH = Math.abs(centerY - SHEET_HEIGHT / 2) < SNAP_THRESHOLD;
+          if (snapV) nextX = SHEET_WIDTH / 2 - width / 2;
+          if (snapH) nextY = SHEET_HEIGHT / 2 - height / 2;
+          guideV.hidden = !snapV;
+          guideH.hidden = !snapH;
 
-        el.x = nextX;
-        el.y = nextY;
-        node.style.left = `${el.x}px`;
-        node.style.top = `${el.y}px`;
-        positionToolbar(node);
-      }
-      function onUp() {
-        document.removeEventListener('mousemove', onMove);
-        document.removeEventListener('mouseup', onUp);
-        guideV.hidden = true;
-        guideH.hidden = true;
-        scheduleSave();
-      }
-      document.addEventListener('mousemove', onMove);
-      document.addEventListener('mouseup', onUp);
+          el.x = nextX;
+          el.y = nextY;
+          node.style.left = `${el.x}px`;
+          node.style.top = `${el.y}px`;
+          positionToolbar(node);
+        },
+        onEnd() {
+          guideV.hidden = true;
+          guideH.hidden = true;
+          scheduleSave();
+        },
+      };
     });
   }
 
@@ -521,35 +564,29 @@ function fontFamilyFor(fontKey) {
   // icon resize a square box, divider resizes a line's width, text resizes
   // its font size) without needing a full applyElementStyle() pass per move.
   function wireResize(handle, node, el, { get, set, min, max, onChange }) {
-    handle.addEventListener('mousedown', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
+    wirePointerDrag(handle, (e) => {
       selectElement(el.id);
       const startX = e.clientX;
       const startValue = get(el);
 
-      function onMove(ev) {
-        const dx = ev.clientX - startX;
-        const value = Math.min(max, Math.max(min, startValue + dx));
-        set(el, value);
-        onChange(node, el);
-        positionToolbar(node);
-        if (selectedId === el.id) sizeInput.value = value;
-      }
-      function onUp() {
-        document.removeEventListener('mousemove', onMove);
-        document.removeEventListener('mouseup', onUp);
-        scheduleSave();
-      }
-      document.addEventListener('mousemove', onMove);
-      document.addEventListener('mouseup', onUp);
+      return {
+        onMove(ev) {
+          const dx = ev.clientX - startX;
+          const value = Math.min(max, Math.max(min, startValue + dx));
+          set(el, value);
+          onChange(node, el);
+          positionToolbar(node);
+          if (selectedId === el.id) sizeInput.value = value;
+        },
+        onEnd() {
+          scheduleSave();
+        },
+      };
     });
   }
 
   function wireRotate(handle, node, el) {
-    handle.addEventListener('mousedown', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
+    wirePointerDrag(handle, (e) => {
       selectElement(el.id);
       const rect = node.getBoundingClientRect();
       const centerX = rect.left + rect.width / 2;
@@ -557,19 +594,17 @@ function fontFamilyFor(fontKey) {
       const startAngle = Math.atan2(e.clientY - centerY, e.clientX - centerX) * (180 / Math.PI);
       const startRotation = el.rotation || 0;
 
-      function onMove(ev) {
-        const angle = Math.atan2(ev.clientY - centerY, ev.clientX - centerX) * (180 / Math.PI);
-        el.rotation = Math.round(startRotation + (angle - startAngle));
-        node.style.transform = `rotate(${el.rotation}deg)`;
-        positionToolbar(node);
-      }
-      function onUp() {
-        document.removeEventListener('mousemove', onMove);
-        document.removeEventListener('mouseup', onUp);
-        scheduleSave();
-      }
-      document.addEventListener('mousemove', onMove);
-      document.addEventListener('mouseup', onUp);
+      return {
+        onMove(ev) {
+          const angle = Math.atan2(ev.clientY - centerY, ev.clientX - centerX) * (180 / Math.PI);
+          el.rotation = Math.round(startRotation + (angle - startAngle));
+          node.style.transform = `rotate(${el.rotation}deg)`;
+          positionToolbar(node);
+        },
+        onEnd() {
+          scheduleSave();
+        },
+      };
     });
   }
 
@@ -731,7 +766,7 @@ function fontFamilyFor(fontKey) {
     rotateHandle.innerHTML = ROTATE_ICON;
     node.appendChild(rotateHandle);
 
-    node.addEventListener('mousedown', () => selectElement(el.id));
+    node.addEventListener('pointerdown', () => selectElement(el.id));
     textContentEl.addEventListener('input', () => {
       el.text = textContentEl.textContent;
       scheduleSave();

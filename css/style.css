@@ -788,6 +788,12 @@ nav.admin-nav.admin-nav-stacked {
   white-space: pre-wrap;
 }
 
+.poster-el {
+  /* Without this, a touch-drag on these elements scrolls/zooms the page
+     instead of being delivered as pointermove events. */
+  touch-action: none;
+}
+
 .poster-el.selected {
   outline: 1.5px dashed var(--gold-deep);
 }
@@ -807,6 +813,7 @@ nav.admin-nav.admin-nav-stacked {
   color: #fff;
   cursor: move;
   user-select: none;
+  touch-action: none;
 }
 
 .poster-el.selected .poster-text-drag-handle {
@@ -851,6 +858,7 @@ nav.admin-nav.admin-nav-stacked {
   border-radius: 4px;
   background: var(--gold-deep);
   cursor: nwse-resize;
+  touch-action: none;
 }
 
 .poster-el.selected .poster-resize-handle {
@@ -871,6 +879,7 @@ nav.admin-nav.admin-nav-stacked {
   color: #fff;
   cursor: grab;
   user-select: none;
+  touch-action: none;
 }
 
 .poster-el.selected .poster-rotate-handle {
@@ -888,6 +897,7 @@ nav.admin-nav.admin-nav-stacked {
   border-radius: 4px;
   background: var(--gold-deep);
   cursor: ew-resize;
+  touch-action: none;
 }
 
 .poster-el.selected .poster-divider-resize-handle {
