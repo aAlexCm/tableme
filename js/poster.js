@@ -220,7 +220,23 @@ function fontFamilyFor(fontKey) {
     clearTimeout(saveTimer);
     saveTimer = setTimeout(() => {
       Storage.setPoster(weddingId, poster);
+      refreshPrintImage();
     }, 500);
+  }
+
+  // Keeps #poster-print-mount's image up to date with every edit, so the
+  // print button's click handler can call window.print() synchronously,
+  // with no awaiting in between. Safari treats print() as "automatic" (and
+  // silently blocks it, or shows an "automatic printing isn't allowed on
+  // this website" prompt) once too much time/async work separates it from
+  // the click that triggered it — capturing the PNG on demand inside the
+  // click handler was exactly that.
+  async function refreshPrintImage() {
+    try {
+      printMountImg.src = await capturePosterPng();
+    } catch (err) {
+      console.warn('refreshPrintImage failed', err);
+    }
   }
 
   function applySheetSize() {
@@ -1149,28 +1165,12 @@ function fontFamilyFor(fontKey) {
     }
   });
 
-  printBtn.addEventListener('click', async () => {
-    printBtn.disabled = true;
-    try {
-      const imgData = await capturePosterPng();
-      printMountImg.src = imgData;
-      const triggerPrint = () => {
-        // Calling print() without first re-focusing this window is the
-        // likely reason this was a silent no-op on mobile before: the page
-        // may not be the OS's notion of the focused window by the time the
-        // async capture above finishes, even though the click itself was a
-        // direct user gesture.
-        window.focus();
-        window.print();
-      };
-      if (printMountImg.complete) {
-        triggerPrint();
-      } else {
-        printMountImg.addEventListener('load', triggerPrint, { once: true });
-      }
-    } finally {
-      printBtn.disabled = false;
-    }
+  printBtn.addEventListener('click', () => {
+    // No async work here at all — #poster-print-mount's image is kept
+    // fresh ahead of time by refreshPrintImage() (see scheduleSave), so
+    // print() can run synchronously, in direct response to the click.
+    window.focus();
+    window.print();
   });
 
   function setLang(lang) {
@@ -1224,6 +1224,11 @@ function fontFamilyFor(fontKey) {
   bgColorInput.value = poster.background;
   bgHexInput.value = poster.background.toUpperCase();
   poster.elements.forEach((el) => createElementNode(el));
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(refreshPrintImage);
+  } else {
+    refreshPrintImage();
+  }
 
   langMount.appendChild(buildLangSwitcher(currentLang, setLang));
   applyTranslations(currentLang);
