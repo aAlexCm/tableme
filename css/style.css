@@ -1053,35 +1053,6 @@ nav.admin-nav.admin-nav-stacked {
   color: var(--gold-deep);
 }
 
-@media print {
-  body * {
-    visibility: hidden;
-  }
-
-  .poster-sheet,
-  .poster-sheet * {
-    visibility: visible;
-  }
-
-  .poster-sheet {
-    position: absolute;
-    top: 0;
-    left: 0;
-    box-shadow: none;
-  }
-
-  .poster-text-drag-handle,
-  .poster-resize-handle,
-  .poster-divider-resize-handle,
-  .poster-rotate-handle {
-    display: none !important;
-  }
-
-  .poster-el.selected {
-    outline: none !important;
-  }
-}
-
 @media (max-width: 760px) {
   .poster-workspace {
     flex-direction: column;

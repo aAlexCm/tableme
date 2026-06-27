@@ -1128,31 +1128,47 @@ function fontFamilyFor(fontKey) {
     qrCornerSelect.innerHTML = QR_CORNER_PRESETS.map((p) => `<option value="${p.key}">${t(currentLang, p.i18nKey)}</option>`).join('');
   }
 
+  async function buildPosterPdf() {
+    const canvas = await window.html2canvas(sheetEl, { scale: 4, useCORS: true });
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const imgData = canvas.toDataURL('image/png');
+    pdf.addImage(imgData, 'PNG', 0, 0, pageWidth, pageHeight);
+    return pdf;
+  }
+
   downloadBtn.addEventListener('click', async () => {
     downloadBtn.disabled = true;
     try {
-      const canvas = await window.html2canvas(sheetEl, { scale: 4, useCORS: true });
-      const { jsPDF } = window.jspdf;
-      const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
-      const pageWidth = pdf.internal.pageSize.getWidth();
-      const pageHeight = pdf.internal.pageSize.getHeight();
-      const imgData = canvas.toDataURL('image/png');
-      pdf.addImage(imgData, 'PNG', 0, 0, pageWidth, pageHeight);
+      const pdf = await buildPosterPdf();
       pdf.save(`affiche-${weddingId}.pdf`);
     } finally {
       downloadBtn.disabled = false;
     }
   });
 
-  printBtn.addEventListener('click', () => {
-    let styleTag = document.getElementById('poster-print-size-style');
-    if (!styleTag) {
-      styleTag = document.createElement('style');
-      styleTag.id = 'poster-print-size-style';
-      document.head.appendChild(styleTag);
+  printBtn.addEventListener('click', async () => {
+    // window.print() is unreliable on mobile — many mobile browsers treat it
+    // as a silent no-op, so nothing visibly happens. Opening the generated
+    // PDF in a new tab instead works everywhere: every mobile/desktop
+    // browser's built-in PDF viewer has its own working print/share icon.
+    // The tab must be opened synchronously, right on the click, or mobile
+    // browsers block it as an unsolicited popup once the PDF build (async)
+    // finishes.
+    const printWindow = window.open('', '_blank');
+    printBtn.disabled = true;
+    try {
+      const pdf = await buildPosterPdf();
+      if (printWindow) {
+        printWindow.location.href = pdf.output('bloburl');
+      } else {
+        pdf.save(`affiche-${weddingId}.pdf`);
+      }
+    } finally {
+      printBtn.disabled = false;
     }
-    styleTag.textContent = '@page { size: A4; margin: 0; }';
-    window.print();
   });
 
   function setLang(lang) {
