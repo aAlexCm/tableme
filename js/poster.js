@@ -52,13 +52,18 @@ const DIVIDER_PRESETS = [
   { key: 'flourish', i18nKey: 'dividerPresetFlourish', ornament: '❦' },
 ];
 
+// U+FE0E (text presentation selector) forces the plain, monochrome glyph on
+// every platform. Without it, some of these (the heart especially) render
+// as a colorful emoji on mobile — ignoring the CSS color entirely, since a
+// color-emoji glyph is drawn from baked-in bitmap/font data — even though
+// the same character shows as a plain recolorable symbol on desktop.
 const ICON_PRESETS = [
-  { key: 'heart', i18nKey: 'iconPresetHeart', symbol: '♥' },
-  { key: 'rings', i18nKey: 'iconPresetRings', symbol: '⚭' },
-  { key: 'flower', i18nKey: 'iconPresetFlower', symbol: '❀' },
-  { key: 'star', i18nKey: 'iconPresetStar', symbol: '✦' },
-  { key: 'floral', i18nKey: 'iconPresetFloral', symbol: '❦' },
-  { key: 'fleur', i18nKey: 'iconPresetFleur', symbol: '⚜' },
+  { key: 'heart', i18nKey: 'iconPresetHeart', symbol: '♥︎' },
+  { key: 'rings', i18nKey: 'iconPresetRings', symbol: '⚭︎' },
+  { key: 'flower', i18nKey: 'iconPresetFlower', symbol: '❀︎' },
+  { key: 'star', i18nKey: 'iconPresetStar', symbol: '✦︎' },
+  { key: 'floral', i18nKey: 'iconPresetFloral', symbol: '❦︎' },
+  { key: 'fleur', i18nKey: 'iconPresetFleur', symbol: '⚜︎' },
 ];
 
 function getDefaultPoster() {
