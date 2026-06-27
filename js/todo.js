@@ -370,6 +370,8 @@ function escapeHtml(value) {
   const emptyStateEl = document.getElementById('todo-empty-state');
   const statusFiltersEl = document.getElementById('todo-status-filters');
   const categoryFiltersEl = document.getElementById('todo-category-filters');
+  const statusFilterSelectEl = document.getElementById('todo-status-filter-select');
+  const categoryFilterSelectEl = document.getElementById('todo-category-filter-select');
 
   function categoryLabel(catId) {
     const cat = CATEGORIES.find((c) => c.id === catId);
@@ -418,6 +420,31 @@ function escapeHtml(value) {
     addCategoryEl.value = categoryFilter !== 'all' ? categoryFilter : CATEGORIES[0].id;
   }
 
+  // Same two filters as the sidebar, as native <select> dropdowns instead —
+  // shown only on mobile (CSS-gated) so the filter list doesn't eat up the
+  // screen the way a tall button list or a full sidebar would.
+  function renderMobileFilterSelects(tasks) {
+    const doneCount = tasks.filter((task) => task.done).length;
+    const statusOptions = [
+      { id: 'all', label: t(currentLang, 'todoFilterAll'), count: tasks.length },
+      { id: 'todo', label: t(currentLang, 'todoFilterTodo'), count: tasks.length - doneCount },
+      { id: 'done', label: t(currentLang, 'todoFilterDone'), count: doneCount },
+    ];
+    statusFilterSelectEl.innerHTML = statusOptions.map((g) => `<option value="${g.id}">${escapeHtml(g.label)} (${g.count})</option>`).join('');
+    statusFilterSelectEl.value = statusFilter;
+
+    const categoryOptions = [
+      { id: 'all', label: t(currentLang, 'todoFilterAll'), count: tasks.length },
+      ...CATEGORIES.map((cat) => ({
+        id: cat.id,
+        label: t(currentLang, cat.key),
+        count: tasks.filter((task) => task.category === cat.id).length,
+      })),
+    ];
+    categoryFilterSelectEl.innerHTML = categoryOptions.map((g) => `<option value="${g.id}">${escapeHtml(g.label)} (${g.count})</option>`).join('');
+    categoryFilterSelectEl.value = categoryFilter;
+  }
+
   function render() {
     const tasks = wedding.tasks || [];
     const done = tasks.filter((task) => task.done).length;
@@ -428,6 +455,7 @@ function escapeHtml(value) {
 
     renderStatusFilters(tasks);
     renderCategoryFilters(tasks);
+    renderMobileFilterSelects(tasks);
     renderAddCategoryOptions();
 
     const filtered = tasks.filter(matchesFilters);
@@ -470,6 +498,16 @@ function escapeHtml(value) {
     render();
   });
 
+  statusFilterSelectEl.addEventListener('change', () => {
+    statusFilter = statusFilterSelectEl.value;
+    render();
+  });
+
+  categoryFilterSelectEl.addEventListener('change', () => {
+    categoryFilter = categoryFilterSelectEl.value;
+    render();
+  });
+
   listEl.addEventListener('click', async (e) => {
     const row = e.target.closest('.todo-row');
     if (!row) return;
@@ -499,6 +537,8 @@ function escapeHtml(value) {
     applyTranslations(lang);
     addBtnEl.setAttribute('aria-label', t(lang, 'todoAddBtnLabel'));
     addCategoryEl.setAttribute('aria-label', t(lang, 'todoAddCategoryAriaLabel'));
+    statusFilterSelectEl.setAttribute('aria-label', t(lang, 'todoFilterByStatus'));
+    categoryFilterSelectEl.setAttribute('aria-label', t(lang, 'todoFilterByCategory'));
     render();
   }
 
@@ -528,6 +568,8 @@ function escapeHtml(value) {
   document.title = 'TableMe · Liste des tâches';
   addBtnEl.setAttribute('aria-label', t(currentLang, 'todoAddBtnLabel'));
   addCategoryEl.setAttribute('aria-label', t(currentLang, 'todoAddCategoryAriaLabel'));
+  statusFilterSelectEl.setAttribute('aria-label', t(currentLang, 'todoFilterByStatus'));
+  categoryFilterSelectEl.setAttribute('aria-label', t(currentLang, 'todoFilterByCategory'));
 
   langMount.appendChild(buildLangSwitcher(currentLang, setLang));
   applyTranslations(currentLang);

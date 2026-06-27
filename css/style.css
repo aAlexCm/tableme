@@ -1585,23 +1585,30 @@ body.admin-theme .todo-row {
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
 }
 
+/* On mobile the sidebar's button lists would either eat a lot of vertical
+   space or need horizontal scrolling, so it's swapped for two compact
+   native <select> dropdowns (same status/category filters) instead. */
+.todo-mobile-filters {
+  display: none;
+}
+
 @media (max-width: 760px) {
-  .todo-layout {
-    flex-direction: column;
-  }
-
   .todo-sidebar {
-    flex: 1 1 auto;
-    width: 100%;
-    padding-top: 0;
-    display: flex;
-    gap: 24px;
-    overflow-x: auto;
+    display: none;
   }
 
-  .todo-filter-group {
-    margin-bottom: 0;
-    flex: 0 0 auto;
+  .todo-mobile-filters {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 18px;
+  }
+
+  .todo-mobile-filters select {
+    flex: 1;
+    min-width: 0;
+    height: 38px;
+    padding: 0 10px;
+    font-size: 0.8rem;
   }
 }
 
