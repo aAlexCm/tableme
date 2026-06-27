@@ -101,6 +101,13 @@ export const Storage = {
     await updateDoc(doc(db, 'weddings', weddingId), { tasks });
   },
 
+  // Separate from setTasks: marks the wedding as having received its
+  // one-time default checklist, so an empty list later (the couple cleared
+  // everything) is never confused with "never seeded" again.
+  async seedTasks(weddingId, tasks) {
+    await updateDoc(doc(db, 'weddings', weddingId), { tasks, tasksSeeded: true });
+  },
+
   async setTheme(weddingId, theme) {
     await updateDoc(doc(db, 'weddings', weddingId), { theme });
   },

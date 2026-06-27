@@ -557,9 +557,10 @@ function escapeHtml(value) {
     return;
   }
 
-  if (wedding.tasks === undefined) {
+  if (!wedding.tasksSeeded) {
     wedding.tasks = buildDefaultTasks(wedding.lang || 'fr');
-    await Storage.setTasks(weddingId, wedding.tasks);
+    wedding.tasksSeeded = true;
+    await Storage.seedTasks(weddingId, wedding.tasks);
   }
 
   contentEl.hidden = false;
