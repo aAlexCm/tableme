@@ -1172,9 +1172,14 @@ function fontFamilyFor(fontKey) {
       }
       printWindow.document.write(`<!DOCTYPE html><html><head><title>TableMe · Printable poster</title>
         <style>
+          /* iOS AirPrint enforces its own minimum margins no matter what
+             @page sets here, so sizing the image in absolute mm overflows
+             the real (smaller) printable area and spills onto a 2nd page.
+             Sizing it relative to that area instead lets it shrink to fit
+             whatever margin the OS actually imposes, on a single page. */
           @page { size: A4; margin: 0; }
-          html, body { margin: 0; padding: 0; }
-          img { display: block; width: 210mm; height: 297mm; }
+          html, body { margin: 0; padding: 0; height: 100%; }
+          img { display: block; width: 100%; height: auto; max-height: 100%; }
         </style>
       </head><body><img id="poster-print-img" src="${imgData}" /></body></html>`);
       printWindow.document.close();
