@@ -575,8 +575,8 @@ function escapeHtml(value) {
     progressFillEl.style.width = total === 0 ? '0%' : `${Math.round((done / total) * 100)}%`;
 
     renderStatusFilters(tasks);
-    renderCategoryFilters(tasks);
     renderTypeFilters(tasks);
+    renderCategoryFilters(tasks);
     renderMobileFilterSelects(tasks);
     renderAddCategoryOptions();
 
