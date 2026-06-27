@@ -1128,21 +1128,20 @@ function fontFamilyFor(fontKey) {
     qrCornerSelect.innerHTML = QR_CORNER_PRESETS.map((p) => `<option value="${p.key}">${t(currentLang, p.i18nKey)}</option>`).join('');
   }
 
-  async function buildPosterPdf() {
+  async function capturePosterPng() {
     const canvas = await window.html2canvas(sheetEl, { scale: 4, useCORS: true });
-    const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
-    const imgData = canvas.toDataURL('image/png');
-    pdf.addImage(imgData, 'PNG', 0, 0, pageWidth, pageHeight);
-    return pdf;
+    return canvas.toDataURL('image/png');
   }
 
   downloadBtn.addEventListener('click', async () => {
     downloadBtn.disabled = true;
     try {
-      const pdf = await buildPosterPdf();
+      const imgData = await capturePosterPng();
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      pdf.addImage(imgData, 'PNG', 0, 0, pageWidth, pageHeight);
       pdf.save(`affiche-${weddingId}.pdf`);
     } finally {
       downloadBtn.disabled = false;
@@ -1150,21 +1149,44 @@ function fontFamilyFor(fontKey) {
   });
 
   printBtn.addEventListener('click', async () => {
-    // window.print() is unreliable on mobile — many mobile browsers treat it
-    // as a silent no-op, so nothing visibly happens. Opening the generated
-    // PDF in a new tab instead works everywhere: every mobile/desktop
-    // browser's built-in PDF viewer has its own working print/share icon.
-    // The tab must be opened synchronously, right on the click, or mobile
-    // browsers block it as an unsolicited popup once the PDF build (async)
-    // finishes.
+    // window.print() on the editor tab itself is a silent no-op on many
+    // mobile browsers (most notably an iOS site installed to the home
+    // screen, which runs without any browser chrome to host the print UI).
+    // Opening a fresh, ordinary browser tab restores that chrome, so this
+    // builds a minimal printable page there and calls print() inside IT
+    // instead. The tab must be opened synchronously, right on the click, or
+    // mobile browsers block it as an unsolicited popup once the async PNG
+    // capture below finishes.
     const printWindow = window.open('', '_blank');
     printBtn.disabled = true;
     try {
-      const pdf = await buildPosterPdf();
-      if (printWindow) {
-        printWindow.location.href = pdf.output('bloburl');
-      } else {
+      const imgData = await capturePosterPng();
+      if (!printWindow) {
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const pageHeight = pdf.internal.pageSize.getHeight();
+        pdf.addImage(imgData, 'PNG', 0, 0, pageWidth, pageHeight);
         pdf.save(`affiche-${weddingId}.pdf`);
+        return;
+      }
+      printWindow.document.write(`<!DOCTYPE html><html><head><title>TableMe · Printable poster</title>
+        <style>
+          @page { size: A4; margin: 0; }
+          html, body { margin: 0; padding: 0; }
+          img { display: block; width: 210mm; height: 297mm; }
+        </style>
+      </head><body><img id="poster-print-img" src="${imgData}" /></body></html>`);
+      printWindow.document.close();
+      const img = printWindow.document.getElementById('poster-print-img');
+      const triggerPrint = () => {
+        printWindow.focus();
+        printWindow.print();
+      };
+      if (img.complete) {
+        triggerPrint();
+      } else {
+        img.addEventListener('load', triggerPrint);
       }
     } finally {
       printBtn.disabled = false;
