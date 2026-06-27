@@ -1053,46 +1053,6 @@ nav.admin-nav.admin-nav-stacked {
   color: var(--gold-deep);
 }
 
-#poster-print-mount {
-  display: none;
-}
-
-@page {
-  size: A4;
-  margin: 0;
-}
-
-/* Printing the live editor canvas directly would mean fixing it at real A4
-   pixel size, which OS print pipelines (notably iOS AirPrint) override with
-   their own minimum margins — overflowing a 2nd near-blank page. Printing a
-   flattened image sized relative to the printable area instead (rather
-   than absolute mm) shrinks to fit whatever margin the OS imposes. */
-@media print {
-  body * {
-    visibility: hidden;
-  }
-
-  #poster-print-mount,
-  #poster-print-mount * {
-    visibility: visible;
-  }
-
-  #poster-print-mount {
-    display: block;
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-  }
-
-  #poster-print-mount img {
-    display: block;
-    width: 100%;
-    height: auto;
-    max-height: 100%;
-  }
-}
-
 @media (max-width: 760px) {
   .poster-workspace {
     flex-direction: column;

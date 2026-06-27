@@ -167,8 +167,6 @@ function fontFamilyFor(fontKey) {
   const addIconBtn = document.getElementById('poster-add-icon-btn');
   const addImageBtn = document.getElementById('poster-add-image-btn');
   const downloadBtn = document.getElementById('poster-download-btn');
-  const printBtn = document.getElementById('poster-print-btn');
-  const printMountImg = document.getElementById('poster-print-img');
 
   const imageMenuEl = document.getElementById('poster-image-menu');
   const imageUploadBtn = document.getElementById('poster-image-upload-btn');
@@ -220,23 +218,7 @@ function fontFamilyFor(fontKey) {
     clearTimeout(saveTimer);
     saveTimer = setTimeout(() => {
       Storage.setPoster(weddingId, poster);
-      refreshPrintImage();
     }, 500);
-  }
-
-  // Keeps #poster-print-mount's image up to date with every edit, so the
-  // print button's click handler can call window.print() synchronously,
-  // with no awaiting in between. Safari treats print() as "automatic" (and
-  // silently blocks it, or shows an "automatic printing isn't allowed on
-  // this website" prompt) once too much time/async work separates it from
-  // the click that triggered it — capturing the PNG on demand inside the
-  // click handler was exactly that.
-  async function refreshPrintImage() {
-    try {
-      printMountImg.src = await capturePosterPng();
-    } catch (err) {
-      console.warn('refreshPrintImage failed', err);
-    }
   }
 
   function applySheetSize() {
@@ -1165,14 +1147,6 @@ function fontFamilyFor(fontKey) {
     }
   });
 
-  printBtn.addEventListener('click', () => {
-    // No async work here at all — #poster-print-mount's image is kept
-    // fresh ahead of time by refreshPrintImage() (see scheduleSave), so
-    // print() can run synchronously, in direct response to the click.
-    window.focus();
-    window.print();
-  });
-
   function setLang(lang) {
     currentLang = lang;
     localStorage.setItem(LANG_KEY, lang);
@@ -1224,11 +1198,6 @@ function fontFamilyFor(fontKey) {
   bgColorInput.value = poster.background;
   bgHexInput.value = poster.background.toUpperCase();
   poster.elements.forEach((el) => createElementNode(el));
-  if (document.fonts && document.fonts.ready) {
-    document.fonts.ready.then(refreshPrintImage);
-  } else {
-    refreshPrintImage();
-  }
 
   langMount.appendChild(buildLangSwitcher(currentLang, setLang));
   applyTranslations(currentLang);
