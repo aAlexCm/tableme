@@ -57,8 +57,15 @@ const DIVIDER_PRESETS = [
 // as a colorful emoji on mobile — ignoring the CSS color entirely, since a
 // color-emoji glyph is drawn from baked-in bitmap/font data — even though
 // the same character shows as a plain recolorable symbol on desktop.
+const HEART_SVG = '<svg viewBox="0 0 24 24" width="100%" height="100%" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>';
+
 const ICON_PRESETS = [
-  { key: 'heart', i18nKey: 'iconPresetHeart', symbol: '♥︎' },
+  // The heart specifically still rendered as a colorful, uncolorable emoji
+  // on at least one real mobile browser even with the U+FE0E text-
+  // presentation selector below (Apple's emoji font is known to override
+  // VS15 for heart glyphs in particular) — an actual SVG path sidesteps
+  // the whole class of platform font-substitution quirks for good.
+  { key: 'heart', i18nKey: 'iconPresetHeart', symbol: '♥︎', svg: HEART_SVG },
   { key: 'rings', i18nKey: 'iconPresetRings', symbol: '⚭︎' },
   { key: 'flower', i18nKey: 'iconPresetFlower', symbol: '❀︎' },
   { key: 'star', i18nKey: 'iconPresetStar', symbol: '✦︎' },
@@ -337,8 +344,12 @@ function fontFamilyFor(fontKey) {
     const glyph = node.querySelector('.poster-icon-glyph');
     if (glyph) {
       const preset = ICON_PRESETS.find((p) => p.key === el.symbol) || ICON_PRESETS[0];
-      glyph.textContent = preset.symbol;
-      glyph.style.fontSize = `${Math.round(el.size * 0.8)}px`;
+      if (preset.svg) {
+        glyph.innerHTML = preset.svg;
+      } else {
+        glyph.textContent = preset.symbol;
+        glyph.style.fontSize = `${Math.round(el.size * 0.8)}px`;
+      }
     }
   }
 
