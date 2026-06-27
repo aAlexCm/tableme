@@ -783,7 +783,14 @@ function fontFamilyFor(fontKey) {
       set: (e, v) => { e.fontSize = v; },
       min: 8,
       max: 200,
-      onChange: (n, e) => { n.style.fontSize = `${e.fontSize}px`; },
+      // Must target .poster-text-content, not the wrapper node: applyTextStyle
+      // sets font-size on that child element directly (an inline style, so it
+      // always wins over whatever the wrapper's font-size is), which is why
+      // setting it on the wrapper here had no visible effect at all.
+      onChange: (n, e) => {
+        const content = n.querySelector('.poster-text-content');
+        if (content) content.style.fontSize = `${e.fontSize}px`;
+      },
     });
     applyTextStyle(node, el);
     sheetContentEl.appendChild(node);
