@@ -1648,6 +1648,19 @@ nav.admin-nav.admin-nav-stacked {
   text-decoration: line-through;
 }
 
+.todo-row-default-tag {
+  margin-left: 6px;
+  padding: 0 6px;
+  border-radius: var(--radius-pill);
+  background: var(--sage-light);
+  color: var(--sage-deep);
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  vertical-align: middle;
+}
+
 .todo-row-category {
   align-self: flex-start;
   padding: 1px 9px;

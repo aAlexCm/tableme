@@ -376,6 +376,30 @@ function migrateLegacyDefaultTask(task) {
   return task;
 }
 
+// One-time repair for default tasks whose category was reassigned back when
+// the UI briefly allowed editing a default task's category (now disallowed —
+// default tasks are delete-only). That left `category` pointing at a
+// category whose template list has nothing to do with `templateIndex`,
+// producing a mismatched/nonsense task title. The frozen literal `text`
+// fallback still holds the original wording, so it's used to find the
+// category the templateIndex actually belongs to and restore it.
+function repairDefaultTaskCategory(task) {
+  if (!task.isDefault || task.templateIndex === undefined || !task.text) return task;
+  if (resolveDefaultText(task.category, task.templateIndex, 'fr') === task.text
+    || resolveDefaultText(task.category, task.templateIndex, 'en') === task.text
+    || resolveDefaultText(task.category, task.templateIndex, 'ro') === task.text) {
+    return task;
+  }
+  for (const lang of Object.keys(DEFAULT_TASKS)) {
+    for (const catId of Object.keys(DEFAULT_TASKS[lang])) {
+      if (DEFAULT_TASKS[lang][catId][task.templateIndex] === task.text) {
+        return { ...task, category: catId };
+      }
+    }
+  }
+  return task;
+}
+
 function escapeHtml(value) {
   return String(value).replace(/[&<>"']/g, (c) => ({
     '&': '&amp;',
@@ -548,12 +572,15 @@ function escapeHtml(value) {
       `;
     }
 
+    const editAction = task.isDefault ? '' : ' data-action="edit"';
+    const defaultTag = task.isDefault ? `<span class="todo-row-default-tag">${escapeHtml(t(currentLang, 'todoDefaultTaskTag'))}</span>` : '';
+
     return `
       <li class="todo-row${task.done ? ' done' : ''}" data-id="${task.id}">
         ${checkBtn}
         <span class="todo-row-main">
-          <span class="todo-row-text" data-action="edit">${escapeHtml(taskText(task, currentLang))}</span>
-          <span class="todo-row-category" data-action="edit">${escapeHtml(categoryLabel(task.category))}</span>
+          <span class="todo-row-text"${editAction}>${escapeHtml(taskText(task, currentLang))}${defaultTag}</span>
+          <span class="todo-row-category"${editAction}>${escapeHtml(categoryLabel(task.category))}</span>
         </span>
         ${deleteBtn}
       </li>
@@ -821,7 +848,7 @@ function escapeHtml(value) {
     wedding.tasksSeeded = true;
     await Storage.seedTasks(weddingId, wedding.tasks);
   } else {
-    const migrated = (wedding.tasks || []).map(migrateLegacyDefaultTask);
+    const migrated = (wedding.tasks || []).map((task) => repairDefaultTaskCategory(migrateLegacyDefaultTask(task)));
     if (migrated.some((task, i) => task !== wedding.tasks[i])) {
       wedding.tasks = migrated;
       await Storage.setTasks(weddingId, migrated);
