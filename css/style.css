@@ -1530,6 +1530,12 @@ nav.admin-nav.admin-nav-stacked {
   list-style: none;
 }
 
+.todo-category-modal-empty {
+  margin: 6px 0;
+  font-size: 0.85rem;
+  font-style: italic;
+}
+
 .todo-category-modal-row {
   display: flex;
   align-items: center;
@@ -1740,9 +1746,25 @@ body.admin-theme .todo-row {
     margin-bottom: 18px;
   }
 
-  .todo-mobile-filters select {
+  .todo-mobile-filter-field {
     flex: 1 1 140px;
     min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .todo-mobile-filter-field label {
+    font-size: 0.66rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: var(--ink);
+    padding-left: 2px;
+  }
+
+  .todo-mobile-filters select {
+    width: 100%;
     height: 38px;
     padding: 0 10px;
     font-size: 0.8rem;

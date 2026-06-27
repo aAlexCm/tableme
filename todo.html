@@ -56,9 +56,18 @@
           <h2 data-i18n="todoPageTitle">Liste des tâches</h2>
 
           <div class="todo-mobile-filters">
-            <select id="todo-status-filter-select" aria-label="Par état"></select>
-            <select id="todo-type-filter-select" aria-label="Par type"></select>
-            <select id="todo-category-filter-select" aria-label="Par catégorie"></select>
+            <div class="todo-mobile-filter-field">
+              <label for="todo-status-filter-select" data-i18n="todoFilterByStatus">Par état</label>
+              <select id="todo-status-filter-select" aria-label="Par état"></select>
+            </div>
+            <div class="todo-mobile-filter-field">
+              <label for="todo-type-filter-select" data-i18n="todoFilterByType">Par type</label>
+              <select id="todo-type-filter-select" aria-label="Par type"></select>
+            </div>
+            <div class="todo-mobile-filter-field">
+              <label for="todo-category-filter-select" data-i18n="todoFilterByCategory">Par catégorie</label>
+              <select id="todo-category-filter-select" aria-label="Par catégorie"></select>
+            </div>
           </div>
 
           <div class="todo-progress">

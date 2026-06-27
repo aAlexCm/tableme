@@ -647,18 +647,20 @@ function escapeHtml(value) {
     });
   }
 
+  // Only custom categories are listed here — the defaults are already
+  // visible in the sidebar/dropdown and can't be deleted anyway, so
+  // repeating all 10 of them in the modal was pure clutter.
   function renderCategoriesModalList() {
-    const rows = CATEGORIES.map((cat) => `
-      <li class="todo-category-modal-row">
-        <span>${escapeHtml(t(currentLang, cat.key))}</span>
-      </li>
-    `).join('') + customCategories.map((cat) => `
+    if (customCategories.length === 0) {
+      categoriesModalListEl.innerHTML = `<p class="muted todo-category-modal-empty">${escapeHtml(t(currentLang, 'todoNoCustomCategories'))}</p>`;
+      return;
+    }
+    categoriesModalListEl.innerHTML = customCategories.map((cat) => `
       <li class="todo-category-modal-row">
         <span>${escapeHtml(cat.label)}<span class="todo-category-custom-tag">${escapeHtml(t(currentLang, 'todoCustomCategoryTag'))}</span></span>
         <button type="button" class="icon-btn icon-btn-danger todo-category-modal-delete" data-category="${cat.id}" aria-label="${escapeHtml(t(currentLang, 'todoDeleteCategoryBtnLabel'))}">${TRASH_ICON}</button>
       </li>
     `).join('');
-    categoriesModalListEl.innerHTML = rows;
   }
 
   function openCategoriesModal() {
