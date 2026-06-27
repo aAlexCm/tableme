@@ -168,6 +168,7 @@ function fontFamilyFor(fontKey) {
   const addImageBtn = document.getElementById('poster-add-image-btn');
   const downloadBtn = document.getElementById('poster-download-btn');
   const printBtn = document.getElementById('poster-print-btn');
+  const printMountImg = document.getElementById('poster-print-img');
 
   const imageMenuEl = document.getElementById('poster-image-menu');
   const imageUploadBtn = document.getElementById('poster-image-upload-btn');
@@ -1149,70 +1150,23 @@ function fontFamilyFor(fontKey) {
   });
 
   printBtn.addEventListener('click', async () => {
-    // window.print() called in place, in this tab, turned out to be a
-    // silent no-op on a real device tested in plain mobile Safari — not
-    // just the standalone/home-screen case this used to special-case for.
-    // The new-tab route below is the only one actually confirmed to work
-    // there, so it's used unconditionally now; the tab must be opened
-    // synchronously, right on the click, or mobile browsers block it as an
-    // unsolicited popup once the async PNG capture below finishes.
-    const printWindow = window.open('', '_blank');
     printBtn.disabled = true;
     try {
       const imgData = await capturePosterPng();
-      if (!printWindow) {
-        const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
-        const pageWidth = pdf.internal.pageSize.getWidth();
-        const pageHeight = pdf.internal.pageSize.getHeight();
-        pdf.addImage(imgData, 'PNG', 0, 0, pageWidth, pageHeight);
-        pdf.save(`affiche-${weddingId}.pdf`);
-        return;
-      }
-      printWindow.document.write(`<!DOCTYPE html><html><head><title>TableMe · Printable poster</title>
-        <style>
-          /* iOS AirPrint enforces its own minimum margins no matter what
-             @page sets here, so sizing the image in absolute mm overflows
-             the real (smaller) printable area and spills onto a 2nd page.
-             Sizing it relative to that area instead lets it shrink to fit
-             whatever margin the OS actually imposes, on a single page. */
-          @page { size: A4; margin: 0; }
-          html, body { margin: 0; padding: 0; height: 100%; }
-          img { display: block; width: 100%; height: auto; max-height: 100%; }
-          #poster-print-close {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            z-index: 1;
-            padding: 8px 16px;
-            border: 1px solid #999;
-            border-radius: 999px;
-            background: #fff;
-            font: 14px -apple-system, sans-serif;
-          }
-          @media print {
-            #poster-print-close { display: none; }
-          }
-        </style>
-      </head><body>
-        <button type="button" id="poster-print-close" onclick="window.close()">${t(currentLang, 'posterPrintCloseBtn')}</button>
-        <img id="poster-print-img" src="${imgData}" />
-      </body></html>`);
-      printWindow.document.close();
-      const img = printWindow.document.getElementById('poster-print-img');
+      printMountImg.src = imgData;
       const triggerPrint = () => {
-        printWindow.focus();
-        printWindow.print();
-        // Best-effort: not all mobile browsers fire afterprint once the
-        // native OS print/share sheet (not the browser's own dialog) is
-        // dismissed, which is why the close button above is the
-        // guaranteed way out, not just this.
-        printWindow.onafterprint = () => printWindow.close();
+        // Calling print() without first re-focusing this window is the
+        // likely reason this was a silent no-op on mobile before: the page
+        // may not be the OS's notion of the focused window by the time the
+        // async capture above finishes, even though the click itself was a
+        // direct user gesture.
+        window.focus();
+        window.print();
       };
-      if (img.complete) {
+      if (printMountImg.complete) {
         triggerPrint();
       } else {
-        img.addEventListener('load', triggerPrint);
+        printMountImg.addEventListener('load', triggerPrint, { once: true });
       }
     } finally {
       printBtn.disabled = false;
