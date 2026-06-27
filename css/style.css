@@ -865,6 +865,24 @@ nav.admin-nav.admin-nav-stacked {
   display: block;
 }
 
+.poster-text-width-handle {
+  position: absolute;
+  top: 50%;
+  right: -6px;
+  transform: translateY(-50%);
+  display: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  background: var(--gold-deep);
+  cursor: ew-resize;
+  touch-action: none;
+}
+
+.poster-el.selected .poster-text-width-handle {
+  display: block;
+}
+
 .poster-rotate-handle {
   position: absolute;
   left: -6px;

@@ -114,6 +114,11 @@ function normalizeElement(el) {
     text: typeof el.text === 'string' ? el.text : '',
     fontKey: FONT_OPTIONS.some((f) => f.key === el.fontKey) ? el.fontKey : FONT_OPTIONS[0].key,
     fontSize: typeof el.fontSize === 'number' ? el.fontSize : 28,
+    // No default on purpose: undefined means "shrink-wrap the text", same as
+    // before this field existed. Only set once the couple drags
+    // poster-text-width-handle, which is also what makes the align buttons
+    // visibly do anything.
+    width: typeof el.width === 'number' ? el.width : undefined,
     bold: !!el.bold,
     italic: !!el.italic,
     align: ['left', 'center', 'right'].includes(el.align) ? el.align : 'left',
@@ -252,6 +257,10 @@ function fontFamilyFor(fontKey) {
   function applyTextStyle(node, el) {
     node.style.left = `${el.x}px`;
     node.style.top = `${el.y}px`;
+    // Left unset (auto width, shrink-to-fit the text) until the couple drags
+    // poster-text-width-handle — only once the box is wider than its content
+    // does the align-left/center/right choice have any visible effect.
+    node.style.width = el.width ? `${el.width}px` : '';
     applyRotation(node, el);
     const content = node.querySelector('.poster-text-content');
     if (!content) return;
@@ -563,7 +572,7 @@ function fontFamilyFor(fontKey) {
   // size-like property, `onChange` re-applies the visual consequence (qr and
   // icon resize a square box, divider resizes a line's width, text resizes
   // its font size) without needing a full applyElementStyle() pass per move.
-  function wireResize(handle, node, el, { get, set, min, max, onChange }) {
+  function wireResize(handle, node, el, { get, set, min, max, onChange, syncSizeInput = true }) {
     wirePointerDrag(handle, (e) => {
       selectElement(el.id);
       const startX = e.clientX;
@@ -576,7 +585,7 @@ function fontFamilyFor(fontKey) {
           set(el, value);
           onChange(node, el);
           positionToolbar(node);
-          if (selectedId === el.id) sizeInput.value = value;
+          if (syncSizeInput && selectedId === el.id) sizeInput.value = value;
         },
         onEnd() {
           scheduleSave();
@@ -761,6 +770,14 @@ function fontFamilyFor(fontKey) {
     resizeHandle.className = 'poster-resize-handle';
     node.appendChild(resizeHandle);
 
+    // Separate from resizeHandle (which scales the font size): without an
+    // independent box width, a single-line text element always shrinks to
+    // fit its content exactly, leaving no extra space for the align-left/
+    // center/right buttons to actually do anything visible.
+    const widthHandle = document.createElement('span');
+    widthHandle.className = 'poster-text-width-handle';
+    node.appendChild(widthHandle);
+
     const rotateHandle = document.createElement('span');
     rotateHandle.className = 'poster-rotate-handle';
     rotateHandle.innerHTML = ROTATE_ICON;
@@ -791,6 +808,14 @@ function fontFamilyFor(fontKey) {
         const content = n.querySelector('.poster-text-content');
         if (content) content.style.fontSize = `${e.fontSize}px`;
       },
+    });
+    wireResize(widthHandle, node, el, {
+      get: (e) => e.width || node.offsetWidth,
+      set: (e, v) => { e.width = v; },
+      min: 40,
+      max: 380,
+      onChange: (n, e) => { n.style.width = `${e.width}px`; },
+      syncSizeInput: false,
     });
     applyTextStyle(node, el);
     sheetContentEl.appendChild(node);
