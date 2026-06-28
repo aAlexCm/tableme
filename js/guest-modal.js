@@ -20,6 +20,8 @@ export function createGuestModal({ weddingId, getLang, onChange }) {
   const guestModal = document.getElementById('guest-modal');
   const guestModalClose = document.getElementById('guest-modal-close');
   const nameInput = document.getElementById('guest-modal-name-input');
+  const phoneInput = document.getElementById('guest-modal-phone-input');
+  const emailInput = document.getElementById('guest-modal-email-input');
   const tableSelect = document.getElementById('guest-modal-table-select');
   const menuSelect = document.getElementById('guest-modal-menu-select');
   const rsvpSelect = document.getElementById('guest-modal-rsvp-select');
@@ -71,6 +73,8 @@ export function createGuestModal({ weddingId, getLang, onChange }) {
     deleteBtn.title = deleteLabel;
     deleteBtn.setAttribute('aria-label', deleteLabel);
     nameInput.value = guest.name;
+    phoneInput.value = guest.phone || '';
+    emailInput.value = guest.email || '';
     tableSelect.innerHTML = buildTableOptionsHtml(wedding.tables || [], guest.table || '');
     menuSelect.innerHTML = buildMenuOptionsHtml(wedding.menus || [], guest.menuId || '');
     rsvpSelect.innerHTML = buildRsvpOptionsHtml(guest.rsvp);
@@ -120,6 +124,34 @@ export function createGuestModal({ weddingId, getLang, onChange }) {
     }
     if (newName === guest.name) return;
     const guests = wedding.guests.map((g) => (g.id === guest.id ? { ...g, name: newName } : g));
+    await Storage.setGuests(weddingId, guests);
+    await notifyChange();
+  });
+
+  phoneInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') phoneInput.blur();
+  });
+
+  phoneInput.addEventListener('change', async () => {
+    const guest = activeGuest();
+    if (!guest) return;
+    const newPhone = phoneInput.value.trim();
+    if (newPhone === (guest.phone || '')) return;
+    const guests = wedding.guests.map((g) => (g.id === guest.id ? { ...g, phone: newPhone } : g));
+    await Storage.setGuests(weddingId, guests);
+    await notifyChange();
+  });
+
+  emailInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') emailInput.blur();
+  });
+
+  emailInput.addEventListener('change', async () => {
+    const guest = activeGuest();
+    if (!guest) return;
+    const newEmail = emailInput.value.trim();
+    if (newEmail === (guest.email || '')) return;
+    const guests = wedding.guests.map((g) => (g.id === guest.id ? { ...g, email: newEmail } : g));
     await Storage.setGuests(weddingId, guests);
     await notifyChange();
   });

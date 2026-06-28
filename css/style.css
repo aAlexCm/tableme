@@ -2393,7 +2393,11 @@ body.admin-theme .menu-card {
   }
 
   .field-grid.field-grid-guest {
-    grid-template-columns: 2fr 1fr auto;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .field-grid.field-grid-guest > button {
+    grid-column: 1 / -1;
   }
 
   .field-grid > button {
@@ -2421,6 +2425,20 @@ body.admin-theme .menu-card {
 
   #wedding-form .field-date {
     min-width: 150px;
+  }
+}
+
+@media (min-width: 900px) {
+  .field-grid.field-grid-guest {
+    grid-template-columns: 1.6fr 0.8fr 1.2fr 1.6fr auto;
+    align-items: end;
+  }
+
+  .field-grid.field-grid-guest > button {
+    grid-column: auto;
+    margin-top: 0;
+    width: auto;
+    justify-self: start;
   }
 }
 
@@ -3088,6 +3106,40 @@ body.admin-theme .guest-row-drop-target {
 
 .guest-row-name:hover {
   text-decoration-color: color-mix(in srgb, var(--charcoal) 35%, transparent);
+}
+
+.guest-row-contact {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+}
+
+.guest-row-contact-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  color: var(--sage-deep);
+  background: var(--sage-light);
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.guest-row-contact-icon:hover {
+  color: var(--gold-deep);
+  background: color-mix(in srgb, var(--gold) 16%, transparent);
+}
+
+body.admin-theme .guest-row-contact-icon {
+  color: var(--charcoal);
+  background: color-mix(in srgb, var(--gold) 10%, transparent);
+}
+
+body.admin-theme .guest-row-contact-icon:hover {
+  color: var(--gold);
+  background: color-mix(in srgb, var(--gold) 18%, transparent);
 }
 
 .guest-menu-edit-wrap,

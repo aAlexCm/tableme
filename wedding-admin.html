@@ -169,12 +169,20 @@
             <label for="guest-table" data-i18n="guestTableLabel">Table</label>
             <input type="text" id="guest-table" placeholder="N° de table" data-i18n-placeholder="guestTablePlaceholder" required />
           </div>
+          <div class="field">
+            <label for="guest-phone" data-i18n="guestPhoneLabel">Téléphone</label>
+            <input type="tel" id="guest-phone" placeholder="06 12 34 56 78" data-i18n-placeholder="guestPhonePlaceholder" />
+          </div>
+          <div class="field">
+            <label for="guest-email" data-i18n="guestEmailLabel">Email</label>
+            <input type="email" id="guest-email" placeholder="invite@email.com" data-i18n-placeholder="guestEmailPlaceholder" />
+          </div>
           <button type="submit" data-i18n="addBtn">Ajouter</button>
         </form>
 
         <div id="bulk-add-panel" hidden>
-          <p class="muted small" data-i18n="bulkAddHint">Un invité par ligne, au format : Nom et prénom, numéro de table</p>
-          <textarea id="bulk-add-textarea" class="bulk-textarea" rows="6" placeholder="Jean Dupont, 1&#10;Claire Martin, 2" data-i18n-placeholder="bulkAddPlaceholder"></textarea>
+          <p class="muted small" data-i18n="bulkAddHint">Un invité par ligne, au format : Nom et prénom ; numéro de table ; téléphone (optionnel) ; email (optionnel)</p>
+          <textarea id="bulk-add-textarea" class="bulk-textarea" rows="6" placeholder="Jean Dupont; 1; 0612345678; jean@email.com&#10;Claire Martin; 2" data-i18n-placeholder="bulkAddPlaceholder"></textarea>
           <button type="button" id="bulk-add-submit" data-i18n="bulkAddBtn">Ajouter la liste</button>
           <p class="bulk-add-feedback" id="bulk-add-feedback" hidden></p>
         </div>
@@ -319,6 +327,17 @@
         </div>
 
         <div class="table-modal-divider"></div>
+
+        <div class="table-modal-row">
+          <div class="field">
+            <label for="guest-modal-phone-input" data-i18n="guestPhoneLabel">Téléphone</label>
+            <input type="tel" id="guest-modal-phone-input" placeholder="06 12 34 56 78" data-i18n-placeholder="guestPhonePlaceholder" />
+          </div>
+          <div class="field">
+            <label for="guest-modal-email-input" data-i18n="guestEmailLabel">Email</label>
+            <input type="email" id="guest-modal-email-input" placeholder="invite@email.com" data-i18n-placeholder="guestEmailPlaceholder" />
+          </div>
+        </div>
 
         <div class="field">
           <label for="guest-modal-table-select" data-i18n="guestTableLabel">Table</label>
