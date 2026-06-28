@@ -15,6 +15,16 @@ const ICONS = {
   chevronUp: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15l-6-6-6 6"/></svg>',
   chevronDown: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>',
   plus: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>',
+  cutlery: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h0a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></svg>',
+  check: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
+  cross: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="M6 6l12 12"/></svg>',
+  clock: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>',
+};
+
+const RSVP_ICONS = {
+  pending: ICONS.clock,
+  confirmed: ICONS.check,
+  declined: ICONS.cross,
 };
 
 function parseBulkGuests(text) {
@@ -509,9 +519,11 @@ function parseSheetRows(rows) {
           <span class="drag-handle">&#10303;</span>
           <span class="guest-row-name">${escapeHtml(g.name)}</span>
           <span class="guest-menu-edit-wrap" data-has-menu="${g.menuId ? '1' : '0'}">
+            <span class="guest-row-mobile-icon" aria-hidden="true">${ICONS.cutlery}</span>
             <select class="guest-menu-edit" data-id="${g.id}" aria-label="${escapeHtml(t(currentLang, 'guestMenuLabel'))}">${buildGuestMenuOptionsHtml(wedding.menus || [], g.menuId || '')}</select>
           </span>
           <span class="guest-rsvp-edit-wrap" data-rsvp="${rsvp}">
+            <span class="guest-row-mobile-icon" aria-hidden="true">${RSVP_ICONS[rsvp]}</span>
             <select class="guest-rsvp-edit guest-rsvp-edit-${rsvp}" data-id="${g.id}" aria-label="${escapeHtml(t(currentLang, 'guestRsvpLabel'))}">${buildGuestRsvpOptionsHtml(rsvp)}</select>
           </span>
           <span class="guest-row-actions">
