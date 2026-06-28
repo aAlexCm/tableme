@@ -225,6 +225,7 @@ const dict = {
     fontBodyWork: 'Work Sans',
     fontBodySource: 'Source Sans',
     addGuestTitle: 'Ajouter un invité',
+    addGuestToggleLabel: "Ajouter un invité",
     guestNameLabel: 'Nom et prénom',
     guestTableLabel: 'Table',
     guestMenuLabel: 'Menu',
@@ -696,6 +697,7 @@ const dict = {
     fontBodyWork: 'Work Sans',
     fontBodySource: 'Source Sans',
     addGuestTitle: 'Add a guest',
+    addGuestToggleLabel: 'Add a guest',
     guestNameLabel: 'First and last name',
     guestTableLabel: 'Table',
     guestMenuLabel: 'Menu',
@@ -1165,6 +1167,7 @@ const dict = {
     fontBodyWork: 'Work Sans',
     fontBodySource: 'Source Sans',
     addGuestTitle: 'Adaugă un invitat',
+    addGuestToggleLabel: 'Adaugă un invitat',
     guestNameLabel: 'Nume și prenume',
     guestTableLabel: 'Masa',
     guestMenuLabel: 'Meniu',
@@ -1430,6 +1433,9 @@ export function applyTranslations(lang) {
   });
   document.querySelectorAll('[data-i18n-placeholder]').forEach((el) => {
     el.placeholder = t(lang, el.dataset.i18nPlaceholder);
+  });
+  document.querySelectorAll('[data-i18n-aria-label]').forEach((el) => {
+    el.setAttribute('aria-label', t(lang, el.dataset.i18nAriaLabel));
   });
 }
 

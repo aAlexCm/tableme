@@ -674,6 +674,13 @@ function parseSheetRows(rows) {
     await renderGuests();
   });
 
+  const addGuestCard = document.getElementById('add-guest-card');
+  const addGuestToggle = document.getElementById('add-guest-toggle');
+  addGuestToggle.addEventListener('click', () => {
+    const open = addGuestCard.classList.toggle('is-open');
+    addGuestToggle.setAttribute('aria-expanded', String(open));
+  });
+
   modeSwitchEl.addEventListener('click', (e) => {
     const btn = e.target.closest('.mode-btn');
     if (!btn) return;

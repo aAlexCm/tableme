@@ -141,7 +141,7 @@
         <a href="#" id="view-tab-floorplan" class="view-switch-tab" data-i18n="floorPlanNavLabel">Plan de salle</a>
       </div>
 
-      <div class="card">
+      <div class="card add-guest-card" id="add-guest-card">
         <div class="card-header-row">
           <h2 data-i18n="addGuestTitle">Ajouter un invité</h2>
           <div class="mode-switch" id="add-mode-switch">
@@ -158,47 +158,52 @@
               <span data-i18n="addModeFile">Fichier</span>
             </button>
           </div>
+          <button type="button" class="icon-btn add-guest-toggle" id="add-guest-toggle" aria-expanded="false" data-i18n-aria-label="addGuestToggleLabel" aria-label="Ajouter un invité">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+          </button>
         </div>
 
-        <form id="guest-form" class="field-grid field-grid-guest">
-          <div class="field">
-            <label for="guest-name" data-i18n="guestNameLabel">Nom et prénom</label>
-            <input type="text" id="guest-name" placeholder="Jean Dupont" data-i18n-placeholder="guestNamePlaceholder" required />
-          </div>
-          <div class="field">
-            <label for="guest-table" data-i18n="guestTableLabel">Table</label>
-            <input type="text" id="guest-table" placeholder="3" data-i18n-placeholder="guestTablePlaceholder" required />
-          </div>
-          <div class="field">
-            <label for="guest-phone" data-i18n="guestPhoneLabel">Téléphone</label>
-            <div class="phone-input-group">
-              <select id="guest-phone-code" class="phone-code-select"></select>
-              <input type="tel" id="guest-phone" placeholder="6 12 34 56 78" data-i18n-placeholder="guestPhonePlaceholder" />
+        <div id="add-guest-fields">
+          <form id="guest-form" class="field-grid field-grid-guest">
+            <div class="field">
+              <label for="guest-name" data-i18n="guestNameLabel">Nom et prénom</label>
+              <input type="text" id="guest-name" placeholder="Jean Dupont" data-i18n-placeholder="guestNamePlaceholder" required />
             </div>
-          </div>
-          <div class="field">
-            <label for="guest-email" data-i18n="guestEmailLabel">Email</label>
-            <input type="email" id="guest-email" placeholder="jean@email.com" data-i18n-placeholder="guestEmailPlaceholder" />
-          </div>
-          <button type="submit" data-i18n="addBtn">Ajouter</button>
-        </form>
+            <div class="field">
+              <label for="guest-table" data-i18n="guestTableLabel">Table</label>
+              <input type="text" id="guest-table" placeholder="3" data-i18n-placeholder="guestTablePlaceholder" required />
+            </div>
+            <div class="field">
+              <label for="guest-phone" data-i18n="guestPhoneLabel">Téléphone</label>
+              <div class="phone-input-group">
+                <select id="guest-phone-code" class="phone-code-select"></select>
+                <input type="tel" id="guest-phone" placeholder="6 12 34 56 78" data-i18n-placeholder="guestPhonePlaceholder" />
+              </div>
+            </div>
+            <div class="field">
+              <label for="guest-email" data-i18n="guestEmailLabel">Email</label>
+              <input type="email" id="guest-email" placeholder="jean@email.com" data-i18n-placeholder="guestEmailPlaceholder" />
+            </div>
+            <button type="submit" data-i18n="addBtn">Ajouter</button>
+          </form>
 
-        <div id="bulk-add-panel" hidden>
-          <p class="muted small" data-i18n="bulkAddHint">Un invité par ligne, au format : Nom et prénom ; numéro de table ; téléphone (optionnel) ; email (optionnel)</p>
-          <textarea id="bulk-add-textarea" class="bulk-textarea" rows="6" placeholder="Jean Dupont; 1; 0612345678; jean@email.com&#10;Claire Martin; 2" data-i18n-placeholder="bulkAddPlaceholder"></textarea>
-          <button type="button" id="bulk-add-submit" data-i18n="bulkAddBtn">Ajouter la liste</button>
-          <p class="bulk-add-feedback" id="bulk-add-feedback" hidden></p>
-        </div>
+          <div id="bulk-add-panel" hidden>
+            <p class="muted small" data-i18n="bulkAddHint">Un invité par ligne, au format : Nom et prénom ; numéro de table ; téléphone (optionnel) ; email (optionnel)</p>
+            <textarea id="bulk-add-textarea" class="bulk-textarea" rows="6" placeholder="Jean Dupont; 1; 0612345678; jean@email.com&#10;Claire Martin; 2" data-i18n-placeholder="bulkAddPlaceholder"></textarea>
+            <button type="button" id="bulk-add-submit" data-i18n="bulkAddBtn">Ajouter la liste</button>
+            <p class="bulk-add-feedback" id="bulk-add-feedback" hidden></p>
+          </div>
 
-        <div id="file-add-panel" hidden>
-          <p class="muted small" data-i18n="fileAddHint">Téléchargez le modèle, remplissez-le, puis importez-le ci-dessous (CSV ou Excel).</p>
-          <button type="button" class="secondary" id="download-template-btn" data-i18n="downloadTemplateBtn">Télécharger le modèle</button>
-          <div class="file-dropzone" id="file-dropzone" tabindex="0">
-            <svg class="file-dropzone-icon" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg>
+          <div id="file-add-panel" hidden>
+            <p class="muted small" data-i18n="fileAddHint">Téléchargez le modèle, remplissez-le, puis importez-le ci-dessous (CSV ou Excel).</p>
+            <button type="button" class="secondary" id="download-template-btn" data-i18n="downloadTemplateBtn">Télécharger le modèle</button>
+            <div class="file-dropzone" id="file-dropzone" tabindex="0">
+              <svg class="file-dropzone-icon" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg>
             <p data-i18n="fileDropzoneText">Glissez-déposez un fichier ici, ou cliquez pour le sélectionner</p>
             <input type="file" id="file-import-input" accept=".csv,.xlsx,.xls" hidden />
           </div>
           <p class="bulk-add-feedback" id="file-add-feedback" hidden></p>
+        </div>
         </div>
       </div>
 

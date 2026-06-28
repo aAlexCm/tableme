@@ -3552,6 +3552,44 @@ h2 {
   margin-bottom: 0;
 }
 
+.add-guest-toggle {
+  display: none;
+}
+
+.add-guest-toggle svg {
+  transition: transform 0.2s ease;
+}
+
+/* Mobile-only: the add-guest card opens collapsed (just the title + this
+   button) since the full form pushes the guest list far down the page on a
+   small screen. Desktop keeps the form always open — this toggle and the
+   collapsing rules below only exist inside the 600px media query. Intentionally
+   not persisted (no localStorage): every page load starts collapsed again,
+   only the open/closed clicks within a session carry over while adding
+   several guests in a row. */
+@media (max-width: 600px) {
+  .add-guest-toggle {
+    display: inline-flex;
+    flex: 0 0 auto;
+    width: 38px;
+    height: 38px;
+    margin-left: auto;
+  }
+
+  .add-guest-card:not(.is-open) .add-guest-toggle svg {
+    transform: rotate(0deg);
+  }
+
+  .add-guest-card.is-open .add-guest-toggle svg {
+    transform: rotate(45deg);
+  }
+
+  .add-guest-card:not(.is-open) #add-mode-switch,
+  .add-guest-card:not(.is-open) #add-guest-fields {
+    display: none;
+  }
+}
+
 .empty-state {
   text-align: center;
   color: #998c77;
