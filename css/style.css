@@ -4422,8 +4422,8 @@ body.admin-theme .theme-decoration-position-arrow {
 .wayfinding-map {
   position: relative;
   width: 100%;
-  max-width: 380px;
-  aspect-ratio: 100 / 60;
+  max-width: 440px;
+  aspect-ratio: 100 / 68;
   margin: 0 auto;
   background: var(--sage-light);
   border: 1px solid rgba(176, 141, 79, 0.3);
@@ -4470,14 +4470,60 @@ body.admin-theme .theme-decoration-position-arrow {
   height: 17px;
 }
 
+/* Only the active from/to markers get an inline label (see the override
+   below) — with every landmark/table labeled at once, text overlapped as
+   soon as two points were close together. Everything else is identified
+   via the legend underneath the map instead. */
 .wayfinding-marker-label {
+  display: none;
   font-family: var(--guest-font-body);
-  font-size: 0.64rem;
+  font-size: 0.68rem;
   font-weight: 700;
   color: var(--charcoal);
   white-space: nowrap;
   line-height: 1;
   text-shadow: 0 0 3px var(--sage-light), 0 0 3px var(--sage-light), 0 0 3px var(--sage-light);
+}
+
+.wayfinding-marker.active-from .wayfinding-marker-label,
+.wayfinding-marker.active-to .wayfinding-marker-label {
+  display: block;
+}
+
+.wayfinding-legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px 16px;
+  margin: 14px auto 0;
+  max-width: 440px;
+}
+
+.wayfinding-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--guest-font-body);
+  font-size: 0.74rem;
+  color: var(--charcoal);
+}
+
+.wayfinding-legend-icon {
+  display: inline-flex;
+  color: var(--sage-deep);
+}
+
+.wayfinding-legend-icon svg {
+  width: 14px;
+  height: 14px;
+}
+
+.wayfinding-legend-shape {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--paper);
+  border: 2px solid var(--sage-deep);
 }
 
 .wayfinding-marker.active-from .wayfinding-marker-shape,
@@ -5675,6 +5721,20 @@ body.guest-theme .mode-btn.active {
 
 .wayfinding-marker-label {
   color: var(--guest-text);
+}
+
+.wayfinding-legend-item {
+  color: var(--guest-text);
+  font-family: var(--guest-font-body);
+}
+
+.wayfinding-legend-icon {
+  color: var(--guest-chair-color);
+}
+
+.wayfinding-legend-shape {
+  background: var(--guest-card-bg);
+  border-color: var(--guest-chair-color);
 }
 
 .wayfinding-marker.active-from .wayfinding-marker-shape,

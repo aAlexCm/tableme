@@ -20,7 +20,7 @@ const WAYFINDING_GRID_COLS = 50;
 const WAYFINDING_GRID_ROWS = 30;
 const WAYFINDING_START_RETREAT = 4;
 const WAYFINDING_END_RETREAT = 4.5;
-const WAYFINDING_MAP_INSET_PCT = 13;
+const WAYFINDING_MAP_INSET_PCT = 8;
 
 function toWayfindingMapPct(rawPct) {
   return WAYFINDING_MAP_INSET_PCT + (rawPct / 100) * (100 - 2 * WAYFINDING_MAP_INSET_PCT);
@@ -425,6 +425,20 @@ function trimRouteEnds(points, startRetreat, endRetreat) {
     const mapWrap = document.createElement('div');
     mapWrap.className = 'wayfinding-map';
     wrap.appendChild(mapWrap);
+
+    // The map itself only ever labels the two active (from/to) markers —
+    // showing every landmark/table's name inline got unreadable once more
+    // than a couple of points were close together. This legend is the
+    // reference for what every other icon/shape on the map means.
+    const legend = document.createElement('div');
+    legend.className = 'wayfinding-legend';
+    legend.innerHTML = points.map((p) => `
+      <span class="wayfinding-legend-item">
+        <span class="wayfinding-legend-icon">${p.kind === 'landmark' ? p.icon : '<span class="wayfinding-legend-shape"></span>'}</span>
+        <span>${escapeHtml(p.label)}</span>
+      </span>
+    `).join('');
+    wrap.appendChild(legend);
 
     function renderMap() {
       mapWrap.innerHTML = '';
