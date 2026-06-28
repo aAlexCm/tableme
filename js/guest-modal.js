@@ -2,7 +2,18 @@ import { Storage } from './storage.js';
 import { t } from './i18n.js';
 import { buildCountryCodeOptionsHtml, combinePhone, splitPhone, DEFAULT_COUNTRY_CODE_BY_LANG } from './phone-codes.js';
 
-const TRASH_ICON = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>';
+const ICONS = {
+  trash: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>',
+  phone: '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>',
+  email: '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-9.18 5.5a2 2 0 0 1-2.04 0L2 7"/></svg>',
+  table: '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10h18"/><path d="M5 10v9"/><path d="M19 10v9"/></svg>',
+  cutlery: '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h0a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></svg>',
+  check: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
+  cross: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="M6 6l12 12"/></svg>',
+  clock: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>',
+};
+
+const RSVP_ICONS = { pending: ICONS.clock, confirmed: ICONS.check, declined: ICONS.cross };
 
 function escapeHtml(value) {
   return String(value).replace(/[&<>"']/g, (c) => ({
@@ -14,22 +25,37 @@ function escapeHtml(value) {
   })[c]);
 }
 
+function initialsFor(name) {
+  const words = (name || '').trim().split(/\s+/).filter(Boolean);
+  if (words.length === 0) return '?';
+  if (words.length === 1) return words[0][0].toUpperCase();
+  return (words[0][0] + words[words.length - 1][0]).toUpperCase();
+}
+
 export function createGuestModal({ weddingId, getLang, onChange }) {
   let wedding = null;
   let activeGuestId = null;
 
   const guestModal = document.getElementById('guest-modal');
   const guestModalClose = document.getElementById('guest-modal-close');
+  const avatarEl = document.getElementById('guest-modal-avatar');
   const nameInput = document.getElementById('guest-modal-name-input');
+  const rsvpGroup = document.getElementById('guest-modal-rsvp-group');
   const phoneCodeSelect = document.getElementById('guest-modal-phone-code');
   const phoneInput = document.getElementById('guest-modal-phone-input');
   const emailInput = document.getElementById('guest-modal-email-input');
   const tableSelect = document.getElementById('guest-modal-table-select');
   const menuSelect = document.getElementById('guest-modal-menu-select');
-  const rsvpSelect = document.getElementById('guest-modal-rsvp-select');
   const deleteBtn = document.getElementById('guest-modal-delete-btn');
 
-  deleteBtn.innerHTML = TRASH_ICON;
+  deleteBtn.querySelector('.guest-modal-delete-icon').innerHTML = ICONS.trash;
+  document.getElementById('guest-modal-icon-phone').innerHTML = ICONS.phone;
+  document.getElementById('guest-modal-icon-email').innerHTML = ICONS.email;
+  document.getElementById('guest-modal-icon-table').innerHTML = ICONS.table;
+  document.getElementById('guest-modal-icon-menu').innerHTML = ICONS.cutlery;
+  ['pending', 'confirmed', 'declined'].forEach((rsvp) => {
+    document.getElementById(`guest-modal-rsvp-icon-${rsvp}`).innerHTML = RSVP_ICONS[rsvp];
+  });
 
   function buildTableOptionsHtml(tables, currentLabel) {
     const lang = getLang();
@@ -49,14 +75,6 @@ export function createGuestModal({ weddingId, getLang, onChange }) {
     return unassignedOpt + options;
   }
 
-  function buildRsvpOptionsHtml(currentStatus) {
-    const lang = getLang();
-    const status = currentStatus || 'pending';
-    return ['pending', 'confirmed', 'declined']
-      .map((value) => `<option value="${value}" ${value === status ? 'selected' : ''}>${escapeHtml(t(lang, `guestRsvp${value[0].toUpperCase()}${value.slice(1)}`))}</option>`)
-      .join('');
-  }
-
   async function refreshWedding() {
     wedding = await Storage.getWedding(weddingId);
   }
@@ -71,9 +89,9 @@ export function createGuestModal({ weddingId, getLang, onChange }) {
       close();
       return;
     }
-    const deleteLabel = t(getLang(), 'deleteBtn');
-    deleteBtn.title = deleteLabel;
+    const deleteLabel = t(getLang(), 'deleteGuestLink');
     deleteBtn.setAttribute('aria-label', deleteLabel);
+    avatarEl.textContent = initialsFor(guest.name);
     nameInput.value = guest.name;
     const { code, number } = splitPhone(guest.phone);
     phoneCodeSelect.innerHTML = buildCountryCodeOptionsHtml(code || DEFAULT_COUNTRY_CODE_BY_LANG[getLang()] || '33');
@@ -81,7 +99,10 @@ export function createGuestModal({ weddingId, getLang, onChange }) {
     emailInput.value = guest.email || '';
     tableSelect.innerHTML = buildTableOptionsHtml(wedding.tables || [], guest.table || '');
     menuSelect.innerHTML = buildMenuOptionsHtml(wedding.menus || [], guest.menuId || '');
-    rsvpSelect.innerHTML = buildRsvpOptionsHtml(guest.rsvp);
+    const rsvp = guest.rsvp || 'pending';
+    rsvpGroup.querySelectorAll('.guest-modal-rsvp-btn').forEach((btn) => {
+      btn.classList.toggle('active', btn.dataset.rsvp === rsvp);
+    });
   }
 
   async function notifyChange() {
@@ -132,6 +153,18 @@ export function createGuestModal({ weddingId, getLang, onChange }) {
     await notifyChange();
   });
 
+  rsvpGroup.addEventListener('click', async (e) => {
+    const btn = e.target.closest('.guest-modal-rsvp-btn');
+    if (!btn) return;
+    const guest = activeGuest();
+    if (!guest) return;
+    const rsvp = btn.dataset.rsvp;
+    if (rsvp === (guest.rsvp || 'pending')) return;
+    const guests = wedding.guests.map((g) => (g.id === guest.id ? { ...g, rsvp } : g));
+    await Storage.setGuests(weddingId, guests);
+    await notifyChange();
+  });
+
   phoneInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') phoneInput.blur();
   });
@@ -175,14 +208,6 @@ export function createGuestModal({ weddingId, getLang, onChange }) {
     const guest = activeGuest();
     if (!guest) return;
     const guests = wedding.guests.map((g) => (g.id === guest.id ? { ...g, menuId: menuSelect.value } : g));
-    await Storage.setGuests(weddingId, guests);
-    await notifyChange();
-  });
-
-  rsvpSelect.addEventListener('change', async () => {
-    const guest = activeGuest();
-    if (!guest) return;
-    const guests = wedding.guests.map((g) => (g.id === guest.id ? { ...g, rsvp: rsvpSelect.value } : g));
     await Storage.setGuests(weddingId, guests);
     await notifyChange();
   });

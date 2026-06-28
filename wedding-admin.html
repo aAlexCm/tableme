@@ -318,45 +318,69 @@
   </div>
 
   <div id="guest-modal" class="modal-overlay" hidden>
-    <div class="modal-panel">
+    <div class="modal-panel guest-modal-panel">
       <button type="button" class="modal-close" id="guest-modal-close" aria-label="Close">&times;</button>
       <div class="modal-scroll">
-        <div class="table-modal-top-row">
-          <div class="field table-name-field">
-            <label for="guest-modal-name-input" data-i18n="guestNameLabel">Nom et prénom</label>
-            <input type="text" id="guest-modal-name-input" class="table-label-input" />
+        <div class="guest-modal-header">
+          <div class="guest-modal-avatar" id="guest-modal-avatar" aria-hidden="true"></div>
+          <input type="text" id="guest-modal-name-input" class="guest-modal-name-input" data-i18n-placeholder="guestNameLabel" aria-label="Nom et prénom" />
+        </div>
+
+        <div class="guest-modal-rsvp-group" id="guest-modal-rsvp-group" role="group" aria-label="Présence">
+          <button type="button" class="guest-modal-rsvp-btn" data-rsvp="pending">
+            <span class="guest-modal-rsvp-icon" id="guest-modal-rsvp-icon-pending" aria-hidden="true"></span>
+            <span data-i18n="guestRsvpPending">En attente</span>
+          </button>
+          <button type="button" class="guest-modal-rsvp-btn" data-rsvp="confirmed">
+            <span class="guest-modal-rsvp-icon" id="guest-modal-rsvp-icon-confirmed" aria-hidden="true"></span>
+            <span data-i18n="guestRsvpConfirmed">Confirmé</span>
+          </button>
+          <button type="button" class="guest-modal-rsvp-btn" data-rsvp="declined">
+            <span class="guest-modal-rsvp-icon" id="guest-modal-rsvp-icon-declined" aria-hidden="true"></span>
+            <span data-i18n="guestRsvpDeclined">Décliné</span>
+          </button>
+        </div>
+
+        <div class="guest-modal-field">
+          <span class="guest-modal-field-icon" id="guest-modal-icon-phone" aria-hidden="true"></span>
+          <div class="field">
+            <label for="guest-modal-phone-input" data-i18n="guestPhoneLabel">Téléphone</label>
+            <div class="phone-input-group">
+              <select id="guest-modal-phone-code" class="phone-code-select"></select>
+              <input type="tel" id="guest-modal-phone-input" placeholder="6 12 34 56 78" data-i18n-placeholder="guestPhonePlaceholder" />
+            </div>
           </div>
-          <button type="button" class="icon-btn icon-btn-danger" id="guest-modal-delete-btn"></button>
         </div>
 
-        <div class="table-modal-divider"></div>
-
-        <div class="field">
-          <label for="guest-modal-phone-input" data-i18n="guestPhoneLabel">Téléphone</label>
-          <div class="phone-input-group">
-            <select id="guest-modal-phone-code" class="phone-code-select"></select>
-            <input type="tel" id="guest-modal-phone-input" placeholder="6 12 34 56 78" data-i18n-placeholder="guestPhonePlaceholder" />
+        <div class="guest-modal-field">
+          <span class="guest-modal-field-icon" id="guest-modal-icon-email" aria-hidden="true"></span>
+          <div class="field">
+            <label for="guest-modal-email-input" data-i18n="guestEmailLabel">Email</label>
+            <input type="email" id="guest-modal-email-input" placeholder="jean@email.com" data-i18n-placeholder="guestEmailPlaceholder" />
           </div>
         </div>
-        <div class="field">
-          <label for="guest-modal-email-input" data-i18n="guestEmailLabel">Email</label>
-          <input type="email" id="guest-modal-email-input" placeholder="jean@email.com" data-i18n-placeholder="guestEmailPlaceholder" />
+
+        <div class="guest-modal-row-2col">
+          <div class="guest-modal-field">
+            <span class="guest-modal-field-icon" id="guest-modal-icon-table" aria-hidden="true"></span>
+            <div class="field">
+              <label for="guest-modal-table-select" data-i18n="guestTableLabel">Table</label>
+              <select id="guest-modal-table-select"></select>
+            </div>
+          </div>
+          <div class="guest-modal-field">
+            <span class="guest-modal-field-icon" id="guest-modal-icon-menu" aria-hidden="true"></span>
+            <div class="field">
+              <label for="guest-modal-menu-select" data-i18n="guestMenuLabel">Menu</label>
+              <select id="guest-modal-menu-select"></select>
+            </div>
+          </div>
         </div>
 
-        <div class="field">
-          <label for="guest-modal-table-select" data-i18n="guestTableLabel">Table</label>
-          <select id="guest-modal-table-select"></select>
-        </div>
-
-        <div class="field">
-          <label for="guest-modal-menu-select" data-i18n="guestMenuLabel">Menu</label>
-          <select id="guest-modal-menu-select"></select>
-        </div>
-
-        <div class="field">
-          <label for="guest-modal-rsvp-select" data-i18n="guestRsvpLabel">Présence</label>
-          <select id="guest-modal-rsvp-select"></select>
-        </div>
+        <button type="button" class="guest-modal-delete-link" id="guest-modal-delete-btn">
+          <span class="guest-modal-delete-icon" aria-hidden="true"></span>
+          <span data-i18n="deleteGuestLink">Supprimer cet invité</span>
+        </button>
       </div>
     </div>
   </div>
