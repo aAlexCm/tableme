@@ -2936,6 +2936,14 @@ body.admin-theme .toggle-switch input:checked + .toggle-switch-track {
   flex: 1;
 }
 
+.guest-row-empty-actions {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.guest-row-empty-fill,
 .guest-row-empty-delete {
   flex: 0 0 auto;
   width: 30px;
@@ -2945,6 +2953,9 @@ body.admin-theme .toggle-switch input:checked + .toggle-switch-track {
   transition: opacity 0.15s ease;
 }
 
+.guest-row-empty:hover .guest-row-empty-fill,
+.guest-row-empty:focus-within .guest-row-empty-fill,
+.guest-row-empty.revealed .guest-row-empty-fill,
 .guest-row-empty:hover .guest-row-empty-delete,
 .guest-row-empty:focus-within .guest-row-empty-delete,
 .guest-row-empty.revealed .guest-row-empty-delete {

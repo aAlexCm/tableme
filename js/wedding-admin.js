@@ -572,17 +572,33 @@ function parseSheetRows(rows) {
         label.textContent = t(currentLang, 'emptySeatPlaceholder');
         li.appendChild(label);
         if (table) {
+          const actions = document.createElement('span');
+          actions.className = 'guest-row-empty-actions';
+
+          const fillLabel = escapeHtml(t(currentLang, 'fillSeatBtn'));
+          const fillBtn = document.createElement('button');
+          fillBtn.type = 'button';
+          fillBtn.className = 'icon-btn guest-row-empty-fill';
+          fillBtn.dataset.action = 'fill-empty-seat';
+          fillBtn.dataset.table = key;
+          fillBtn.title = fillLabel;
+          fillBtn.setAttribute('aria-label', fillLabel);
+          fillBtn.innerHTML = ICONS.plus;
+          actions.appendChild(fillBtn);
+
           const deleteLabel = escapeHtml(t(currentLang, 'deleteSeatBtn'));
-          const btn = document.createElement('button');
-          btn.type = 'button';
-          btn.className = 'icon-btn icon-btn-danger guest-row-empty-delete';
-          btn.dataset.action = 'delete-seat';
-          btn.dataset.id = li.dataset.id;
-          btn.dataset.tableId = table.id;
-          btn.title = deleteLabel;
-          btn.setAttribute('aria-label', deleteLabel);
-          btn.innerHTML = ICONS.trash;
-          li.appendChild(btn);
+          const deleteBtn = document.createElement('button');
+          deleteBtn.type = 'button';
+          deleteBtn.className = 'icon-btn icon-btn-danger guest-row-empty-delete';
+          deleteBtn.dataset.action = 'delete-seat';
+          deleteBtn.dataset.id = li.dataset.id;
+          deleteBtn.dataset.tableId = table.id;
+          deleteBtn.title = deleteLabel;
+          deleteBtn.setAttribute('aria-label', deleteLabel);
+          deleteBtn.innerHTML = ICONS.trash;
+          actions.appendChild(deleteBtn);
+
+          li.appendChild(actions);
         }
         return li;
       }
@@ -649,6 +665,14 @@ function parseSheetRows(rows) {
         .forEach((row) => { row.hidden = !tableMatches; });
       groupEl.hidden = !tableMatches && !anyGuestVisible;
     });
+  }
+
+  function fillEmptySeatForm(tableLabel) {
+    const singleModeBtn = modeSwitchEl.querySelector('.mode-btn[data-mode="single"]');
+    if (singleModeBtn && !singleModeBtn.classList.contains('active')) singleModeBtn.click();
+    guestTableInput.value = tableLabel || '';
+    guestForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    guestNameInput.focus();
   }
 
   guestForm.addEventListener('submit', async (e) => {
@@ -803,6 +827,11 @@ function parseSheetRows(rows) {
 
     const emptyRow = e.target.closest('.guest-row-empty');
     if (emptyRow) {
+      const fillBtn = e.target.closest('button[data-action="fill-empty-seat"]');
+      if (fillBtn) {
+        fillEmptySeatForm(fillBtn.dataset.table);
+        return;
+      }
       const deleteBtn = e.target.closest('button[data-action="delete-seat"]');
       if (!deleteBtn) {
         document.querySelectorAll('.guest-row-empty.revealed').forEach((el) => {
