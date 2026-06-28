@@ -22,8 +22,26 @@ const WAYFINDING_START_RETREAT = 4;
 const WAYFINDING_END_RETREAT = 4.5;
 const WAYFINDING_MAP_INSET_PCT = 8;
 
-function toWayfindingMapPct(rawPct) {
-  return WAYFINDING_MAP_INSET_PCT + (rawPct / 100) * (100 - 2 * WAYFINDING_MAP_INSET_PCT);
+// Landmarks/tables only ever occupy part of the floor-plan canvas — mapping
+// raw 0-100% canvas coordinates straight onto the mini-map left most of it
+// empty whenever the layout didn't use the full canvas. Instead we scale
+// each axis to the actual bounding box of the points being shown, so the
+// mini-map always fills its frame.
+function getWayfindingBounds(points) {
+  const xs = points.map((p) => p.x);
+  const ys = points.map((p) => p.y);
+  return {
+    minX: Math.min(...xs),
+    maxX: Math.max(...xs),
+    minY: Math.min(...ys),
+    maxY: Math.max(...ys),
+  };
+}
+
+function toWayfindingMapPct(rawPct, min, max) {
+  const span = max - min;
+  const ratio = span > 0 ? (rawPct - min) / span : 0.5;
+  return WAYFINDING_MAP_INSET_PCT + ratio * (100 - 2 * WAYFINDING_MAP_INSET_PCT);
 }
 
 function findGridPath(blocked, start, end) {
@@ -378,6 +396,7 @@ function trimRouteEnds(points, startRetreat, endRetreat) {
   function buildWayfindingPanel(defaultToId) {
     const points = getWayfindingPoints();
     if (points.length < 2) return null;
+    const bounds = getWayfindingBounds(points);
 
     const entranceLandmark = (currentWedding.landmarks || []).find((lm) => lm.type === 'entrance');
     const fromId = entranceLandmark ? `landmark:${entranceLandmark.id}` : points[0].id;
@@ -448,8 +467,8 @@ function trimRouteEnds(points, startRetreat, endRetreat) {
       points.forEach((p) => {
         const marker = document.createElement('div');
         marker.className = `wayfinding-marker wayfinding-marker-${p.kind}${p.kind === 'table' ? ` ${p.shape}${p.rotated ? ' rotated' : ''}` : ''}`;
-        marker.style.left = `${toWayfindingMapPct(p.x)}%`;
-        marker.style.top = `${toWayfindingMapPct(p.y)}%`;
+        marker.style.left = `${toWayfindingMapPct(p.x, bounds.minX, bounds.maxX)}%`;
+        marker.style.top = `${toWayfindingMapPct(p.y, bounds.minY, bounds.maxY)}%`;
         marker.classList.toggle('active-from', p.id === currentFrom);
         marker.classList.toggle('active-to', p.id === currentTo);
         marker.innerHTML = p.kind === 'landmark'
@@ -461,13 +480,13 @@ function trimRouteEnds(points, startRetreat, endRetreat) {
       const fromPoint = points.find((p) => p.id === currentFrom);
       const toPoint = points.find((p) => p.id === currentTo);
       if (fromPoint && toPoint && fromPoint.id !== toPoint.id) {
-        const a = { x: toWayfindingMapPct(fromPoint.x), y: toWayfindingMapPct(fromPoint.y) * (WAYFINDING_VIEWBOX_H / 100) };
-        const b = { x: toWayfindingMapPct(toPoint.x), y: toWayfindingMapPct(toPoint.y) * (WAYFINDING_VIEWBOX_H / 100) };
+        const a = { x: toWayfindingMapPct(fromPoint.x, bounds.minX, bounds.maxX), y: toWayfindingMapPct(fromPoint.y, bounds.minY, bounds.maxY) * (WAYFINDING_VIEWBOX_H / 100) };
+        const b = { x: toWayfindingMapPct(toPoint.x, bounds.minX, bounds.maxX), y: toWayfindingMapPct(toPoint.y, bounds.minY, bounds.maxY) * (WAYFINDING_VIEWBOX_H / 100) };
         const obstacles = points
           .filter((p) => p.id !== currentFrom && p.id !== currentTo)
           .map((p) => {
-            const cx = toWayfindingMapPct(p.x);
-            const cy = toWayfindingMapPct(p.y) * (WAYFINDING_VIEWBOX_H / 100);
+            const cx = toWayfindingMapPct(p.x, bounds.minX, bounds.maxX);
+            const cy = toWayfindingMapPct(p.y, bounds.minY, bounds.maxY) * (WAYFINDING_VIEWBOX_H / 100);
             return {
               x0: cx - WAYFINDING_OBSTACLE_HALF_W,
               x1: cx + WAYFINDING_OBSTACLE_HALF_W,
