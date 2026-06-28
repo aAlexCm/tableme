@@ -14,8 +14,8 @@ const PATH_LANG_MATCH = location.pathname.match(/^\/guest\/(fr|en|ro)\/?$/);
 const PATH_LANG = PATH_LANG_MATCH && LANGS.includes(PATH_LANG_MATCH[1]) ? PATH_LANG_MATCH[1] : null;
 const WAYFINDING_VIEWBOX_W = 100;
 const WAYFINDING_VIEWBOX_H = 60;
-const WAYFINDING_OBSTACLE_HALF_W = 8;
-const WAYFINDING_OBSTACLE_HALF_H = 6;
+const WAYFINDING_OBSTACLE_HALF_W = 5;
+const WAYFINDING_OBSTACLE_HALF_H = 4;
 const WAYFINDING_GRID_COLS = 50;
 const WAYFINDING_GRID_ROWS = 30;
 const WAYFINDING_ANCHOR_RADIUS = 4.5;
@@ -54,6 +54,21 @@ function findGridPath(blocked, start, end) {
   visited[key(start.row, start.col)] = 1;
   let qi = 0;
   let found = false;
+
+  // Whenever both a row-move and a col-move are equally short overall,
+  // plain BFS can record the path that happens to turn immediately next
+  // to the start instead of going straight — any equally-short path is a
+  // valid shortest path to BFS. Exploring the dominant axis first makes
+  // BFS settle on the path that continues straight for as long as
+  // possible and turns only once it has to, which both looks right and
+  // matches the direction we already chose for the marker's anchor.
+  const rowStep = Math.sign(end.row - start.row) || 1;
+  const colStep = Math.sign(end.col - start.col) || 1;
+  const rowFirst = Math.abs(end.row - start.row) >= Math.abs(end.col - start.col);
+  const neighborOffsets = rowFirst
+    ? [{ row: rowStep, col: 0 }, { row: -rowStep, col: 0 }, { row: 0, col: colStep }, { row: 0, col: -colStep }]
+    : [{ row: 0, col: colStep }, { row: 0, col: -colStep }, { row: rowStep, col: 0 }, { row: -rowStep, col: 0 }];
+
   while (qi < queue.length) {
     const cur = queue[qi];
     qi += 1;
@@ -61,13 +76,8 @@ function findGridPath(blocked, start, end) {
       found = true;
       break;
     }
-    const neighbors = [
-      { row: cur.row - 1, col: cur.col },
-      { row: cur.row + 1, col: cur.col },
-      { row: cur.row, col: cur.col - 1 },
-      { row: cur.row, col: cur.col + 1 },
-    ];
-    for (const n of neighbors) {
+    for (const offset of neighborOffsets) {
+      const n = { row: cur.row + offset.row, col: cur.col + offset.col };
       if (n.row < 0 || n.row >= rows || n.col < 0 || n.col >= cols) continue;
       const k = key(n.row, n.col);
       if (visited[k] || blocked[n.row][n.col]) continue;
