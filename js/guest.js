@@ -19,6 +19,7 @@ const WAYFINDING_OBSTACLE_HALF_H = 6;
 const WAYFINDING_GRID_COLS = 50;
 const WAYFINDING_GRID_ROWS = 30;
 const WAYFINDING_ANCHOR_RADIUS = 4.5;
+const WAYFINDING_DIRECTION_LOOKAHEAD = 10;
 const WAYFINDING_MAP_INSET_PCT = 8;
 
 // Landmarks/tables only ever occupy part of the floor-plan canvas — mapping
@@ -189,14 +190,37 @@ function simplifyRouteBySight(points, obstacles) {
   return result;
 }
 
+// Walks `distance` units along the polyline from points[0] and returns
+// where that lands (or the final point if the path is shorter). Used to
+// judge a marker's approach direction over a short stretch of the route
+// rather than just its very first/last segment — a small obstacle-driven
+// jog right next to a marker is often much shorter than the straight
+// stretch beyond it, and picking a direction from that tiny jog alone
+// chose the wrong one of the 4 anchors (e.g. ending up centered on the
+// underside of a table that the route otherwise approaches horizontally).
+function sampleAlongPath(points, distance) {
+  let remaining = distance;
+  for (let i = 0; i < points.length - 1; i += 1) {
+    const p0 = points[i];
+    const p1 = points[i + 1];
+    const segLen = Math.hypot(p1.x - p0.x, p1.y - p0.y);
+    if (segLen >= remaining) {
+      const ratio = segLen > 0 ? remaining / segLen : 0;
+      return { x: p0.x + (p1.x - p0.x) * ratio, y: p0.y + (p1.y - p0.y) * ratio };
+    }
+    remaining -= segLen;
+  }
+  return points[points.length - 1];
+}
+
 // Each marker has 4 fixed attachment points — north, south, east, west of
 // its true center, all at the same radius from it, like the 4 invisible
 // docking points a floor-plan editor would offer. Retreating along
 // whatever bent path the router found could land the visible line-end
 // off both axes at once (looking like it touched the icon's corner rather
 // than a side), so the line instead always starts/ends at exactly one of
-// these 4 points — whichever one matches the direction the route actually
-// leaves in, found by routing once from the bare centers first.
+// these 4 points — whichever one matches the route's net direction over
+// a short lookahead, found by routing once from the bare centers first.
 function getRouteDirection(from, to) {
   const dx = to.x - from.x;
   const dy = to.y - from.y;
@@ -528,8 +552,8 @@ function getCardinalAnchor(center, direction, radius) {
         // re-route from the matching cardinal point on each marker so the
         // visible line always starts/ends exactly on one of its 4 anchors.
         const previewRoute = simplifyRouteBySight(computeWayfindingPath(fromCenter, toCenter, obstacles), obstacles);
-        const startDirection = getRouteDirection(fromCenter, previewRoute[1] || toCenter);
-        const endDirection = getRouteDirection(toCenter, previewRoute[previewRoute.length - 2] || fromCenter);
+        const startDirection = getRouteDirection(fromCenter, sampleAlongPath(previewRoute, WAYFINDING_DIRECTION_LOOKAHEAD));
+        const endDirection = getRouteDirection(toCenter, sampleAlongPath([...previewRoute].reverse(), WAYFINDING_DIRECTION_LOOKAHEAD));
         const a = getCardinalAnchor(fromCenter, startDirection, WAYFINDING_ANCHOR_RADIUS);
         const b = getCardinalAnchor(toCenter, endDirection, WAYFINDING_ANCHOR_RADIUS);
         const routePoints = simplifyRouteBySight(computeWayfindingPath(a, b, obstacles), obstacles);
