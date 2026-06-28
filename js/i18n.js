@@ -1409,7 +1409,7 @@ export function buildLangSwitcher(currentLang, onChange) {
   trigger.setAttribute('aria-haspopup', 'listbox');
   trigger.setAttribute('aria-expanded', 'false');
   trigger.setAttribute('aria-label', 'Langue / Language / Limbă');
-  trigger.innerHTML = `<span class="lang-switcher-current">${LANG_LABELS[selected]}</span><span class="lang-switcher-chevron">&#9662;</span>`;
+  trigger.innerHTML = `<span class="lang-switcher-current">${LANG_LABELS[selected]}</span><span class="lang-switcher-current-short">${selected.toUpperCase()}</span><span class="lang-switcher-chevron">&#9662;</span>`;
 
   const menu = document.createElement('ul');
   menu.className = 'lang-switcher-menu';
@@ -1445,6 +1445,7 @@ export function buildLangSwitcher(currentLang, onChange) {
         if (code !== selected) {
           selected = code;
           trigger.querySelector('.lang-switcher-current').textContent = LANG_LABELS[code];
+          trigger.querySelector('.lang-switcher-current-short').textContent = code.toUpperCase();
           renderOptions();
           onChange(code);
         }

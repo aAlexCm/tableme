@@ -3377,6 +3377,10 @@ h2 {
   background: var(--sage-light);
 }
 
+.lang-switcher-current-short {
+  display: none;
+}
+
 .lang-switcher-chevron {
   font-size: 0.6rem;
   color: var(--gold);
@@ -4984,9 +4988,27 @@ body.admin-theme .theme-decoration-position-arrow {
     font-size: 2.4rem;
   }
 
+  /* Mirrors the dropup pattern already used on tableme.app's landing page:
+     pinned to the bottom-right instead of the top (out of the way of
+     page headers/banners), with the menu opening upward so it doesn't run
+     off the bottom of a short viewport. */
   .lang-switcher-mount {
-    top: 12px;
+    top: auto;
+    bottom: 12px;
     right: 12px;
+  }
+
+  .lang-switcher-menu {
+    top: auto;
+    bottom: calc(100% + 8px);
+  }
+
+  .lang-switcher-current {
+    display: none;
+  }
+
+  .lang-switcher-current-short {
+    display: inline;
   }
 
   .lang-switcher-trigger {
