@@ -30,6 +30,7 @@ function escapeHtml(value) {
   const contentEl = document.getElementById('menu-content');
   const weddingNameEl = document.getElementById('menu-wedding-name');
   const backLinkEl = document.getElementById('menu-back-link');
+  const statsEl = document.getElementById('menu-stats');
   const addFormEl = document.getElementById('menu-add-form');
   const addInputEl = document.getElementById('menu-add-input');
   const addBtnEl = document.getElementById('menu-add-btn');
@@ -114,8 +115,32 @@ function escapeHtml(value) {
     `;
   }
 
+  function renderStats() {
+    const menus = wedding.menus || [];
+    if (menus.length === 0) {
+      statsEl.hidden = true;
+      return;
+    }
+    const guests = (wedding.guests || []).filter((g) => !g.empty);
+    const cards = [{ label: t(currentLang, 'menuStatsTotalGuests'), value: guests.length, warn: false }];
+    menus.forEach((menu) => {
+      cards.push({ label: menu.title, value: guests.filter((g) => g.menuId === menu.id).length, warn: false });
+    });
+    const unassigned = guests.filter((g) => !g.menuId || !menus.some((m) => m.id === g.menuId)).length;
+    cards.push({ label: t(currentLang, 'menuStatsUnassigned'), value: unassigned, warn: unassigned > 0 });
+
+    statsEl.hidden = false;
+    statsEl.innerHTML = cards.map((c) => `
+      <div class="menu-stat-card${c.warn ? ' menu-stat-card-warn' : ''}">
+        <p class="menu-stat-card-label">${escapeHtml(c.label)}</p>
+        <p class="menu-stat-card-value">${c.value}</p>
+      </div>
+    `).join('');
+  }
+
   function render() {
     const menus = wedding.menus || [];
+    renderStats();
     emptyStateEl.hidden = menus.length > 0;
     listEl.innerHTML = menus.map((menu) => renderMenuCard(menu)).join('');
   }

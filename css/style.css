@@ -1770,6 +1770,43 @@ body.admin-theme .todo-row {
   }
 }
 
+.menu-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 22px;
+}
+
+.menu-stat-card {
+  flex: 1 1 150px;
+  min-width: 140px;
+  padding: 14px 16px;
+  border-radius: var(--radius-sm);
+  background: var(--cream);
+}
+
+.menu-stat-card-label {
+  margin: 0 0 4px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.menu-stat-card-value {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--gold-deep);
+}
+
+.menu-stat-card-warn {
+  background: color-mix(in srgb, var(--error) 12%, var(--cream));
+}
+
+.menu-stat-card-warn .menu-stat-card-value {
+  color: var(--error);
+}
+
 .menu-add-form {
   display: flex;
   align-items: center;

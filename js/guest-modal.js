@@ -21,6 +21,7 @@ export function createGuestModal({ weddingId, getLang, onChange }) {
   const guestModalClose = document.getElementById('guest-modal-close');
   const nameInput = document.getElementById('guest-modal-name-input');
   const tableSelect = document.getElementById('guest-modal-table-select');
+  const menuSelect = document.getElementById('guest-modal-menu-select');
   const deleteBtn = document.getElementById('guest-modal-delete-btn');
 
   deleteBtn.innerHTML = TRASH_ICON;
@@ -30,6 +31,15 @@ export function createGuestModal({ weddingId, getLang, onChange }) {
     const unassignedOpt = `<option value="" ${currentLabel === '' ? 'selected' : ''}>${escapeHtml(t(lang, 'unassignedOption'))}</option>`;
     const options = tables
       .map((tb) => `<option value="${escapeHtml(tb.label)}" ${tb.label === currentLabel ? 'selected' : ''}>${escapeHtml(tb.label)}</option>`)
+      .join('');
+    return unassignedOpt + options;
+  }
+
+  function buildMenuOptionsHtml(menus, currentMenuId) {
+    const lang = getLang();
+    const unassignedOpt = `<option value="" ${currentMenuId === '' ? 'selected' : ''}>${escapeHtml(t(lang, 'unassignedOption'))}</option>`;
+    const options = menus
+      .map((menu) => `<option value="${escapeHtml(menu.id)}" ${menu.id === currentMenuId ? 'selected' : ''}>${escapeHtml(menu.title)}</option>`)
       .join('');
     return unassignedOpt + options;
   }
@@ -53,6 +63,7 @@ export function createGuestModal({ weddingId, getLang, onChange }) {
     deleteBtn.setAttribute('aria-label', deleteLabel);
     nameInput.value = guest.name;
     tableSelect.innerHTML = buildTableOptionsHtml(wedding.tables || [], guest.table || '');
+    menuSelect.innerHTML = buildMenuOptionsHtml(wedding.menus || [], guest.menuId || '');
   }
 
   async function notifyChange() {
@@ -107,6 +118,14 @@ export function createGuestModal({ weddingId, getLang, onChange }) {
     const guest = activeGuest();
     if (!guest) return;
     const guests = wedding.guests.map((g) => (g.id === guest.id ? { ...g, table: tableSelect.value } : g));
+    await Storage.setGuests(weddingId, guests);
+    await notifyChange();
+  });
+
+  menuSelect.addEventListener('change', async () => {
+    const guest = activeGuest();
+    if (!guest) return;
+    const guests = wedding.guests.map((g) => (g.id === guest.id ? { ...g, menuId: menuSelect.value } : g));
     await Storage.setGuests(weddingId, guests);
     await notifyChange();
   });
