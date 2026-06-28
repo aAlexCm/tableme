@@ -1,5 +1,6 @@
 import { Storage } from './storage.js';
 import { t } from './i18n.js';
+import { buildCountryCodeOptionsHtml, combinePhone, splitPhone, DEFAULT_COUNTRY_CODE_BY_LANG } from './phone-codes.js';
 
 const TRASH_ICON = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>';
 
@@ -20,6 +21,7 @@ export function createGuestModal({ weddingId, getLang, onChange }) {
   const guestModal = document.getElementById('guest-modal');
   const guestModalClose = document.getElementById('guest-modal-close');
   const nameInput = document.getElementById('guest-modal-name-input');
+  const phoneCodeSelect = document.getElementById('guest-modal-phone-code');
   const phoneInput = document.getElementById('guest-modal-phone-input');
   const emailInput = document.getElementById('guest-modal-email-input');
   const tableSelect = document.getElementById('guest-modal-table-select');
@@ -73,7 +75,9 @@ export function createGuestModal({ weddingId, getLang, onChange }) {
     deleteBtn.title = deleteLabel;
     deleteBtn.setAttribute('aria-label', deleteLabel);
     nameInput.value = guest.name;
-    phoneInput.value = guest.phone || '';
+    const { code, number } = splitPhone(guest.phone);
+    phoneCodeSelect.innerHTML = buildCountryCodeOptionsHtml(code || DEFAULT_COUNTRY_CODE_BY_LANG[getLang()] || '33');
+    phoneInput.value = number;
     emailInput.value = guest.email || '';
     tableSelect.innerHTML = buildTableOptionsHtml(wedding.tables || [], guest.table || '');
     menuSelect.innerHTML = buildMenuOptionsHtml(wedding.menus || [], guest.menuId || '');
@@ -132,15 +136,18 @@ export function createGuestModal({ weddingId, getLang, onChange }) {
     if (e.key === 'Enter') phoneInput.blur();
   });
 
-  phoneInput.addEventListener('change', async () => {
+  async function savePhone() {
     const guest = activeGuest();
     if (!guest) return;
-    const newPhone = phoneInput.value.trim();
+    const newPhone = combinePhone(phoneCodeSelect.value, phoneInput.value);
     if (newPhone === (guest.phone || '')) return;
     const guests = wedding.guests.map((g) => (g.id === guest.id ? { ...g, phone: newPhone } : g));
     await Storage.setGuests(weddingId, guests);
     await notifyChange();
-  });
+  }
+
+  phoneInput.addEventListener('change', savePhone);
+  phoneCodeSelect.addEventListener('change', savePhone);
 
   emailInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') emailInput.blur();

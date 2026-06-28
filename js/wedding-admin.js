@@ -4,6 +4,7 @@ import { createTableModal } from './table-modal.js';
 import { createGuestModal } from './guest-modal.js';
 import { createShareControls } from './share-controls.js';
 import { isFeatureEnabled } from './features.js';
+import { buildCountryCodeOptionsHtml, combinePhone, DEFAULT_COUNTRY_CODE_BY_LANG } from './phone-codes.js';
 
 const LANG_KEY = 'tableme_wedding_admin_lang';
 const DEFAULT_SEATS = 8;
@@ -116,8 +117,10 @@ function parseSheetRows(rows) {
   const guestForm = document.getElementById('guest-form');
   const guestNameInput = document.getElementById('guest-name');
   const guestTableInput = document.getElementById('guest-table');
+  const guestPhoneCodeSelect = document.getElementById('guest-phone-code');
   const guestPhoneInput = document.getElementById('guest-phone');
   const guestEmailInput = document.getElementById('guest-email');
+  guestPhoneCodeSelect.innerHTML = buildCountryCodeOptionsHtml(DEFAULT_COUNTRY_CODE_BY_LANG[currentLang] || '33');
   const guestListEl = document.getElementById('guest-list');
   const guestEmptyEl = document.getElementById('guest-empty');
 
@@ -683,7 +686,7 @@ function parseSheetRows(rows) {
     e.preventDefault();
     const name = guestNameInput.value.trim();
     const table = guestTableInput.value.trim();
-    const phone = guestPhoneInput.value.trim();
+    const phone = combinePhone(guestPhoneCodeSelect.value, guestPhoneInput.value);
     const email = guestEmailInput.value.trim();
     if (!name || !table) return;
     await Storage.addGuest(weddingId, name, table, phone, email);

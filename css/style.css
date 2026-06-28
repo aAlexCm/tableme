@@ -292,6 +292,25 @@ input:focus, select:focus, textarea:focus {
   box-shadow: 0 0 0 4px rgba(176, 141, 79, 0.14);
 }
 
+.phone-input-group {
+  display: flex;
+}
+
+.phone-input-group .phone-code-select {
+  flex: 0 0 auto;
+  width: 84px;
+  min-width: 84px;
+  padding: 0 6px;
+  border-right: none;
+  border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+}
+
+.phone-input-group input {
+  flex: 1;
+  min-width: 0;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+
 .search-field {
   position: relative;
   display: flex;
@@ -2430,7 +2449,7 @@ body.admin-theme .menu-card {
 
 @media (min-width: 900px) {
   .field-grid.field-grid-guest {
-    grid-template-columns: 1.6fr 0.8fr 1.2fr 1.6fr auto;
+    grid-template-columns: 1.4fr 0.5fr 1.6fr 1.3fr auto;
     align-items: end;
   }
 

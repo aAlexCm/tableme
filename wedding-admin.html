@@ -163,19 +163,22 @@
         <form id="guest-form" class="field-grid field-grid-guest">
           <div class="field">
             <label for="guest-name" data-i18n="guestNameLabel">Nom et prénom</label>
-            <input type="text" id="guest-name" placeholder="Nom et prénom de l'invité" data-i18n-placeholder="guestNamePlaceholder" required />
+            <input type="text" id="guest-name" placeholder="Jean Dupont" data-i18n-placeholder="guestNamePlaceholder" required />
           </div>
           <div class="field">
             <label for="guest-table" data-i18n="guestTableLabel">Table</label>
-            <input type="text" id="guest-table" placeholder="N° de table" data-i18n-placeholder="guestTablePlaceholder" required />
+            <input type="text" id="guest-table" placeholder="3" data-i18n-placeholder="guestTablePlaceholder" required />
           </div>
           <div class="field">
             <label for="guest-phone" data-i18n="guestPhoneLabel">Téléphone</label>
-            <input type="tel" id="guest-phone" placeholder="06 12 34 56 78" data-i18n-placeholder="guestPhonePlaceholder" />
+            <div class="phone-input-group">
+              <select id="guest-phone-code" class="phone-code-select"></select>
+              <input type="tel" id="guest-phone" placeholder="6 12 34 56 78" data-i18n-placeholder="guestPhonePlaceholder" />
+            </div>
           </div>
           <div class="field">
             <label for="guest-email" data-i18n="guestEmailLabel">Email</label>
-            <input type="email" id="guest-email" placeholder="invite@email.com" data-i18n-placeholder="guestEmailPlaceholder" />
+            <input type="email" id="guest-email" placeholder="jean@email.com" data-i18n-placeholder="guestEmailPlaceholder" />
           </div>
           <button type="submit" data-i18n="addBtn">Ajouter</button>
         </form>
@@ -306,7 +309,7 @@
       <div class="field">
         <label for="table-add-new-input" data-i18n="addNewGuestLabel">Ou ajouter un nouvel invité</label>
         <div class="table-modal-add">
-          <input type="text" id="table-add-new-input" data-i18n-placeholder="guestNamePlaceholder" placeholder="Nom et prénom de l'invité" />
+          <input type="text" id="table-add-new-input" data-i18n-placeholder="guestNamePlaceholder" placeholder="Jean Dupont" />
           <button type="button" class="icon-btn" id="table-add-new-btn"></button>
         </div>
       </div>
@@ -328,15 +331,16 @@
 
         <div class="table-modal-divider"></div>
 
-        <div class="table-modal-row">
-          <div class="field">
-            <label for="guest-modal-phone-input" data-i18n="guestPhoneLabel">Téléphone</label>
-            <input type="tel" id="guest-modal-phone-input" placeholder="06 12 34 56 78" data-i18n-placeholder="guestPhonePlaceholder" />
+        <div class="field">
+          <label for="guest-modal-phone-input" data-i18n="guestPhoneLabel">Téléphone</label>
+          <div class="phone-input-group">
+            <select id="guest-modal-phone-code" class="phone-code-select"></select>
+            <input type="tel" id="guest-modal-phone-input" placeholder="6 12 34 56 78" data-i18n-placeholder="guestPhonePlaceholder" />
           </div>
-          <div class="field">
-            <label for="guest-modal-email-input" data-i18n="guestEmailLabel">Email</label>
-            <input type="email" id="guest-modal-email-input" placeholder="invite@email.com" data-i18n-placeholder="guestEmailPlaceholder" />
-          </div>
+        </div>
+        <div class="field">
+          <label for="guest-modal-email-input" data-i18n="guestEmailLabel">Email</label>
+          <input type="email" id="guest-modal-email-input" placeholder="jean@email.com" data-i18n-placeholder="guestEmailPlaceholder" />
         </div>
 
         <div class="field">
