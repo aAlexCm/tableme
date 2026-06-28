@@ -110,6 +110,11 @@ function parseSheetRows(rows) {
 
   const guestsTitle = document.getElementById('guests-title');
   const guestRsvpSummaryEl = document.getElementById('guest-rsvp-summary');
+  const guestSearchEl = document.getElementById('guest-search');
+  const guestSearchToggle = document.getElementById('guest-search-toggle');
+  const guestSearchInput = document.getElementById('guest-search-input');
+  const guestSearchClear = document.getElementById('guest-search-clear');
+  let guestSearchQuery = '';
   const guestForm = document.getElementById('guest-form');
   const guestNameInput = document.getElementById('guest-name');
   const guestTableInput = document.getElementById('guest-table');
@@ -483,6 +488,8 @@ function parseSheetRows(rows) {
     cachedWedding = wedding;
 
     guestsTitle.textContent = `${t(currentLang, 'guestsTitlePrefix')}${wedding.name}`;
+    guestSearchToggle.setAttribute('aria-label', t(currentLang, 'guestSearchToggleLabel'));
+    guestSearchClear.setAttribute('aria-label', t(currentLang, 'guestSearchClearLabel'));
     renderGuestRsvpSummary(wedding.guests);
     guestListEl.innerHTML = '';
     guestEmptyEl.hidden = wedding.guests.some((g) => !g.empty);
@@ -493,6 +500,7 @@ function parseSheetRows(rows) {
     groupGuestsByTable(wedding.guests, tableLabels).forEach(({ key, guests }) => {
       const groupEl = document.createElement('div');
       groupEl.className = 'table-group';
+      groupEl.dataset.tableSearch = `${t(currentLang, 'tableLabel')} ${key || ''}`;
 
       const table = tableByLabel.get(key);
       const editLabel = escapeHtml(t(currentLang, 'editTableBtn'));
@@ -611,6 +619,35 @@ function parseSheetRows(rows) {
       attachListDropEvents(list);
       groupEl.appendChild(list);
       guestListEl.appendChild(groupEl);
+    });
+
+    applyGuestSearchFilter();
+  }
+
+  function normalizeSearchText(value) {
+    return (value || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  }
+
+  function applyGuestSearchFilter() {
+    const q = normalizeSearchText(guestSearchQuery);
+    guestListEl.querySelectorAll('.table-group').forEach((groupEl) => {
+      if (!q) {
+        groupEl.hidden = false;
+        groupEl.querySelectorAll('.guest-row, .guest-row-empty, .guest-row-add-seat, .table-guest-list-empty')
+          .forEach((row) => { row.hidden = false; });
+        return;
+      }
+      const tableMatches = normalizeSearchText(groupEl.dataset.tableSearch).includes(q);
+      let anyGuestVisible = false;
+      groupEl.querySelectorAll('.guest-row').forEach((row) => {
+        const name = row.querySelector('.guest-row-name')?.textContent || '';
+        const matches = tableMatches || normalizeSearchText(name).includes(q);
+        row.hidden = !matches;
+        if (matches) anyGuestVisible = true;
+      });
+      groupEl.querySelectorAll('.guest-row-empty, .guest-row-add-seat, .table-guest-list-empty')
+        .forEach((row) => { row.hidden = !tableMatches; });
+      groupEl.hidden = !tableMatches && !anyGuestVisible;
     });
   }
 
@@ -844,6 +881,44 @@ function parseSheetRows(rows) {
     if (!e.target.closest('.table-group-title-row')) {
       document.querySelectorAll('.table-group-title-row.revealed').forEach((el) => el.classList.remove('revealed'));
     }
+    if (!e.target.closest('#guest-search') && !guestSearchQuery) {
+      guestSearchEl.classList.remove('is-open');
+      guestSearchToggle.setAttribute('aria-expanded', 'false');
+    }
+  });
+
+  function openGuestSearch() {
+    guestSearchEl.classList.add('is-open');
+    guestSearchToggle.setAttribute('aria-expanded', 'true');
+    requestAnimationFrame(() => guestSearchInput.focus());
+  }
+
+  function closeGuestSearch() {
+    guestSearchEl.classList.remove('is-open');
+    guestSearchToggle.setAttribute('aria-expanded', 'false');
+    guestSearchInput.value = '';
+    guestSearchQuery = '';
+    guestSearchClear.hidden = true;
+    applyGuestSearchFilter();
+  }
+
+  guestSearchToggle.addEventListener('click', () => {
+    if (guestSearchEl.classList.contains('is-open')) closeGuestSearch();
+    else openGuestSearch();
+  });
+
+  guestSearchInput.addEventListener('input', () => {
+    guestSearchQuery = guestSearchInput.value;
+    guestSearchClear.hidden = !guestSearchQuery;
+    applyGuestSearchFilter();
+  });
+
+  guestSearchClear.addEventListener('click', () => {
+    guestSearchInput.value = '';
+    guestSearchQuery = '';
+    guestSearchClear.hidden = true;
+    guestSearchInput.focus();
+    applyGuestSearchFilter();
   });
 
   if (!weddingId) {

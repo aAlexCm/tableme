@@ -193,7 +193,20 @@
 
       <div class="card">
         <div class="guests-title-row">
-          <h2 id="guests-title">Invités</h2>
+          <div class="guests-title-main">
+            <h2 id="guests-title">Invités</h2>
+            <div class="guest-search" id="guest-search">
+              <button type="button" class="icon-btn guest-search-toggle" id="guest-search-toggle" aria-expanded="false" aria-label="Rechercher">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+              </button>
+              <div class="guest-search-field">
+                <input type="text" class="guest-search-input" id="guest-search-input" data-i18n-placeholder="guestSearchPlaceholder" placeholder="Rechercher un invité ou une table…" />
+                <button type="button" class="icon-btn guest-search-clear" id="guest-search-clear" aria-label="Effacer" hidden>
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="M6 6l12 12"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
           <div class="guest-rsvp-summary" id="guest-rsvp-summary"></div>
         </div>
         <div class="guest-groups" id="guest-list"></div>
