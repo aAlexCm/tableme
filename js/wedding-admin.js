@@ -524,7 +524,7 @@ function parseSheetRows(rows) {
           </span>
           <span class="guest-rsvp-edit-wrap" data-rsvp="${rsvp}">
             <span class="guest-row-mobile-icon" aria-hidden="true">${RSVP_ICONS[rsvp]}</span>
-            <select class="guest-rsvp-edit guest-rsvp-edit-${rsvp}" data-id="${g.id}" aria-label="${escapeHtml(t(currentLang, 'guestRsvpLabel'))}">${buildGuestRsvpOptionsHtml(rsvp)}</select>
+            <select class="guest-rsvp-edit" data-id="${g.id}" aria-label="${escapeHtml(t(currentLang, 'guestRsvpLabel'))}">${buildGuestRsvpOptionsHtml(rsvp)}</select>
           </span>
           <span class="guest-row-actions">
             <input type="text" class="guest-table-edit" data-id="${g.id}" value="${escapeHtml(g.table)}" aria-label="${escapeHtml(t(currentLang, 'tableLabel'))}" />

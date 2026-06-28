@@ -3086,12 +3086,7 @@ body.admin-theme .guest-row-drop-target {
   flex: 0 0 auto;
 }
 
-.guest-row-mobile-icon {
-  display: none;
-}
-
-.guest-menu-edit,
-.guest-rsvp-edit {
+.guest-menu-edit {
   flex: 0 0 auto;
   width: auto;
   height: auto;
@@ -3101,26 +3096,61 @@ body.admin-theme .guest-row-drop-target {
   font-size: 0.72rem;
   font-weight: 600;
   cursor: pointer;
-}
-
-.guest-menu-edit {
   background: var(--sage-light);
   color: var(--sage-deep);
 }
 
-.guest-rsvp-edit-pending {
-  background: var(--cream);
-  color: var(--ink);
+/* The RSVP control is icon + colour only, on every screen size (3 states
+   are easy to read at a glance without text) — unlike the menu pill, which
+   keeps showing its text everywhere since there can be many menus and an
+   icon alone wouldn't say which one is assigned. */
+.guest-rsvp-edit-wrap {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #fdf3d6;
 }
 
-.guest-rsvp-edit-confirmed {
-  background: var(--gold-light);
-  color: var(--gold-deep);
+.guest-rsvp-edit-wrap select {
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  font-size: 0;
+  color: transparent;
+  background: transparent;
+  cursor: pointer;
 }
 
-.guest-rsvp-edit-declined {
-  background: color-mix(in srgb, var(--error) 12%, transparent);
+.guest-rsvp-edit-wrap .guest-row-mobile-icon {
+  display: flex;
+  position: absolute;
+  inset: 0;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  color: #92750c;
+}
+
+.guest-rsvp-edit-wrap[data-rsvp="confirmed"] {
+  background: #ddf3e3;
+}
+
+.guest-rsvp-edit-wrap[data-rsvp="confirmed"] .guest-row-mobile-icon {
+  color: #2f7a4d;
+}
+
+.guest-rsvp-edit-wrap[data-rsvp="declined"] {
+  background: #fbdfdf;
+}
+
+.guest-rsvp-edit-wrap[data-rsvp="declined"] .guest-row-mobile-icon {
   color: var(--error);
+}
+
+.guest-menu-edit-wrap .guest-row-mobile-icon {
+  display: none;
 }
 
 .guest-row-actions {
@@ -4709,21 +4739,22 @@ body.admin-theme .theme-decoration-position-arrow {
     gap: 4px;
   }
 
-  /* On mobile there's no room for full text pills next to the guest's
+  /* On mobile there's no room for a full text pill next to the guest's
      name (that's what made the name itself get squeezed to zero width) —
-     the menu/rsvp selects collapse to a small round icon button instead.
-     The <select> itself stays functionally in place (full native dropdown
+     the menu select collapses to a small round icon button instead. The
+     <select> itself stays functionally in place (full native dropdown
      with real text options) but is rendered invisible, sized to match its
-     icon overlay, so tapping the icon opens the real picker. */
-  .guest-menu-edit-wrap,
-  .guest-rsvp-edit-wrap {
+     icon overlay, so tapping the icon opens the real picker. The rsvp
+     control is already icon-only on every screen size, so it needs no
+     mobile-specific override here. */
+  .guest-menu-edit-wrap {
     width: 26px;
     height: 26px;
     border-radius: 50%;
+    background: var(--sage-light);
   }
 
-  .guest-menu-edit-wrap select,
-  .guest-rsvp-edit-wrap select {
+  .guest-menu-edit-wrap select {
     width: 26px;
     height: 26px;
     padding: 0;
@@ -4734,50 +4765,19 @@ body.admin-theme .theme-decoration-position-arrow {
     background: transparent;
   }
 
-  .guest-row-mobile-icon {
+  .guest-menu-edit-wrap .guest-row-mobile-icon {
+    display: flex;
     position: absolute;
     inset: 0;
-    display: flex;
     align-items: center;
     justify-content: center;
     pointer-events: none;
-  }
-
-  .guest-menu-edit-wrap {
-    background: var(--sage-light);
-  }
-
-  .guest-menu-edit-wrap .guest-row-mobile-icon {
     color: var(--sage-deep);
     opacity: 0.4;
   }
 
   .guest-menu-edit-wrap[data-has-menu="1"] .guest-row-mobile-icon {
     opacity: 1;
-  }
-
-  .guest-rsvp-edit-wrap {
-    background: var(--cream);
-  }
-
-  .guest-rsvp-edit-wrap .guest-row-mobile-icon {
-    color: var(--ink);
-  }
-
-  .guest-rsvp-edit-wrap[data-rsvp="confirmed"] {
-    background: var(--gold-light);
-  }
-
-  .guest-rsvp-edit-wrap[data-rsvp="confirmed"] .guest-row-mobile-icon {
-    color: var(--gold-deep);
-  }
-
-  .guest-rsvp-edit-wrap[data-rsvp="declined"] {
-    background: color-mix(in srgb, var(--error) 12%, transparent);
-  }
-
-  .guest-rsvp-edit-wrap[data-rsvp="declined"] .guest-row-mobile-icon {
-    color: var(--error);
   }
 
   .guest-table-edit {
