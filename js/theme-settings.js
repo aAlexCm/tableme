@@ -1,5 +1,5 @@
 import { Storage } from './storage.js';
-import { t } from './i18n.js';
+import { applyTranslations, buildLangSwitcher, t } from './i18n.js';
 import {
   GUEST_THEME_PRESETS,
   GUEST_THEME_COLOR_KEYS,
@@ -11,35 +11,12 @@ import { DECORATION_ELEMENTS, DECORATION_POSITIONS, getDefaultDecoration, normal
 import { ICONS as TABLE_ICONS } from './table-modal.js';
 import { wireColorHexPair } from './color-hex.js';
 
+const LANG_KEY = 'tableme_wedding_admin_lang';
+
 const UPLOAD_ICON = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg>';
 const NONE_ICON = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M5 19 19 5"/></svg>';
 const ARROW_ICON = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="4"/><polyline points="6 10 12 4 18 10"/></svg>';
 const MAX_DECORATION_DIMENSION = 480;
-
-function readAndResizeImage(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onerror = () => reject(reader.error);
-    reader.onload = () => {
-      const img = new Image();
-      img.onerror = reject;
-      img.onload = () => {
-        const scale = Math.min(1, MAX_DECORATION_DIMENSION / Math.max(img.width, img.height));
-        const width = Math.round(img.width * scale);
-        const height = Math.round(img.height * scale);
-        const canvas = document.createElement('canvas');
-        canvas.width = width;
-        canvas.height = height;
-        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
-        resolve(canvas.toDataURL('image/png'));
-      };
-      img.src = reader.result;
-    };
-    reader.readAsDataURL(file);
-  });
-}
-
-export const PALETTE_ICON = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 0 20c1.1 0 2-.9 2-2 0-.5-.2-1-.5-1.4-.3-.4-.5-.9-.5-1.4 0-1.1.9-2 2-2h2.4a3.6 3.6 0 0 0 3.6-3.6C21 6.8 17 2 12 2z"/><circle cx="7.5" cy="10.5" r="1.2" fill="currentColor"/><circle cx="11" cy="6.8" r="1.2" fill="currentColor"/><circle cx="15.5" cy="7.5" r="1.2" fill="currentColor"/><circle cx="17.5" cy="11.8" r="1.2" fill="currentColor"/></svg>';
 
 const THEME_COLOR_LABEL_KEYS = {
   bg: 'themeColorBg',
@@ -65,10 +42,43 @@ function escapeHtml(value) {
   })[c]);
 }
 
-export function createThemeSettings({ weddingId, getLang }) {
-  const themeSettingsBtn = document.getElementById('theme-settings-btn');
-  const themeModal = document.getElementById('theme-modal');
-  const themeModalClose = document.getElementById('theme-modal-close');
+function readAndResizeImage(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(reader.error);
+    reader.onload = () => {
+      const img = new Image();
+      img.onerror = reject;
+      img.onload = () => {
+        const scale = Math.min(1, MAX_DECORATION_DIMENSION / Math.max(img.width, img.height));
+        const width = Math.round(img.width * scale);
+        const height = Math.round(img.height * scale);
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/png'));
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+(async function () {
+  const params = new URLSearchParams(window.location.search);
+  const weddingId = params.get('id');
+
+  let currentLang = localStorage.getItem(LANG_KEY) || 'fr';
+  let wedding = null;
+
+  const langMount = document.getElementById('lang-switcher-mount');
+  const notFoundEl = document.getElementById('not-found');
+  const contentEl = document.getElementById('theme-settings-content');
+  const weddingNameEl = document.getElementById('theme-settings-wedding-name');
+  const backLinkEl = document.getElementById('theme-settings-back-link');
+  const guestLinkEl = document.getElementById('theme-settings-guest-link');
+
   const themePresetGridEl = document.getElementById('theme-preset-grid');
   const themeFontTitleGridEl = document.getElementById('theme-font-title-grid');
   const themeFontBodyGridEl = document.getElementById('theme-font-body-grid');
@@ -84,24 +94,24 @@ export function createThemeSettings({ weddingId, getLang }) {
   const decorationPositionFieldEl = document.getElementById('theme-decoration-position-field');
   const decorationPositionGridEl = document.getElementById('theme-decoration-position-grid');
 
-  function updateLabels() {
-    const lang = getLang();
-    const label = t(lang, 'themeSettingsBtn');
-    themeSettingsBtn.title = label;
-    themeSettingsBtn.setAttribute('aria-label', label);
+  function refreshGuestLink() {
+    guestLinkEl.href = `guest/${currentLang}?id=${weddingId}`;
+  }
 
+  function updateLabels() {
     decorationRemoveBtn.innerHTML = TABLE_ICONS.trash;
-    const removeLabel = t(lang, 'decorationRemoveBtn');
+    const removeLabel = t(currentLang, 'decorationRemoveBtn');
     decorationRemoveBtn.title = removeLabel;
     decorationRemoveBtn.setAttribute('aria-label', removeLabel);
+    refreshGuestLink();
   }
 
   async function render() {
-    const wedding = await Storage.getWedding(weddingId);
+    wedding = await Storage.getWedding(weddingId);
     if (!wedding) return;
     const theme = wedding.theme || getDefaultTheme();
     const fonts = theme.fonts || getDefaultTheme().fonts;
-    const lang = getLang();
+    const lang = currentLang;
 
     themePresetGridEl.innerHTML = GUEST_THEME_PRESETS.map((preset) => {
       const isActive = theme.preset === preset.id;
@@ -175,32 +185,12 @@ export function createThemeSettings({ weddingId, getLang }) {
     `).join('');
   }
 
-  function openModal() {
-    themeModal.hidden = false;
-    document.body.classList.add('modal-open');
-  }
-
-  function closeModal() {
-    themeModal.hidden = true;
-    document.body.classList.remove('modal-open');
-  }
-
-  themeSettingsBtn.addEventListener('click', openModal);
-  themeModalClose.addEventListener('click', closeModal);
-  themeModal.addEventListener('click', (e) => {
-    if (e.target === themeModal) closeModal();
-  });
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && !themeModal.hidden) closeModal();
-  });
-
   themePresetGridEl.addEventListener('click', async (e) => {
     const btn = e.target.closest('.theme-preset-option');
     if (!btn) return;
     const preset = GUEST_THEME_PRESETS.find((p) => p.id === btn.dataset.preset);
     if (!preset) return;
-    const wedding = await Storage.getWedding(weddingId);
-    const theme = (wedding && wedding.theme) || getDefaultTheme();
+    const theme = wedding.theme || getDefaultTheme();
     const fonts = theme.fonts || getDefaultTheme().fonts;
     const decoration = theme.decoration || getDefaultDecoration();
     await Storage.setTheme(weddingId, { preset: preset.id, colors: { ...preset.colors }, fonts, decoration });
@@ -210,8 +200,6 @@ export function createThemeSettings({ weddingId, getLang }) {
   themeFontTitleGridEl.addEventListener('click', async (e) => {
     const btn = e.target.closest('.theme-font-option');
     if (!btn) return;
-    const wedding = await Storage.getWedding(weddingId);
-    if (!wedding) return;
     const theme = wedding.theme || getDefaultTheme();
     const fonts = { ...(theme.fonts || getDefaultTheme().fonts), title: btn.dataset.fontTitle };
     await Storage.setTheme(weddingId, { ...theme, fonts });
@@ -221,8 +209,6 @@ export function createThemeSettings({ weddingId, getLang }) {
   themeFontBodyGridEl.addEventListener('click', async (e) => {
     const btn = e.target.closest('.theme-font-option');
     if (!btn) return;
-    const wedding = await Storage.getWedding(weddingId);
-    if (!wedding) return;
     const theme = wedding.theme || getDefaultTheme();
     const fonts = { ...(theme.fonts || getDefaultTheme().fonts), body: btn.dataset.fontBody };
     await Storage.setTheme(weddingId, { ...theme, fonts });
@@ -236,13 +222,12 @@ export function createThemeSettings({ weddingId, getLang }) {
   themeCustomGridEl.addEventListener('change', async (e) => {
     const input = e.target.closest('input[type="color"]');
     if (!input) return;
-    const wedding = await Storage.getWedding(weddingId);
-    if (!wedding) return;
     const theme = wedding.theme || getDefaultTheme();
     const fonts = theme.fonts || getDefaultTheme().fonts;
     const decoration = theme.decoration || getDefaultDecoration();
     const colors = { ...theme.colors, [input.dataset.key]: input.value };
     await Storage.setTheme(weddingId, { preset: 'custom', colors, fonts, decoration });
+    wedding.theme = { preset: 'custom', colors, fonts, decoration };
     themePresetGridEl.querySelectorAll('.theme-preset-option').forEach((b) => b.classList.remove('active'));
   });
 
@@ -250,8 +235,6 @@ export function createThemeSettings({ weddingId, getLang }) {
     const btn = e.target.closest('.theme-decoration-option');
     if (!btn) return;
     const key = btn.dataset.decoration;
-    const wedding = await Storage.getWedding(weddingId);
-    if (!wedding) return;
     const theme = wedding.theme || getDefaultTheme();
     const prevDecoration = normalizeDecoration(theme.decoration);
     const decoration = {
@@ -270,8 +253,6 @@ export function createThemeSettings({ weddingId, getLang }) {
     decorationFileInput.value = '';
     if (!file) return;
     const dataUrl = await readAndResizeImage(file);
-    const wedding = await Storage.getWedding(weddingId);
-    if (!wedding) return;
     const theme = wedding.theme || getDefaultTheme();
     const prevDecoration = normalizeDecoration(theme.decoration);
     const decoration = { ...prevDecoration, element: 'custom', customImage: dataUrl };
@@ -280,8 +261,6 @@ export function createThemeSettings({ weddingId, getLang }) {
   });
 
   decorationRemoveBtn.addEventListener('click', async () => {
-    const wedding = await Storage.getWedding(weddingId);
-    if (!wedding) return;
     const theme = wedding.theme || getDefaultTheme();
     const decoration = { ...getDefaultDecoration() };
     await Storage.setTheme(weddingId, { ...theme, decoration });
@@ -292,8 +271,6 @@ export function createThemeSettings({ weddingId, getLang }) {
     const btn = e.target.closest('.theme-decoration-position-option');
     if (!btn) return;
     const key = btn.dataset.position;
-    const wedding = await Storage.getWedding(weddingId);
-    if (!wedding) return;
     const theme = wedding.theme || getDefaultTheme();
     const prevDecoration = normalizeDecoration(theme.decoration);
     const isActive = prevDecoration.positions.includes(key);
@@ -306,11 +283,36 @@ export function createThemeSettings({ weddingId, getLang }) {
     await render();
   });
 
-  function init() {
-    document.getElementById('theme-settings-icon').innerHTML = PALETTE_ICON;
+  function setLang(lang) {
+    currentLang = lang;
+    localStorage.setItem(LANG_KEY, lang);
+    applyTranslations(lang);
     updateLabels();
     render();
   }
 
-  return { init, updateLabels, render };
-}
+  if (!weddingId) {
+    notFoundEl.hidden = false;
+    applyTranslations(currentLang);
+    langMount.appendChild(buildLangSwitcher(currentLang, setLang));
+    return;
+  }
+
+  wedding = await Storage.getWedding(weddingId);
+  if (!wedding) {
+    notFoundEl.hidden = false;
+    applyTranslations(currentLang);
+    langMount.appendChild(buildLangSwitcher(currentLang, setLang));
+    return;
+  }
+
+  contentEl.hidden = false;
+  weddingNameEl.textContent = wedding.name;
+  backLinkEl.href = `wedding-admin.html?id=${weddingId}`;
+  document.title = 'TableMe · Personnaliser la page invité';
+  updateLabels();
+
+  langMount.appendChild(buildLangSwitcher(currentLang, setLang));
+  applyTranslations(currentLang);
+  await render();
+})();

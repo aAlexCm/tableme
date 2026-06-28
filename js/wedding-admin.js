@@ -3,7 +3,6 @@ import { applyTranslations, buildLangSwitcher, t } from './i18n.js';
 import { createTableModal } from './table-modal.js';
 import { createGuestModal } from './guest-modal.js';
 import { createShareControls } from './share-controls.js';
-import { createThemeSettings } from './theme-settings.js';
 import { isFeatureEnabled } from './features.js';
 
 const LANG_KEY = 'tableme_wedding_admin_lang';
@@ -146,11 +145,6 @@ function parseSheetRows(rows) {
     weddingNameEl,
   });
 
-  const themeSettings = createThemeSettings({
-    weddingId,
-    getLang: () => currentLang,
-  });
-
   function escapeHtml(value) {
     return String(value).replace(/[&<>"']/g, (c) => ({
       '&': '&amp;',
@@ -185,8 +179,8 @@ function parseSheetRows(rows) {
     document.querySelectorAll('#add-mode-switch .mode-btn[data-mode="bulk"], #add-mode-switch .mode-btn[data-mode="file"]')
       .forEach((btn) => { btn.hidden = !bulkImportEnabled; });
 
-    const themeBtn = document.getElementById('theme-settings-btn');
-    if (themeBtn) themeBtn.hidden = !isFeatureEnabled(wedding, 'themeCustomization');
+    const themeTile = document.getElementById('theme-settings-tile');
+    if (themeTile) themeTile.hidden = !isFeatureEnabled(wedding, 'themeCustomization');
 
     const qrBtn = document.getElementById('qr-code-btn');
     if (qrBtn) qrBtn.hidden = !isFeatureEnabled(wedding, 'qrShare');
@@ -218,9 +212,7 @@ function parseSheetRows(rows) {
     shareControls.updateLabels();
     tableModalApi.updateLabels();
     updatePageTitle();
-    themeSettings.updateLabels();
     renderGuests();
-    themeSettings.render();
   }
 
   function groupGuestsByTable(guests, tableLabels) {
@@ -884,8 +876,9 @@ function parseSheetRows(rows) {
   if (todoTile) todoTile.href = `todo.html?id=${weddingId}`;
   const menuTile = document.getElementById('menu-tile');
   if (menuTile) menuTile.href = `menu.html?id=${weddingId}`;
+  const themeTile = document.getElementById('theme-settings-tile');
+  if (themeTile) themeTile.href = `theme-settings.html?id=${weddingId}`;
   shareControls.init(weddingId);
-  themeSettings.init();
   updatePageTitle();
   applyFeatureGating(wedding);
 

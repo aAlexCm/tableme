@@ -2,7 +2,6 @@ import { Storage, generateId } from './storage.js';
 import { applyTranslations, buildLangSwitcher, t } from './i18n.js';
 import { createTableModal, ICONS } from './table-modal.js';
 import { createShareControls } from './share-controls.js';
-import { createThemeSettings } from './theme-settings.js';
 import { DEFAULT_SEATS, getRectShapeSize, getTableReach, buildChairs } from './table-shape.js';
 import { LANDMARK_TYPES, getLandmarkType } from './landmarks.js';
 import { isFeatureEnabled } from './features.js';
@@ -153,11 +152,6 @@ function reconcileTables(wedding) {
     weddingNameEl,
   });
 
-  const themeSettings = createThemeSettings({
-    weddingId,
-    getLang: () => currentLang,
-  });
-
   function escapeHtml(value) {
     return String(value).replace(/[&<>"']/g, (c) => ({
       '&': '&amp;',
@@ -221,8 +215,6 @@ function reconcileTables(wedding) {
     applyTranslations(lang);
     tableModalApi.updateLabels();
     shareControls.updateLabels();
-    themeSettings.updateLabels();
-    themeSettings.render();
     updateFullscreenLabel();
     updatePageTitle();
     renderLandmarkPicker();
@@ -911,9 +903,11 @@ function reconcileTables(wedding) {
   initCountdown(wedding.date);
   listTabLink.href = `wedding-admin.html?id=${weddingId}`;
   shareControls.init(weddingId);
-  themeSettings.init();
-  const themeBtn = document.getElementById('theme-settings-btn');
-  if (themeBtn) themeBtn.hidden = !isFeatureEnabled(wedding, 'themeCustomization');
+  const themeTile = document.getElementById('theme-settings-tile');
+  if (themeTile) {
+    themeTile.href = `theme-settings.html?id=${weddingId}`;
+    themeTile.hidden = !isFeatureEnabled(wedding, 'themeCustomization');
+  }
   const qrBtn = document.getElementById('qr-code-btn');
   if (qrBtn) qrBtn.hidden = !isFeatureEnabled(wedding, 'qrShare');
   const partnersTile = document.getElementById('partners-tile');
