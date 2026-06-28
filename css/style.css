@@ -3571,8 +3571,8 @@ h2 {
   .add-guest-toggle {
     display: inline-flex;
     flex: 0 0 auto;
-    width: 38px;
-    height: 38px;
+    width: 32px;
+    height: 32px;
     margin-left: auto;
   }
 
@@ -3587,6 +3587,18 @@ h2 {
   .add-guest-card:not(.is-open) #add-mode-switch,
   .add-guest-card:not(.is-open) #add-guest-fields {
     display: none;
+  }
+
+  .add-guest-card:not(.is-open) {
+    padding: 14px 18px;
+  }
+
+  .add-guest-card:not(.is-open) .card-header-row {
+    margin-bottom: 0;
+  }
+
+  .add-guest-card:not(.is-open) .card-header-row h2 {
+    font-size: 1.15rem;
   }
 }
 
