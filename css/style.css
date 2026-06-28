@@ -3079,6 +3079,13 @@ body.admin-theme .guest-row-drop-target {
   text-decoration-color: color-mix(in srgb, var(--charcoal) 35%, transparent);
 }
 
+.guest-menu-edit-wrap,
+.guest-rsvp-edit-wrap {
+  position: relative;
+  display: inline-flex;
+  flex: 0 0 auto;
+}
+
 .guest-menu-edit,
 .guest-rsvp-edit {
   flex: 0 0 auto;
@@ -4696,6 +4703,68 @@ body.admin-theme .theme-decoration-position-arrow {
     width: auto;
     flex: 0 0 auto;
     gap: 4px;
+  }
+
+  /* On mobile there's no room for full text pills next to the guest's
+     name (that's what made the name itself get squeezed to zero width) —
+     the menu/rsvp selects collapse to a small round icon button instead.
+     The <select> itself stays functionally in place (full native dropdown
+     with real text options) but is rendered invisible, sized to match its
+     icon overlay, so tapping the icon opens the real picker. */
+  .guest-menu-edit-wrap,
+  .guest-rsvp-edit-wrap {
+    width: 26px;
+    height: 26px;
+  }
+
+  .guest-menu-edit-wrap select,
+  .guest-rsvp-edit-wrap select {
+    width: 26px;
+    height: 26px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    font-size: 0;
+    color: transparent;
+    background: transparent;
+  }
+
+  .guest-menu-edit-wrap::after,
+  .guest-rsvp-edit-wrap::after {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-size: 13px;
+    line-height: 1;
+    pointer-events: none;
+  }
+
+  .guest-menu-edit-wrap::after {
+    content: '🍽';
+    background: var(--sage-light);
+    opacity: 0.4;
+  }
+
+  .guest-menu-edit-wrap[data-has-menu="1"]::after {
+    opacity: 1;
+  }
+
+  .guest-rsvp-edit-wrap::after {
+    content: '⏳';
+    background: var(--cream);
+  }
+
+  .guest-rsvp-edit-wrap[data-rsvp="confirmed"]::after {
+    content: '✅';
+    background: var(--gold-light);
+  }
+
+  .guest-rsvp-edit-wrap[data-rsvp="declined"]::after {
+    content: '❌';
+    background: color-mix(in srgb, var(--error) 12%, transparent);
   }
 
   .guest-table-edit {

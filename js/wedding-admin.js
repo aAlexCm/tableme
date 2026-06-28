@@ -508,8 +508,12 @@ function parseSheetRows(rows) {
         li.innerHTML = `
           <span class="drag-handle">&#10303;</span>
           <span class="guest-row-name">${escapeHtml(g.name)}</span>
-          <select class="guest-menu-edit" data-id="${g.id}" aria-label="${escapeHtml(t(currentLang, 'guestMenuLabel'))}">${buildGuestMenuOptionsHtml(wedding.menus || [], g.menuId || '')}</select>
-          <select class="guest-rsvp-edit guest-rsvp-edit-${rsvp}" data-id="${g.id}" aria-label="${escapeHtml(t(currentLang, 'guestRsvpLabel'))}">${buildGuestRsvpOptionsHtml(rsvp)}</select>
+          <span class="guest-menu-edit-wrap" data-has-menu="${g.menuId ? '1' : '0'}">
+            <select class="guest-menu-edit" data-id="${g.id}" aria-label="${escapeHtml(t(currentLang, 'guestMenuLabel'))}">${buildGuestMenuOptionsHtml(wedding.menus || [], g.menuId || '')}</select>
+          </span>
+          <span class="guest-rsvp-edit-wrap" data-rsvp="${rsvp}">
+            <select class="guest-rsvp-edit guest-rsvp-edit-${rsvp}" data-id="${g.id}" aria-label="${escapeHtml(t(currentLang, 'guestRsvpLabel'))}">${buildGuestRsvpOptionsHtml(rsvp)}</select>
+          </span>
           <span class="guest-row-actions">
             <input type="text" class="guest-table-edit" data-id="${g.id}" value="${escapeHtml(g.table)}" aria-label="${escapeHtml(t(currentLang, 'tableLabel'))}" />
             <span class="row-arrows">
