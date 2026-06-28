@@ -294,6 +294,22 @@ input:focus, select:focus, textarea:focus {
 
 .phone-input-group {
   display: flex;
+  border-radius: var(--radius-sm);
+  transition: box-shadow 0.15s ease;
+}
+
+/* The select and input each keep their own (half-rounded) border-radius so
+   they read as one merged pill, but that means each one's default focus
+   box-shadow doesn't line up with the pill's true outer shape and visibly
+   bleeds past the seam between them. Suppress the per-control glow and draw
+   a single correctly-rounded one on the shared wrapper instead. */
+.phone-input-group .phone-code-select:focus,
+.phone-input-group input:focus {
+  box-shadow: none;
+}
+
+.phone-input-group:focus-within {
+  box-shadow: 0 0 0 4px rgba(176, 141, 79, 0.14);
 }
 
 .phone-input-group .phone-code-select {
