@@ -5007,6 +5007,21 @@ body.admin-theme .guest-row-empty {
   border-color: color-mix(in srgb, var(--gold) 30%, transparent);
 }
 
+/* The generic "body.admin-theme select" rule above (white paper background +
+   grey border) otherwise outranks the menu/rsvp pill colors declared earlier
+   in this file (same .class specificity, but plain "select" adds an extra
+   element to the selector) and paints right over them. */
+body.admin-theme .guest-menu-edit {
+  background: var(--sage-light);
+  border-color: transparent;
+}
+
+body.admin-theme .guest-rsvp-edit-wrap select,
+body.admin-theme .guest-menu-edit-wrap select {
+  background: transparent;
+  border: none;
+}
+
 body.admin-theme .wedding-item {
   background: var(--paper);
   border: 1px solid #eef0f3;
