@@ -18,8 +18,7 @@ const WAYFINDING_OBSTACLE_HALF_W = 8;
 const WAYFINDING_OBSTACLE_HALF_H = 6;
 const WAYFINDING_GRID_COLS = 50;
 const WAYFINDING_GRID_ROWS = 30;
-const WAYFINDING_START_RETREAT = 4;
-const WAYFINDING_END_RETREAT = 4.5;
+const WAYFINDING_ANCHOR_RADIUS = 4.5;
 const WAYFINDING_MAP_INSET_PCT = 8;
 
 // Landmarks/tables only ever occupy part of the floor-plan canvas — mapping
@@ -190,51 +189,28 @@ function simplifyRouteBySight(points, obstacles) {
   return result;
 }
 
-function pathLength(points) {
-  let total = 0;
-  for (let i = 0; i < points.length - 1; i += 1) {
-    total += Math.hypot(points[i + 1].x - points[i].x, points[i + 1].y - points[i].y);
-  }
-  return total;
+// Each marker has 4 fixed attachment points — north, south, east, west of
+// its true center, all at the same radius from it, like the 4 invisible
+// docking points a floor-plan editor would offer. Retreating along
+// whatever bent path the router found could land the visible line-end
+// off both axes at once (looking like it touched the icon's corner rather
+// than a side), so the line instead always starts/ends at exactly one of
+// these 4 points — whichever one matches the direction the route actually
+// leaves in, found by routing once from the bare centers first.
+function getRouteDirection(from, to) {
+  const dx = to.x - from.x;
+  const dy = to.y - from.y;
+  if (Math.abs(dx) >= Math.abs(dy)) return dx >= 0 ? 'E' : 'W';
+  return dy >= 0 ? 'S' : 'N';
 }
 
-// Walks `distance` units along the polyline starting from points[0] and
-// returns where that lands, plus whatever vertices remain beyond it. Used
-// (rather than just trimming the first/last segment) because an obstacle
-// right next to a marker can force a tight little zigzag in the first one
-// or two segments — trimming only the first segment left the visible line
-// kinking almost on top of the icon. Walking by arc-length instead skips
-// straight past any such zigzag that's shorter than the retreat distance.
-function advanceAlongPath(points, distance) {
-  let remaining = distance;
-  for (let i = 0; i < points.length - 1; i += 1) {
-    const p0 = points[i];
-    const p1 = points[i + 1];
-    const segLen = Math.hypot(p1.x - p0.x, p1.y - p0.y);
-    if (segLen >= remaining) {
-      const ratio = segLen > 0 ? remaining / segLen : 0;
-      return {
-        point: { x: p0.x + (p1.x - p0.x) * ratio, y: p0.y + (p1.y - p0.y) * ratio },
-        rest: points.slice(i + 1),
-      };
-    }
-    remaining -= segLen;
+function getCardinalAnchor(center, direction, radius) {
+  switch (direction) {
+    case 'E': return { x: center.x + radius, y: center.y };
+    case 'W': return { x: center.x - radius, y: center.y };
+    case 'S': return { x: center.x, y: center.y + radius };
+    default: return { x: center.x, y: center.y - radius };
   }
-  return { point: points[points.length - 1], rest: [] };
-}
-
-function trimRouteEnds(points, startRetreat, endRetreat) {
-  if (points.length < 2) return points;
-  const totalLen = pathLength(points);
-  const cap = totalLen * 0.4;
-  const startDist = Math.min(startRetreat, cap);
-  const endDist = Math.min(endRetreat, cap);
-
-  const { point: newStart, rest: afterStart } = advanceAlongPath(points, startDist);
-  const fromStart = [newStart, ...afterStart];
-  const { point: newEnd, rest: beforeEndReversed } = advanceAlongPath([...fromStart].reverse(), endDist);
-
-  return [newEnd, ...beforeEndReversed].reverse();
 }
 
 (async function () {
@@ -528,13 +504,16 @@ function trimRouteEnds(points, startRetreat, endRetreat) {
       const fromPoint = points.find((p) => p.id === currentFrom);
       const toPoint = points.find((p) => p.id === currentTo);
       if (fromPoint && toPoint && fromPoint.id !== toPoint.id) {
-        const a = { x: toWayfindingMapPct(fromPoint.x, bounds.minX, bounds.maxX), y: toWayfindingMapPct(fromPoint.y, bounds.minY, bounds.maxY) * (WAYFINDING_VIEWBOX_H / 100) };
-        const b = { x: toWayfindingMapPct(toPoint.x, bounds.minX, bounds.maxX), y: toWayfindingMapPct(toPoint.y, bounds.minY, bounds.maxY) * (WAYFINDING_VIEWBOX_H / 100) };
+        const toViewboxPoint = (p) => ({
+          x: toWayfindingMapPct(p.x, bounds.minX, bounds.maxX),
+          y: toWayfindingMapPct(p.y, bounds.minY, bounds.maxY) * (WAYFINDING_VIEWBOX_H / 100),
+        });
+        const fromCenter = toViewboxPoint(fromPoint);
+        const toCenter = toViewboxPoint(toPoint);
         const obstacles = points
           .filter((p) => p.id !== currentFrom && p.id !== currentTo)
           .map((p) => {
-            const cx = toWayfindingMapPct(p.x, bounds.minX, bounds.maxX);
-            const cy = toWayfindingMapPct(p.y, bounds.minY, bounds.maxY) * (WAYFINDING_VIEWBOX_H / 100);
+            const { x: cx, y: cy } = toViewboxPoint(p);
             return {
               x0: cx - WAYFINDING_OBSTACLE_HALF_W,
               x1: cx + WAYFINDING_OBSTACLE_HALF_W,
@@ -542,9 +521,18 @@ function trimRouteEnds(points, startRetreat, endRetreat) {
               y1: cy + WAYFINDING_OBSTACLE_HALF_H,
             };
           });
-        const rawRoutePoints = computeWayfindingPath(a, b, obstacles);
-        const sightRoutePoints = simplifyRouteBySight(rawRoutePoints, obstacles);
-        const routePoints = trimRouteEnds(sightRoutePoints, WAYFINDING_START_RETREAT, WAYFINDING_END_RETREAT);
+
+        // Route once from the bare centers purely to discover which way the
+        // path actually leaves each marker (it has to dodge obstacles, so a
+        // straight-line guess between the two centers isn't reliable), then
+        // re-route from the matching cardinal point on each marker so the
+        // visible line always starts/ends exactly on one of its 4 anchors.
+        const previewRoute = simplifyRouteBySight(computeWayfindingPath(fromCenter, toCenter, obstacles), obstacles);
+        const startDirection = getRouteDirection(fromCenter, previewRoute[1] || toCenter);
+        const endDirection = getRouteDirection(toCenter, previewRoute[previewRoute.length - 2] || fromCenter);
+        const a = getCardinalAnchor(fromCenter, startDirection, WAYFINDING_ANCHOR_RADIUS);
+        const b = getCardinalAnchor(toCenter, endDirection, WAYFINDING_ANCHOR_RADIUS);
+        const routePoints = simplifyRouteBySight(computeWayfindingPath(a, b, obstacles), obstacles);
 
         const svgNs = 'http://www.w3.org/2000/svg';
         const svg = document.createElementNS(svgNs, 'svg');
