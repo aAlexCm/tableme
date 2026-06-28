@@ -283,7 +283,7 @@ textarea {
 
 input::placeholder, textarea::placeholder {
   color: var(--sage-deep);
-  opacity: 0.75;
+  opacity: 0.45;
 }
 
 input:focus, select:focus, textarea:focus {
@@ -2574,10 +2574,6 @@ a.view-switch-tab:hover {
   border: none;
   border-radius: var(--radius-sm);
   resize: vertical;
-}
-
-.bulk-textarea::placeholder {
-  color: #7c8a6c;
 }
 
 #bulk-add-submit {
@@ -5628,11 +5624,6 @@ body.admin-theme a.secondary:hover {
   color: var(--gold-deep);
 }
 
-body.admin-theme input::placeholder,
-body.admin-theme textarea::placeholder {
-  color: var(--charcoal);
-}
-
 /* Floor-plan canvas: the --gold/--sage variables above already neutralize most of this,
    but a few shadows/borders use hardcoded warm-tinted rgba() values. */
 body.admin-theme .landmark-picker {
@@ -5891,7 +5882,7 @@ body.guest-theme select {
 
 body.guest-theme input::placeholder {
   color: var(--guest-input-text);
-  opacity: 0.6;
+  opacity: 0.45;
 }
 
 body.guest-theme input:focus,
