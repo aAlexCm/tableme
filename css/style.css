@@ -3188,35 +3188,46 @@ body.admin-theme .guest-row-drop-target {
   border-color: var(--gold-deep);
 }
 
+/* The pill border/radius lives on this collapsing wrapper (not on the input
+   inside it) so the shape itself animates as one piece — clipping a
+   separately-rounded child via overflow:hidden while max-width animates
+   caused stray curved seams at the corners in Chrome. */
 .guest-search-field {
   position: relative;
   display: flex;
   align-items: center;
   max-width: 0;
-  opacity: 0;
   overflow: hidden;
   margin-left: 0;
-  transition: max-width 0.3s ease, opacity 0.2s ease, margin-left 0.3s ease;
+  border: 1.5px solid transparent;
+  border-radius: var(--radius-pill);
+  background: var(--paper);
+  transition: max-width 0.3s ease, margin-left 0.3s ease, border-color 0.15s ease;
 }
 
 .guest-search.is-open .guest-search-field {
   max-width: 240px;
-  opacity: 1;
   margin-left: 8px;
+  border-color: rgba(15, 23, 42, 0.12);
+}
+
+.guest-search-field:focus-within {
+  border-color: var(--gold-deep) !important;
 }
 
 .guest-search-input {
+  flex: 0 0 220px;
   width: 220px;
   padding: 7px 32px 7px 12px;
-  border-radius: var(--radius-pill);
-  border: 1.5px solid rgba(15, 23, 42, 0.12);
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
   font-size: 0.88rem;
   font-family: inherit;
 }
 
 .guest-search-input:focus {
   outline: none;
-  border-color: var(--gold-deep);
 }
 
 .guest-search-clear {
