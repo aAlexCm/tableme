@@ -44,21 +44,27 @@ const QR_CORNER_PRESETS = [
   { key: 'circle', i18nKey: 'qrCornerCircle', squareType: 'dot', dotType: 'dot' },
 ];
 
+// SVG, not the ♥ character: a color-emoji glyph is drawn from the system's
+// own baked-in bitmap/font data, which CSS color can't touch — and Apple's
+// emoji font is known to render hearts in color regardless of the U+FE0E
+// text-presentation selector that works fine for the other dingbats below.
+// An actual vector path sidesteps the whole class of font-substitution
+// quirks. Shared between the divider's "heart" ornament and the icon tool's
+// heart preset below.
+const HEART_SVG = '<svg viewBox="0 0 24 24" width="100%" height="100%" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>';
+
 const DIVIDER_PRESETS = [
   { key: 'plain', i18nKey: 'dividerPresetPlain', ornament: '' },
-  { key: 'heart', i18nKey: 'dividerPresetHeart', ornament: '♥' },
-  { key: 'diamond', i18nKey: 'dividerPresetDiamond', ornament: '◆' },
+  { key: 'heart', i18nKey: 'dividerPresetHeart', ornament: '♥︎', svg: HEART_SVG },
+  { key: 'diamond', i18nKey: 'dividerPresetDiamond', ornament: '◆︎' },
   { key: 'dot', i18nKey: 'dividerPresetDot', ornament: '•' },
-  { key: 'flourish', i18nKey: 'dividerPresetFlourish', ornament: '❦' },
+  { key: 'flourish', i18nKey: 'dividerPresetFlourish', ornament: '❦︎' },
 ];
 
 // U+FE0E (text presentation selector) forces the plain, monochrome glyph on
-// every platform. Without it, some of these (the heart especially) render
-// as a colorful emoji on mobile — ignoring the CSS color entirely, since a
-// color-emoji glyph is drawn from baked-in bitmap/font data — even though
-// the same character shows as a plain recolorable symbol on desktop.
-const HEART_SVG = '<svg viewBox="0 0 24 24" width="100%" height="100%" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>';
-
+// every platform. Without it, some of these render as a colorful emoji on
+// mobile — ignoring the CSS color entirely — even though the same character
+// shows as a plain recolorable symbol on desktop.
 const ICON_PRESETS = [
   // The heart specifically still rendered as a colorful, uncolorable emoji
   // on at least one real mobile browser even with the U+FE0E text-
@@ -328,9 +334,19 @@ function fontFamilyFor(fontKey) {
     const ornamentEl = node.querySelector('.poster-divider-ornament');
     if (ornamentEl) {
       const preset = DIVIDER_PRESETS.find((p) => p.key === el.style) || DIVIDER_PRESETS[0];
-      ornamentEl.textContent = preset.ornament;
       ornamentEl.hidden = !preset.ornament;
-      ornamentEl.style.fontSize = `${el.ornamentSize}px`;
+      if (preset.svg) {
+        ornamentEl.innerHTML = preset.svg;
+        ornamentEl.style.fontSize = '';
+        const svg = ornamentEl.querySelector('svg');
+        if (svg) {
+          svg.style.width = `${el.ornamentSize}px`;
+          svg.style.height = `${el.ornamentSize}px`;
+        }
+      } else {
+        ornamentEl.textContent = preset.ornament;
+        ornamentEl.style.fontSize = `${el.ornamentSize}px`;
+      }
     }
   }
 
