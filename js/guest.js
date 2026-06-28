@@ -21,6 +21,11 @@ const WAYFINDING_GRID_ROWS = 30;
 const WAYFINDING_ANCHOR_RADIUS = 4.5;
 const WAYFINDING_DIRECTION_LOOKAHEAD = 10;
 const WAYFINDING_MAP_INSET_PCT = 8;
+// Mirrors the real floor-plan's getRectShapeSize() px values down onto the
+// tiny mini-map marker so a 20-seat table actually looks longer than an
+// 8-seat one — 0.17 picked so the default 8-seat table (the floor plan's
+// built-in minimum length) lands close to the marker's old fixed 22x13 size.
+const WAYFINDING_RECT_MARKER_SCALE = 0.17;
 
 // Landmarks/tables only ever occupy part of the floor-plan canvas — mapping
 // raw 0-100% canvas coordinates straight onto the mini-map left most of it
@@ -433,6 +438,7 @@ function getCardinalAnchor(center, direction, radius) {
       kind: 'table',
       shape: tb.shape === 'rectangle' ? 'rectangle' : 'round',
       rotated: !!tb.rotated,
+      seats: tb.seats != null ? tb.seats : DEFAULT_SEATS,
       x: tb.x,
       y: tb.y,
       label: `${t(currentLang, 'tableLabel')} ${tb.label}`,
@@ -532,6 +538,12 @@ function getCardinalAnchor(center, direction, radius) {
         marker.innerHTML = p.kind === 'landmark'
           ? `<span class="wayfinding-marker-icon">${p.icon}</span><span class="wayfinding-marker-label">${escapeHtml(p.label)}</span>`
           : `<span class="wayfinding-marker-shape"></span><span class="wayfinding-marker-label">${escapeHtml(p.label)}</span>`;
+        if (p.kind === 'table' && p.shape === 'rectangle') {
+          const { width, height } = getRectShapeSize(p.seats, p.rotated);
+          const shapeEl = marker.querySelector('.wayfinding-marker-shape');
+          shapeEl.style.width = `${Math.round(width * WAYFINDING_RECT_MARKER_SCALE)}px`;
+          shapeEl.style.height = `${Math.round(height * WAYFINDING_RECT_MARKER_SCALE)}px`;
+        }
         mapWrap.appendChild(marker);
       });
 
