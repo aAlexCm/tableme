@@ -3508,7 +3508,7 @@ select.mini-lang-select {
 
 @media (max-width: 600px) {
   .theme-settings-preview-banner {
-    position: static;
+    top: 6px;
     padding: 18px 20px;
   }
 
