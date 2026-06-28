@@ -3242,8 +3242,12 @@ body.admin-theme .guest-row-drop-target {
   box-shadow: none;
 }
 
-.guest-search-clear:hover {
+.guest-search-field .guest-search-clear:hover {
   background: var(--sage-light);
+  /* .icon-btn:hover (defined later, same specificity as a plain :hover
+     class rule) resets transform to none, which would otherwise undo the
+     translateY(-50%) centering above and drop the button down. */
+  transform: translateY(-50%);
 }
 
 .guest-rsvp-summary {
