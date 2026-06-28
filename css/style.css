@@ -3484,6 +3484,7 @@ select.mini-lang-select {
 }
 
 .theme-settings-preview-btn {
+  position: relative;
   display: inline-flex;
   flex: 0 0 auto;
   align-items: center;
@@ -3504,6 +3505,38 @@ select.mini-lang-select {
   transform: translateY(-2px);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.22);
   color: var(--gold-deep);
+}
+
+/* Fires after every saved change, so the button itself draws the eye
+   toward "go check what you just changed" instead of relying on the
+   couple to remember to click it. The badge sticks around until the
+   link is actually opened; the pulse is just a few seconds of motion to
+   catch the eye at the moment of the change. */
+.theme-settings-preview-btn.has-update::after {
+  content: '';
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #e0533f;
+  border: 2px solid var(--gold-deep);
+}
+
+.theme-settings-preview-btn.pulse-attention {
+  animation: theme-preview-pulse 0.9s ease-in-out 2;
+}
+
+@keyframes theme-preview-pulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18), 0 0 0 0 rgba(255, 255, 255, 0.6);
+  }
+  50% {
+    transform: scale(1.07);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.22), 0 0 0 9px rgba(255, 255, 255, 0);
+  }
 }
 
 @media (max-width: 600px) {

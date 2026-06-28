@@ -98,6 +98,25 @@ function readAndResizeImage(file) {
     guestLinkEl.href = `guest/${currentLang}?id=${weddingId}`;
   }
 
+  let guestLinkPulseTimer = null;
+
+  // Draws the eye to the guest-page link right after a change is saved —
+  // a badge that persists until the link is actually opened, plus a brief
+  // pulse so a change made while already looking at the button still gets
+  // noticed.
+  function flagGuestLinkUpdated() {
+    guestLinkEl.classList.add('has-update');
+    guestLinkEl.classList.remove('pulse-attention');
+    void guestLinkEl.offsetWidth;
+    guestLinkEl.classList.add('pulse-attention');
+    clearTimeout(guestLinkPulseTimer);
+    guestLinkPulseTimer = setTimeout(() => guestLinkEl.classList.remove('pulse-attention'), 1800);
+  }
+
+  guestLinkEl.addEventListener('click', () => {
+    guestLinkEl.classList.remove('has-update');
+  });
+
   function updateLabels() {
     decorationRemoveBtn.innerHTML = TABLE_ICONS.trash;
     const removeLabel = t(currentLang, 'decorationRemoveBtn');
@@ -195,6 +214,7 @@ function readAndResizeImage(file) {
     const decoration = theme.decoration || getDefaultDecoration();
     await Storage.setTheme(weddingId, { preset: preset.id, colors: { ...preset.colors }, fonts, decoration });
     await render();
+    flagGuestLinkUpdated();
   });
 
   themeFontTitleGridEl.addEventListener('click', async (e) => {
@@ -204,6 +224,7 @@ function readAndResizeImage(file) {
     const fonts = { ...(theme.fonts || getDefaultTheme().fonts), title: btn.dataset.fontTitle };
     await Storage.setTheme(weddingId, { ...theme, fonts });
     await render();
+    flagGuestLinkUpdated();
   });
 
   themeFontBodyGridEl.addEventListener('click', async (e) => {
@@ -213,6 +234,7 @@ function readAndResizeImage(file) {
     const fonts = { ...(theme.fonts || getDefaultTheme().fonts), body: btn.dataset.fontBody };
     await Storage.setTheme(weddingId, { ...theme, fonts });
     await render();
+    flagGuestLinkUpdated();
   });
 
   themeCustomToggleBtn.addEventListener('click', () => {
@@ -229,6 +251,7 @@ function readAndResizeImage(file) {
     await Storage.setTheme(weddingId, { preset: 'custom', colors, fonts, decoration });
     wedding.theme = { preset: 'custom', colors, fonts, decoration };
     themePresetGridEl.querySelectorAll('.theme-preset-option').forEach((b) => b.classList.remove('active'));
+    flagGuestLinkUpdated();
   });
 
   decorationGridEl.addEventListener('click', async (e) => {
@@ -244,6 +267,7 @@ function readAndResizeImage(file) {
     };
     await Storage.setTheme(weddingId, { ...theme, decoration });
     await render();
+    flagGuestLinkUpdated();
   });
 
   decorationUploadBtn.addEventListener('click', () => decorationFileInput.click());
@@ -258,6 +282,7 @@ function readAndResizeImage(file) {
     const decoration = { ...prevDecoration, element: 'custom', customImage: dataUrl };
     await Storage.setTheme(weddingId, { ...theme, decoration });
     await render();
+    flagGuestLinkUpdated();
   });
 
   decorationRemoveBtn.addEventListener('click', async () => {
@@ -265,6 +290,7 @@ function readAndResizeImage(file) {
     const decoration = { ...getDefaultDecoration() };
     await Storage.setTheme(weddingId, { ...theme, decoration });
     await render();
+    flagGuestLinkUpdated();
   });
 
   decorationPositionGridEl.addEventListener('click', async (e) => {
@@ -281,6 +307,7 @@ function readAndResizeImage(file) {
     const decoration = { ...prevDecoration, positions };
     await Storage.setTheme(weddingId, { ...theme, decoration });
     await render();
+    flagGuestLinkUpdated();
   });
 
   function setLang(lang) {
