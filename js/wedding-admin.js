@@ -19,7 +19,6 @@ const ICONS = {
   cross: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="M6 6l12 12"/></svg>',
   clock: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>',
   phone: '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>',
-  email: '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-9.18 5.5a2 2 0 0 1-2.04 0L2 7"/></svg>',
 };
 
 const RSVP_ICONS = {
@@ -34,12 +33,12 @@ function parseBulkGuests(text) {
   text.split('\n').forEach((line) => {
     const trimmed = line.trim();
     if (!trimmed) return;
-    const [name, table, phone, email] = trimmed.split(';').map((part) => part.trim());
+    const [name, table, phone] = trimmed.split(';').map((part) => part.trim());
     if (!name || !table) {
       skipped += 1;
       return;
     }
-    entries.push({ name, table, phone: phone || '', email: email || '' });
+    entries.push({ name, table, phone: phone || '' });
   });
   return { entries, skipped };
 }
@@ -51,13 +50,12 @@ function parseSheetRows(rows) {
     const name = (row[0] ?? '').toString().trim();
     const table = (row[1] ?? '').toString().trim();
     const phone = (row[2] ?? '').toString().trim();
-    const email = (row[3] ?? '').toString().trim();
     if (!name && !table) return;
     if (!name || !table) {
       skipped += 1;
       return;
     }
-    entries.push({ name, table, phone, email });
+    entries.push({ name, table, phone });
   });
   return { entries, skipped };
 }
@@ -118,7 +116,6 @@ function parseSheetRows(rows) {
   const guestTableInput = document.getElementById('guest-table');
   const guestPhoneCodeSelect = document.getElementById('guest-phone-code');
   const guestPhoneInput = document.getElementById('guest-phone');
-  const guestEmailInput = document.getElementById('guest-email');
   guestPhoneCodeSelect.innerHTML = buildCountryCodeOptionsHtml(DEFAULT_COUNTRY_CODE_BY_LANG[currentLang] || '33');
   const guestListEl = document.getElementById('guest-list');
   const guestEmptyEl = document.getElementById('guest-empty');
@@ -525,7 +522,6 @@ function parseSheetRows(rows) {
           <span class="guest-row-name">${escapeHtml(g.name)}</span>
           <span class="guest-row-contact">
             ${g.phone ? `<a class="guest-row-contact-icon" href="tel:${escapeHtml(g.phone)}" title="${escapeHtml(g.phone)}" aria-label="${escapeHtml(t(currentLang, 'guestPhoneLabel'))}: ${escapeHtml(g.phone)}">${ICONS.phone}</a>` : ''}
-            ${g.email ? `<a class="guest-row-contact-icon" href="mailto:${escapeHtml(g.email)}" title="${escapeHtml(g.email)}" aria-label="${escapeHtml(t(currentLang, 'guestEmailLabel'))}: ${escapeHtml(g.email)}">${ICONS.email}</a>` : ''}
           </span>
           <span class="guest-menu-edit-wrap" data-has-menu="${g.menuId ? '1' : '0'}">
             <span class="guest-row-mobile-icon" aria-hidden="true">${ICONS.cutlery}</span>
@@ -667,9 +663,8 @@ function parseSheetRows(rows) {
     const name = guestNameInput.value.trim();
     const table = guestTableInput.value.trim();
     const phone = combinePhone(guestPhoneCodeSelect.value, guestPhoneInput.value);
-    const email = guestEmailInput.value.trim();
     if (!name || !table) return;
-    await Storage.addGuest(weddingId, name, table, phone, email);
+    await Storage.addGuest(weddingId, name, table, phone);
     guestForm.reset();
     await renderGuests();
   });
@@ -712,7 +707,6 @@ function parseSheetRows(rows) {
       t(currentLang, 'guestNameLabel'),
       t(currentLang, 'guestTableLabel'),
       t(currentLang, 'guestPhoneLabel'),
-      t(currentLang, 'guestEmailLabel'),
     ].join(',');
     const examples = t(currentLang, 'fileTemplateExample');
     const csv = `${header}\n${examples}\n`;

@@ -3600,6 +3600,13 @@ h2 {
   .add-guest-card:not(.is-open) .card-header-row h2 {
     font-size: 0.95rem;
   }
+
+  .add-guest-card.is-open .add-guest-toggle {
+    position: absolute;
+    top: 22px;
+    right: 22px;
+    margin-left: 0;
+  }
 }
 
 .empty-state {

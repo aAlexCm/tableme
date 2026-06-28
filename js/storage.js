@@ -60,12 +60,11 @@ export const Storage = {
     await updateDoc(doc(db, 'weddings', weddingId), { poster });
   },
 
-  async addGuest(weddingId, name, table, phone, email) {
+  async addGuest(weddingId, name, table, phone) {
     const wedding = await this.getWedding(weddingId);
     if (!wedding) return null;
     const guest = { id: generateId(), name, table };
     if (phone) guest.phone = phone;
-    if (email) guest.email = email;
     const guests = [...wedding.guests, guest];
     await updateDoc(doc(db, 'weddings', weddingId), { guests });
     return guest;
@@ -77,7 +76,6 @@ export const Storage = {
     const newGuests = entries.map((e) => {
       const guest = { id: generateId(), name: e.name, table: e.table };
       if (e.phone) guest.phone = e.phone;
-      if (e.email) guest.email = e.email;
       return guest;
     });
     const guests = [...wedding.guests, ...newGuests];
