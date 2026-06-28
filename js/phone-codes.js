@@ -101,7 +101,7 @@ export function buildCountryCodeOptionsHtml(selectedCode) {
     .map(({ code, flag, name }) => {
       const isSelected = !selected && code === selectedCode;
       if (isSelected) selected = true;
-      return `<option value="${code}" ${isSelected ? 'selected' : ''}>${flag} +${code} ${name}</option>`;
+      return `<option value="${code}" title="${name}" ${isSelected ? 'selected' : ''}>${flag} +${code}</option>`;
     })
     .join('');
 }

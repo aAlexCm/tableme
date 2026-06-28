@@ -298,8 +298,8 @@ input:focus, select:focus, textarea:focus {
 
 .phone-input-group .phone-code-select {
   flex: 0 0 auto;
-  width: 118px;
-  min-width: 118px;
+  width: 88px;
+  min-width: 88px;
   padding: 0 6px;
   border-right: none;
   border-radius: var(--radius-sm) 0 0 var(--radius-sm);
