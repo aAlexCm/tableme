@@ -5502,6 +5502,13 @@ body.admin-theme nav.admin-nav {
   box-shadow: var(--card-shadow);
 }
 
+/* The nav turning into its own card (above) left the page's original
+   56px top padding looking like dead space above it — :not(.poster-page)
+   keeps poster.html's own already-tuned 24px override untouched. */
+body.admin-theme .page:not(.poster-page) {
+  padding-top: 28px;
+}
+
 /* On wedding-admin.html/floor-plan.html, the countdown sits inline as a
    middle flex item of nav.admin-nav itself (name -- countdown -- actions),
    instead of stacking below it — this keeps the whole header a single thin
