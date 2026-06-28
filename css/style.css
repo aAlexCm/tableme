@@ -3368,16 +3368,6 @@ body.admin-theme .guest-row-contact-icon:hover {
   color: var(--error);
 }
 
-.guest-row-actions {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex: 0 0 auto;
-  max-width: 0;
-  overflow: hidden;
-  transition: max-width 0.18s ease;
-}
-
 .guest-table-edit {
   width: 56px;
   flex: 0 0 auto;
@@ -3387,32 +3377,76 @@ body.admin-theme .guest-row-contact-icon:hover {
   border-radius: var(--radius-sm);
 }
 
-.row-arrows {
-  display: flex;
-  gap: 2px;
+.guest-row-more {
+  position: relative;
   flex: 0 0 auto;
+  display: flex;
 }
 
-.guest-row .guest-table-edit,
-.guest-row .icon-btn {
-  opacity: 0;
-  pointer-events: none;
+.guest-row-more-btn {
+  color: var(--sage-deep);
 }
 
-.guest-row:hover .guest-table-edit,
-.guest-row:hover .icon-btn,
-.guest-row:focus-within .guest-table-edit,
-.guest-row:focus-within .icon-btn,
-.guest-row.revealed .guest-table-edit,
-.guest-row.revealed .icon-btn {
-  opacity: 1;
-  pointer-events: auto;
+.guest-row-more-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 15;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 170px;
+  padding: 10px;
+  background: var(--paper);
+  border: 1px solid var(--gold-light);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 16px 36px rgba(138, 109, 60, 0.16);
 }
 
-.guest-row:hover .guest-row-actions,
-.guest-row:focus-within .guest-row-actions,
-.guest-row.revealed .guest-row-actions {
-  max-width: 220px;
+.guest-row-more-menu:not([hidden]) {
+  display: flex;
+}
+
+.guest-row-more-field {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.guest-row-more-field span {
+  font-size: 0.68rem;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--sage-deep);
+}
+
+.guest-row-more-field .guest-table-edit {
+  width: 64px;
+}
+
+.guest-row-more-delete {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 8px;
+  border: none;
+  border-radius: calc(var(--radius-sm) - 5px);
+  background: transparent;
+  color: var(--error);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+}
+
+.guest-row-more-delete:hover {
+  background: #fbdfdf;
+}
+
+.guest-row-more-delete svg {
+  flex-shrink: 0;
 }
 
 .actions {
@@ -5208,12 +5242,6 @@ body.admin-theme .theme-decoration-position-arrow {
     font-size: 0.95rem;
   }
 
-  .guest-row-actions {
-    width: auto;
-    flex: 0 0 auto;
-    gap: 4px;
-  }
-
   /* On mobile there's no room for a full text pill next to the guest's
      name (that's what made the name itself get squeezed to zero width) —
      the menu select collapses to a small round icon button instead. The
@@ -5255,14 +5283,8 @@ body.admin-theme .theme-decoration-position-arrow {
     opacity: 1;
   }
 
-  .guest-table-edit {
-    width: 38px;
-    padding: 6px 4px;
-    font-size: 16px;
-  }
-
-  .row-arrows {
-    gap: 0;
+  .guest-row-more-field .guest-table-edit {
+    width: 56px;
   }
 
   .guest-row .icon-btn {

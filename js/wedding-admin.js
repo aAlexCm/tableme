@@ -12,8 +12,7 @@ const DEFAULT_SEATS = 8;
 const ICONS = {
   trash: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>',
   pencil: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z"/></svg>',
-  chevronUp: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15l-6-6-6 6"/></svg>',
-  chevronDown: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>',
+  kebab: '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>',
   plus: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>',
   cutlery: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h0a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></svg>',
   check: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
@@ -333,27 +332,6 @@ function parseSheetRows(rows) {
     await Storage.setGuests(weddingId, newGuests);
   }
 
-  async function moveGuest(guestId, direction) {
-    const wedding = await Storage.getWedding(weddingId);
-    if (!wedding) return;
-    const groups = groupGuestsByTable(wedding.guests);
-    let moved = false;
-    for (const group of groups) {
-      const idx = group.guests.findIndex((g) => g.id === guestId);
-      if (idx === -1) continue;
-      const swapIdx = direction === 'up' ? idx - 1 : idx + 1;
-      if (swapIdx >= 0 && swapIdx < group.guests.length) {
-        [group.guests[idx], group.guests[swapIdx]] = [group.guests[swapIdx], group.guests[idx]];
-        moved = true;
-      }
-      break;
-    }
-    if (!moved) return;
-    const newGuests = groups.flatMap((g) => g.guests);
-    await Storage.setGuests(weddingId, newGuests);
-    await renderGuests();
-  }
-
   async function updateGuestTable(guestId, newTable) {
     const table = newTable.trim();
     if (!table) {
@@ -557,13 +535,15 @@ function parseSheetRows(rows) {
             <span class="guest-row-mobile-icon" aria-hidden="true">${RSVP_ICONS[rsvp]}</span>
             <select class="guest-rsvp-edit" data-id="${g.id}" aria-label="${escapeHtml(t(currentLang, 'guestRsvpLabel'))}">${buildGuestRsvpOptionsHtml(rsvp)}</select>
           </span>
-          <span class="guest-row-actions">
-            <input type="text" class="guest-table-edit" data-id="${g.id}" value="${escapeHtml(g.table)}" aria-label="${escapeHtml(t(currentLang, 'tableLabel'))}" />
-            <span class="row-arrows">
-              <button type="button" class="icon-btn" data-action="move-up" data-id="${g.id}" aria-label="up">${ICONS.chevronUp}</button>
-              <button type="button" class="icon-btn" data-action="move-down" data-id="${g.id}" aria-label="down">${ICONS.chevronDown}</button>
-            </span>
-            <button type="button" class="icon-btn icon-btn-danger" data-action="delete-guest" data-id="${g.id}" title="${deleteLabel}" aria-label="${deleteLabel}">${ICONS.trash}</button>
+          <span class="guest-row-more">
+            <button type="button" class="icon-btn guest-row-more-btn" data-action="toggle-more" aria-haspopup="true" aria-expanded="false" aria-label="${escapeHtml(t(currentLang, 'moreActionsLabel'))}">${ICONS.kebab}</button>
+            <div class="guest-row-more-menu" hidden>
+              <label class="guest-row-more-field">
+                <span>${escapeHtml(t(currentLang, 'tableLabel'))}</span>
+                <input type="text" class="guest-table-edit" data-id="${g.id}" value="${escapeHtml(g.table)}" aria-label="${escapeHtml(t(currentLang, 'tableLabel'))}" />
+              </label>
+              <button type="button" class="guest-row-more-delete" data-action="delete-guest" data-id="${g.id}">${ICONS.trash} ${deleteLabel}</button>
+            </div>
           </span>
         `;
         attachRowDragEvents(li);
@@ -880,23 +860,21 @@ function parseSheetRows(rows) {
       return;
     }
 
-    const interactive = e.target.closest('button, a, input, select');
-    if (!interactive) {
-      document.querySelectorAll('.guest-row.revealed').forEach((el) => {
-        if (el !== row) el.classList.remove('revealed');
-      });
-      row.classList.toggle('revealed');
-      return;
-    }
-
     const btn = e.target.closest('button');
     if (!btn) return;
     const { action, id } = btn.dataset;
     if (action === 'delete-guest') {
       await Storage.deleteGuest(weddingId, id);
       await renderGuests();
-    } else if (action === 'move-up' || action === 'move-down') {
-      await moveGuest(id, action === 'move-up' ? 'up' : 'down');
+    } else if (action === 'toggle-more') {
+      const menu = btn.nextElementSibling;
+      const willOpen = menu.hidden;
+      document.querySelectorAll('.guest-row-more-menu').forEach((el) => {
+        el.hidden = true;
+        el.previousElementSibling.setAttribute('aria-expanded', 'false');
+      });
+      menu.hidden = !willOpen;
+      btn.setAttribute('aria-expanded', String(willOpen));
     }
   });
 
@@ -918,8 +896,11 @@ function parseSheetRows(rows) {
   });
 
   document.addEventListener('click', (e) => {
-    if (!e.target.closest('.guest-row')) {
-      document.querySelectorAll('.guest-row.revealed').forEach((el) => el.classList.remove('revealed'));
+    if (!e.target.closest('.guest-row-more')) {
+      document.querySelectorAll('.guest-row-more-menu:not([hidden])').forEach((el) => {
+        el.hidden = true;
+        el.previousElementSibling.setAttribute('aria-expanded', 'false');
+      });
     }
     if (!e.target.closest('.table-group-title-row')) {
       document.querySelectorAll('.table-group-title-row.revealed').forEach((el) => el.classList.remove('revealed'));
