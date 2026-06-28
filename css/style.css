@@ -3079,6 +3079,17 @@ body.admin-theme .guest-row-drop-target {
   text-decoration-color: color-mix(in srgb, var(--charcoal) 35%, transparent);
 }
 
+.guest-row-menu-tag {
+  flex: 0 0 auto;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--sage-light);
+  color: var(--sage-deep);
+  font-size: 0.72rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
 .guest-row-actions {
   display: flex;
   align-items: center;

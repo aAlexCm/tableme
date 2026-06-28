@@ -469,6 +469,8 @@ function parseSheetRows(rows) {
 
       function renderGuestRow(g) {
         const deleteLabel = escapeHtml(t(currentLang, 'deleteBtn'));
+        const menu = (wedding.menus || []).find((m) => m.id === g.menuId);
+        const menuTagHtml = menu ? `<span class="guest-row-menu-tag">${escapeHtml(menu.title)}</span>` : '';
         const li = document.createElement('li');
         li.className = 'guest-row';
         li.draggable = true;
@@ -476,6 +478,7 @@ function parseSheetRows(rows) {
         li.innerHTML = `
           <span class="drag-handle">&#10303;</span>
           <span class="guest-row-name">${escapeHtml(g.name)}</span>
+          ${menuTagHtml}
           <span class="guest-row-actions">
             <input type="text" class="guest-table-edit" data-id="${g.id}" value="${escapeHtml(g.table)}" aria-label="${escapeHtml(t(currentLang, 'tableLabel'))}" />
             <span class="row-arrows">
