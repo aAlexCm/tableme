@@ -190,21 +190,51 @@ function simplifyRouteBySight(points, obstacles) {
   return result;
 }
 
+function pathLength(points) {
+  let total = 0;
+  for (let i = 0; i < points.length - 1; i += 1) {
+    total += Math.hypot(points[i + 1].x - points[i].x, points[i + 1].y - points[i].y);
+  }
+  return total;
+}
+
+// Walks `distance` units along the polyline starting from points[0] and
+// returns where that lands, plus whatever vertices remain beyond it. Used
+// (rather than just trimming the first/last segment) because an obstacle
+// right next to a marker can force a tight little zigzag in the first one
+// or two segments — trimming only the first segment left the visible line
+// kinking almost on top of the icon. Walking by arc-length instead skips
+// straight past any such zigzag that's shorter than the retreat distance.
+function advanceAlongPath(points, distance) {
+  let remaining = distance;
+  for (let i = 0; i < points.length - 1; i += 1) {
+    const p0 = points[i];
+    const p1 = points[i + 1];
+    const segLen = Math.hypot(p1.x - p0.x, p1.y - p0.y);
+    if (segLen >= remaining) {
+      const ratio = segLen > 0 ? remaining / segLen : 0;
+      return {
+        point: { x: p0.x + (p1.x - p0.x) * ratio, y: p0.y + (p1.y - p0.y) * ratio },
+        rest: points.slice(i + 1),
+      };
+    }
+    remaining -= segLen;
+  }
+  return { point: points[points.length - 1], rest: [] };
+}
+
 function trimRouteEnds(points, startRetreat, endRetreat) {
   if (points.length < 2) return points;
-  const trim = (p0, p1, retreat) => {
-    const dx = p1.x - p0.x;
-    const dy = p1.y - p0.y;
-    const len = Math.hypot(dx, dy);
-    if (len <= 0.001) return p0;
-    const r = Math.min(retreat, len * 0.4);
-    return { x: p0.x + (dx / len) * r, y: p0.y + (dy / len) * r };
-  };
-  const result = points.map((p) => ({ ...p }));
-  const lastIdx = result.length - 1;
-  result[0] = trim(result[0], result[1], startRetreat);
-  result[lastIdx] = trim(result[lastIdx], result[lastIdx - 1], endRetreat);
-  return result;
+  const totalLen = pathLength(points);
+  const cap = totalLen * 0.4;
+  const startDist = Math.min(startRetreat, cap);
+  const endDist = Math.min(endRetreat, cap);
+
+  const { point: newStart, rest: afterStart } = advanceAlongPath(points, startDist);
+  const fromStart = [newStart, ...afterStart];
+  const { point: newEnd, rest: beforeEndReversed } = advanceAlongPath([...fromStart].reverse(), endDist);
+
+  return [newEnd, ...beforeEndReversed].reverse();
 }
 
 (async function () {
