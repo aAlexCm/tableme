@@ -78,6 +78,7 @@ function readAndResizeImage(file) {
   const weddingNameEl = document.getElementById('theme-settings-wedding-name');
   const backLinkEl = document.getElementById('theme-settings-back-link');
   const guestLinkEl = document.getElementById('theme-settings-guest-link');
+  const previewTextEl = document.getElementById('theme-settings-preview-text');
   const previewTitleEl = document.getElementById('theme-settings-preview-title');
   const previewDescEl = document.getElementById('theme-settings-preview-desc');
 
@@ -139,14 +140,17 @@ function readAndResizeImage(file) {
     });
   }
 
-  // The banner is teal from the start, but its title/desc start empty —
-  // the very first saved change types them out (title, then a second
-  // later the description) and they stay filled in after that; later
-  // changes just re-trigger the button's badge/pulse instead of
-  // re-typing the text every time.
+  // The banner is teal from the start, but with no title/desc yet there's
+  // nothing to reserve space for — the text block stays collapsed (see
+  // .theme-settings-preview-banner-text in css) so the banner is just the
+  // button with even padding. The very first saved change opens it up and
+  // types the title out, then a second later the description, and they
+  // stay filled in after that; later changes just re-trigger the button's
+  // badge/pulse instead of re-typing the text every time.
   async function revealPreviewBanner() {
     if (previewRevealed) return;
     previewRevealed = true;
+    previewTextEl.classList.add('is-revealed');
     await typeText(previewTitleEl, t(currentLang, 'themeSettingsPreviewTitle'));
     await new Promise((resolve) => setTimeout(resolve, 1000));
     await typeText(previewDescEl, t(currentLang, 'themeSettingsPreviewDesc'));

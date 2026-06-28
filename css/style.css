@@ -3469,24 +3469,33 @@ select.mini-lang-select {
   box-shadow: 0 10px 28px rgba(15, 23, 42, 0.18);
 }
 
-/* Title/desc start empty — the first saved change types them out (see
-   theme-settings.js) — but the banner itself is teal from the start so
-   it never looks like a blank, broken box. min-height keeps the banner
-   from changing height once the text appears. */
+/* Collapsed to nothing until the first saved change reveals it (see
+   .is-revealed and theme-settings.js) — with no title/desc yet, there's
+   no point reserving space for them; the banner just wraps the button
+   with even padding above and below. Once revealed, this grows open
+   and the title/desc type themselves out inside it. */
+.theme-settings-preview-banner-text {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.5s ease;
+}
+
+.theme-settings-preview-banner-text.is-revealed {
+  max-height: 90px;
+}
+
 .theme-settings-preview-banner-title {
   margin: 0 0 4px;
   font-family: 'Playfair Display', serif;
   font-size: 1.1rem;
   font-weight: 700;
   color: #fff;
-  min-height: 1.4em;
 }
 
 .theme-settings-preview-banner-desc {
   margin: 0;
   font-size: 0.85rem;
   color: rgba(255, 255, 255, 0.85);
-  min-height: 1.3em;
 }
 
 .theme-settings-preview-btn {
