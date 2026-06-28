@@ -3567,13 +3567,6 @@ select.mini-lang-select {
     margin-bottom: 16px;
   }
 
-  /* The language switcher is a fixed, always-on-top element pinned to the
-     top-right of the viewport — reserve room for it here so the banner's
-     own title/description text never wraps underneath its pill. */
-  .theme-settings-preview-banner-text {
-    padding-right: 92px;
-  }
-
   .theme-settings-preview-banner-title {
     font-size: 0.85rem;
     margin: 0 0 2px;
