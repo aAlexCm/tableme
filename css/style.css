@@ -3453,9 +3453,6 @@ select.mini-lang-select {
    change the OTHER page (the guest-facing one). This stays in view while
    scrolling through the (long) settings list below, so the prompt to go
    check the result is never more than a glance away. */
-/* Starts blank and white on purpose — there's nothing to look at yet.
-   The first change reveals it (see .is-active below) and it stays
-   revealed from then on. */
 .theme-settings-preview-banner {
   position: sticky;
   top: 12px;
@@ -3468,40 +3465,28 @@ select.mini-lang-select {
   padding: 20px 26px;
   margin-bottom: 24px;
   border-radius: var(--radius);
-  background: var(--paper);
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.1);
-  transition: background 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
-}
-
-.theme-settings-preview-banner.is-active {
   background: var(--gold-deep);
-  border-color: transparent;
   box-shadow: 0 10px 28px rgba(15, 23, 42, 0.18);
 }
 
+/* Title/desc start empty — the first saved change types them out (see
+   theme-settings.js) — but the banner itself is teal from the start so
+   it never looks like a blank, broken box. min-height keeps the banner
+   from changing height once the text appears. */
 .theme-settings-preview-banner-title {
   margin: 0 0 4px;
   font-family: 'Playfair Display', serif;
   font-size: 1.1rem;
   font-weight: 700;
-  color: var(--charcoal);
-  min-height: 1.4em;
-}
-
-.theme-settings-preview-banner.is-active .theme-settings-preview-banner-title {
   color: #fff;
+  min-height: 1.4em;
 }
 
 .theme-settings-preview-banner-desc {
   margin: 0;
   font-size: 0.85rem;
-  color: var(--ink);
-  min-height: 1.3em;
-}
-
-.theme-settings-preview-banner.is-active .theme-settings-preview-banner-desc {
   color: rgba(255, 255, 255, 0.85);
+  min-height: 1.3em;
 }
 
 .theme-settings-preview-btn {
