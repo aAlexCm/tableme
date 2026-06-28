@@ -78,6 +78,9 @@ function readAndResizeImage(file) {
   const weddingNameEl = document.getElementById('theme-settings-wedding-name');
   const backLinkEl = document.getElementById('theme-settings-back-link');
   const guestLinkEl = document.getElementById('theme-settings-guest-link');
+  const previewBannerEl = document.getElementById('theme-settings-preview-banner');
+  const previewTitleEl = document.getElementById('theme-settings-preview-title');
+  const previewDescEl = document.getElementById('theme-settings-preview-desc');
 
   const themePresetGridEl = document.getElementById('theme-preset-grid');
   const themeFontTitleGridEl = document.getElementById('theme-font-title-grid');
@@ -105,6 +108,7 @@ function readAndResizeImage(file) {
   // pulse so a change made while already looking at the button still gets
   // noticed.
   function flagGuestLinkUpdated() {
+    revealPreviewBanner();
     guestLinkEl.classList.add('has-update');
     guestLinkEl.classList.remove('pulse-attention');
     void guestLinkEl.offsetWidth;
@@ -117,12 +121,50 @@ function readAndResizeImage(file) {
     guestLinkEl.classList.remove('has-update');
   });
 
+  let previewRevealed = false;
+
+  function typeText(el, text, speed = 28) {
+    return new Promise((resolve) => {
+      el.textContent = '';
+      let i = 0;
+      const tick = () => {
+        i += 1;
+        el.textContent = text.slice(0, i);
+        if (i < text.length) {
+          setTimeout(tick, speed);
+        } else {
+          resolve();
+        }
+      };
+      tick();
+    });
+  }
+
+  // The banner starts blank and white — easy to miss, which is the point:
+  // it only earns its place once there's actually something to look at.
+  // The very first change reveals it (teal background, title typed out,
+  // then the description a second later) and it stays revealed after
+  // that; later changes just re-trigger the button's badge/pulse instead
+  // of re-typing the text every time.
+  async function revealPreviewBanner() {
+    if (previewRevealed) return;
+    previewRevealed = true;
+    previewBannerEl.classList.add('is-active');
+    await typeText(previewTitleEl, t(currentLang, 'themeSettingsPreviewTitle'));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await typeText(previewDescEl, t(currentLang, 'themeSettingsPreviewDesc'));
+  }
+
   function updateLabels() {
     decorationRemoveBtn.innerHTML = TABLE_ICONS.trash;
     const removeLabel = t(currentLang, 'decorationRemoveBtn');
     decorationRemoveBtn.title = removeLabel;
     decorationRemoveBtn.setAttribute('aria-label', removeLabel);
     refreshGuestLink();
+    if (previewRevealed) {
+      previewTitleEl.textContent = t(currentLang, 'themeSettingsPreviewTitle');
+      previewDescEl.textContent = t(currentLang, 'themeSettingsPreviewDesc');
+    }
   }
 
   async function render() {

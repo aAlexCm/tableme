@@ -3453,6 +3453,9 @@ select.mini-lang-select {
    change the OTHER page (the guest-facing one). This stays in view while
    scrolling through the (long) settings list below, so the prompt to go
    check the result is never more than a glance away. */
+/* Starts blank and white on purpose — there's nothing to look at yet.
+   The first change reveals it (see .is-active below) and it stays
+   revealed from then on. */
 .theme-settings-preview-banner {
   position: sticky;
   top: 12px;
@@ -3465,7 +3468,15 @@ select.mini-lang-select {
   padding: 20px 26px;
   margin-bottom: 24px;
   border-radius: var(--radius);
+  background: var(--paper);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.1);
+  transition: background 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
+}
+
+.theme-settings-preview-banner.is-active {
   background: var(--gold-deep);
+  border-color: transparent;
   box-shadow: 0 10px 28px rgba(15, 23, 42, 0.18);
 }
 
@@ -3474,12 +3485,22 @@ select.mini-lang-select {
   font-family: 'Playfair Display', serif;
   font-size: 1.1rem;
   font-weight: 700;
+  color: var(--charcoal);
+  min-height: 1.4em;
+}
+
+.theme-settings-preview-banner.is-active .theme-settings-preview-banner-title {
   color: #fff;
 }
 
 .theme-settings-preview-banner-desc {
   margin: 0;
   font-size: 0.85rem;
+  color: var(--ink);
+  min-height: 1.3em;
+}
+
+.theme-settings-preview-banner.is-active .theme-settings-preview-banner-desc {
   color: rgba(255, 255, 255, 0.85);
 }
 
@@ -3492,6 +3513,7 @@ select.mini-lang-select {
   padding: 13px 24px;
   border-radius: var(--radius-pill);
   background: #fff;
+  border: 1.5px solid rgba(15, 23, 42, 0.1);
   color: var(--gold-deep);
   font-weight: 700;
   font-size: 0.92rem;
@@ -3542,8 +3564,9 @@ select.mini-lang-select {
 @media (max-width: 600px) {
   .theme-settings-preview-banner {
     top: 6px;
-    padding: 14px 16px;
-    gap: 10px;
+    padding: 10px 14px;
+    gap: 8px;
+    margin-bottom: 16px;
   }
 
   /* The language switcher is a fixed, always-on-top element pinned to the
@@ -3554,18 +3577,19 @@ select.mini-lang-select {
   }
 
   .theme-settings-preview-banner-title {
-    font-size: 0.95rem;
+    font-size: 0.85rem;
+    margin: 0 0 2px;
   }
 
   .theme-settings-preview-banner-desc {
-    font-size: 0.78rem;
+    font-size: 0.72rem;
   }
 
   .theme-settings-preview-btn {
     width: 100%;
     justify-content: center;
-    padding: 11px 20px;
-    font-size: 0.85rem;
+    padding: 8px 16px;
+    font-size: 0.8rem;
   }
 }
 
