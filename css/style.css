@@ -3448,6 +3448,76 @@ select.mini-lang-select {
   padding: 6px 0;
 }
 
+/* A deliberately bold, sticky banner — the whole point of moving theme
+   settings to its own page was that couples didn't realize these controls
+   change the OTHER page (the guest-facing one). This stays in view while
+   scrolling through the (long) settings list below, so the prompt to go
+   check the result is never more than a glance away. */
+.theme-settings-preview-banner {
+  position: sticky;
+  top: 12px;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 20px 26px;
+  margin-bottom: 24px;
+  border-radius: var(--radius);
+  background: var(--gold-deep);
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.18);
+}
+
+.theme-settings-preview-banner-title {
+  margin: 0 0 4px;
+  font-family: 'Playfair Display', serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.theme-settings-preview-banner-desc {
+  margin: 0;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.theme-settings-preview-btn {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 24px;
+  border-radius: var(--radius-pill);
+  background: #fff;
+  color: var(--gold-deep);
+  font-weight: 700;
+  font-size: 0.92rem;
+  text-decoration: none;
+  white-space: nowrap;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.theme-settings-preview-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.22);
+  color: var(--gold-deep);
+}
+
+@media (max-width: 600px) {
+  .theme-settings-preview-banner {
+    position: static;
+    padding: 18px 20px;
+  }
+
+  .theme-settings-preview-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
 .theme-preset-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
