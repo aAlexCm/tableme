@@ -471,6 +471,8 @@ function parseSheetRows(rows) {
         const deleteLabel = escapeHtml(t(currentLang, 'deleteBtn'));
         const menu = (wedding.menus || []).find((m) => m.id === g.menuId);
         const menuTagHtml = menu ? `<span class="guest-row-menu-tag">${escapeHtml(menu.title)}</span>` : '';
+        const rsvp = g.rsvp || 'pending';
+        const rsvpTagHtml = `<span class="guest-row-rsvp-tag guest-row-rsvp-${rsvp}">${escapeHtml(t(currentLang, `guestRsvp${rsvp[0].toUpperCase()}${rsvp.slice(1)}`))}</span>`;
         const li = document.createElement('li');
         li.className = 'guest-row';
         li.draggable = true;
@@ -479,6 +481,7 @@ function parseSheetRows(rows) {
           <span class="drag-handle">&#10303;</span>
           <span class="guest-row-name">${escapeHtml(g.name)}</span>
           ${menuTagHtml}
+          ${rsvpTagHtml}
           <span class="guest-row-actions">
             <input type="text" class="guest-table-edit" data-id="${g.id}" value="${escapeHtml(g.table)}" aria-label="${escapeHtml(t(currentLang, 'tableLabel'))}" />
             <span class="row-arrows">

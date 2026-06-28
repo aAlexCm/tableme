@@ -22,6 +22,7 @@ export function createGuestModal({ weddingId, getLang, onChange }) {
   const nameInput = document.getElementById('guest-modal-name-input');
   const tableSelect = document.getElementById('guest-modal-table-select');
   const menuSelect = document.getElementById('guest-modal-menu-select');
+  const rsvpSelect = document.getElementById('guest-modal-rsvp-select');
   const deleteBtn = document.getElementById('guest-modal-delete-btn');
 
   deleteBtn.innerHTML = TRASH_ICON;
@@ -44,6 +45,14 @@ export function createGuestModal({ weddingId, getLang, onChange }) {
     return unassignedOpt + options;
   }
 
+  function buildRsvpOptionsHtml(currentStatus) {
+    const lang = getLang();
+    const status = currentStatus || 'pending';
+    return ['pending', 'confirmed', 'declined']
+      .map((value) => `<option value="${value}" ${value === status ? 'selected' : ''}>${escapeHtml(t(lang, `guestRsvp${value[0].toUpperCase()}${value.slice(1)}`))}</option>`)
+      .join('');
+  }
+
   async function refreshWedding() {
     wedding = await Storage.getWedding(weddingId);
   }
@@ -64,6 +73,7 @@ export function createGuestModal({ weddingId, getLang, onChange }) {
     nameInput.value = guest.name;
     tableSelect.innerHTML = buildTableOptionsHtml(wedding.tables || [], guest.table || '');
     menuSelect.innerHTML = buildMenuOptionsHtml(wedding.menus || [], guest.menuId || '');
+    rsvpSelect.innerHTML = buildRsvpOptionsHtml(guest.rsvp);
   }
 
   async function notifyChange() {
@@ -126,6 +136,14 @@ export function createGuestModal({ weddingId, getLang, onChange }) {
     const guest = activeGuest();
     if (!guest) return;
     const guests = wedding.guests.map((g) => (g.id === guest.id ? { ...g, menuId: menuSelect.value } : g));
+    await Storage.setGuests(weddingId, guests);
+    await notifyChange();
+  });
+
+  rsvpSelect.addEventListener('change', async () => {
+    const guest = activeGuest();
+    if (!guest) return;
+    const guests = wedding.guests.map((g) => (g.id === guest.id ? { ...g, rsvp: rsvpSelect.value } : g));
     await Storage.setGuests(weddingId, guests);
     await notifyChange();
   });

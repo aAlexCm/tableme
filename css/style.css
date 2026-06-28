@@ -3090,6 +3090,27 @@ body.admin-theme .guest-row-drop-target {
   white-space: nowrap;
 }
 
+.guest-row-rsvp-tag {
+  flex: 0 0 auto;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--cream);
+  color: var(--ink);
+  font-size: 0.72rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.guest-row-rsvp-confirmed {
+  background: var(--gold-light);
+  color: var(--gold-deep);
+}
+
+.guest-row-rsvp-declined {
+  background: color-mix(in srgb, var(--error) 12%, transparent);
+  color: var(--error);
+}
+
 .guest-row-actions {
   display: flex;
   align-items: center;
