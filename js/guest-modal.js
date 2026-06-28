@@ -107,6 +107,16 @@ export function createGuestModal({ weddingId, getLang, onChange }) {
     if (onChange) await onChange();
   }
 
+  async function saveGuests(guests) {
+    try {
+      await Storage.setGuests(weddingId, guests);
+    } catch (err) {
+      console.error('setGuests failed', err);
+      alert(t(getLang(), 'saveErrorRetry'));
+    }
+    await notifyChange();
+  }
+
   async function open(guestId) {
     activeGuestId = guestId;
     await refreshWedding();
@@ -145,8 +155,7 @@ export function createGuestModal({ weddingId, getLang, onChange }) {
     }
     if (newName === guest.name) return;
     const guests = wedding.guests.map((g) => (g.id === guest.id ? { ...g, name: newName } : g));
-    await Storage.setGuests(weddingId, guests);
-    await notifyChange();
+    await saveGuests(guests);
   });
 
   rsvpGroup.addEventListener('click', async (e) => {
@@ -157,8 +166,7 @@ export function createGuestModal({ weddingId, getLang, onChange }) {
     const rsvp = btn.dataset.rsvp;
     if (rsvp === (guest.rsvp || 'pending')) return;
     const guests = wedding.guests.map((g) => (g.id === guest.id ? { ...g, rsvp } : g));
-    await Storage.setGuests(weddingId, guests);
-    await notifyChange();
+    await saveGuests(guests);
   });
 
   phoneInput.addEventListener('keydown', (e) => {
@@ -171,8 +179,7 @@ export function createGuestModal({ weddingId, getLang, onChange }) {
     const newPhone = combinePhone(phoneCodeSelect.value, phoneInput.value);
     if (newPhone === (guest.phone || '')) return;
     const guests = wedding.guests.map((g) => (g.id === guest.id ? { ...g, phone: newPhone } : g));
-    await Storage.setGuests(weddingId, guests);
-    await notifyChange();
+    await saveGuests(guests);
   }
 
   phoneInput.addEventListener('change', savePhone);
@@ -182,16 +189,14 @@ export function createGuestModal({ weddingId, getLang, onChange }) {
     const guest = activeGuest();
     if (!guest) return;
     const guests = wedding.guests.map((g) => (g.id === guest.id ? { ...g, table: tableSelect.value } : g));
-    await Storage.setGuests(weddingId, guests);
-    await notifyChange();
+    await saveGuests(guests);
   });
 
   menuSelect.addEventListener('change', async () => {
     const guest = activeGuest();
     if (!guest) return;
     const guests = wedding.guests.map((g) => (g.id === guest.id ? { ...g, menuId: menuSelect.value } : g));
-    await Storage.setGuests(weddingId, guests);
-    await notifyChange();
+    await saveGuests(guests);
   });
 
   deleteBtn.addEventListener('click', async () => {

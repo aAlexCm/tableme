@@ -878,7 +878,16 @@ function reconcileTables(wedding) {
     return;
   }
 
-  await fetchWeddingData();
+  try {
+    await fetchWeddingData();
+  } catch (err) {
+    console.error('getWedding failed', err);
+    document.getElementById('connection-error').hidden = false;
+    document.getElementById('connection-error-retry').addEventListener('click', () => location.reload());
+    applyTranslations(currentLang);
+    langMount.appendChild(buildLangSwitcher(currentLang, setLang));
+    return;
+  }
   if (!wedding) {
     notFoundEl.hidden = false;
     applyTranslations(currentLang);

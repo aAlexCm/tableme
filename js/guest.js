@@ -723,7 +723,20 @@ function getCardinalAnchor(center, direction, radius) {
     return;
   }
 
-  const wedding = await Storage.getWedding(weddingId);
+  let wedding;
+  try {
+    wedding = await Storage.getWedding(weddingId);
+  } catch (err) {
+    console.error('getWedding failed', err);
+    langMount.appendChild(buildLangSwitcher(currentLang, setLang));
+    applyTranslations(currentLang);
+    titleEl.textContent = t(currentLang, 'guestHeroTitle');
+    document.title = 'TableMe · Find my table';
+    const connectionErrorEl = document.getElementById('connection-error');
+    connectionErrorEl.hidden = false;
+    document.getElementById('connection-error-retry').addEventListener('click', () => location.reload());
+    return;
+  }
   if (!wedding) {
     langMount.appendChild(buildLangSwitcher(currentLang, setLang));
     applyTranslations(currentLang);

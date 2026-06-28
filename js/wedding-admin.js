@@ -326,36 +326,51 @@ function parseSheetRows(rows) {
     // on a write + a re-fetch round trip — that double network hop is what
     // made the drop feel like it landed a full second late.
     await renderGuests({ ...wedding, guests: newGuests });
-    await Storage.setGuests(weddingId, newGuests);
+    await saveGuestsWithRetry(newGuests);
   }
 
+  // Same fix as moveGuestToContainer above: build off cachedWedding and render
+  // immediately, then write in the background, instead of fetch + write + fetch.
+  // That extra read-before-write also meant two rapid edits could each read a
+  // stale snapshot and overwrite each other's change — going through the single
+  // in-memory cachedWedding instead removes that race for same-tab edits.
   async function updateGuestTable(guestId, newTable) {
     const table = newTable.trim();
     if (!table) {
       await renderGuests();
       return;
     }
-    const wedding = await Storage.getWedding(weddingId);
+    const wedding = cachedWedding || (await Storage.getWedding(weddingId));
     if (!wedding) return;
     const guests = wedding.guests.map((g) => (g.id === guestId ? { ...g, table } : g));
-    await Storage.setGuests(weddingId, guests);
-    await renderGuests();
+    await renderGuests({ ...wedding, guests });
+    await saveGuestsWithRetry(guests);
   }
 
   async function updateGuestMenu(guestId, menuId) {
-    const wedding = await Storage.getWedding(weddingId);
+    const wedding = cachedWedding || (await Storage.getWedding(weddingId));
     if (!wedding) return;
     const guests = wedding.guests.map((g) => (g.id === guestId ? { ...g, menuId } : g));
-    await Storage.setGuests(weddingId, guests);
-    await renderGuests();
+    await renderGuests({ ...wedding, guests });
+    await saveGuestsWithRetry(guests);
   }
 
   async function updateGuestRsvp(guestId, rsvp) {
-    const wedding = await Storage.getWedding(weddingId);
+    const wedding = cachedWedding || (await Storage.getWedding(weddingId));
     if (!wedding) return;
     const guests = wedding.guests.map((g) => (g.id === guestId ? { ...g, rsvp } : g));
-    await Storage.setGuests(weddingId, guests);
-    await renderGuests();
+    await renderGuests({ ...wedding, guests });
+    await saveGuestsWithRetry(guests);
+  }
+
+  async function saveGuestsWithRetry(guests) {
+    try {
+      await Storage.setGuests(weddingId, guests);
+    } catch (err) {
+      console.error('setGuests failed', err);
+      alert(t(currentLang, 'saveErrorRetry'));
+      await renderGuests();
+    }
   }
 
   function attachRowDragEvents(row) {
@@ -949,7 +964,17 @@ function parseSheetRows(rows) {
     return;
   }
 
-  const wedding = await Storage.getWedding(weddingId);
+  let wedding;
+  try {
+    wedding = await Storage.getWedding(weddingId);
+  } catch (err) {
+    console.error('getWedding failed', err);
+    document.getElementById('connection-error').hidden = false;
+    document.getElementById('connection-error-retry').addEventListener('click', () => location.reload());
+    applyTranslations(currentLang);
+    langMount.appendChild(buildLangSwitcher(currentLang, setLang));
+    return;
+  }
   if (!wedding) {
     notFoundEl.hidden = false;
     applyTranslations(currentLang);
