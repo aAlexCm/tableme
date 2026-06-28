@@ -3079,34 +3079,35 @@ body.admin-theme .guest-row-drop-target {
   text-decoration-color: color-mix(in srgb, var(--charcoal) 35%, transparent);
 }
 
-.guest-row-menu-tag {
+.guest-menu-edit,
+.guest-rsvp-edit {
   flex: 0 0 auto;
-  padding: 3px 10px;
+  width: auto;
+  height: auto;
+  padding: 4px 8px;
+  border: 1px solid transparent;
   border-radius: var(--radius-pill);
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.guest-menu-edit {
   background: var(--sage-light);
   color: var(--sage-deep);
-  font-size: 0.72rem;
-  font-weight: 600;
-  white-space: nowrap;
 }
 
-.guest-row-rsvp-tag {
-  flex: 0 0 auto;
-  padding: 3px 10px;
-  border-radius: var(--radius-pill);
+.guest-rsvp-edit-pending {
   background: var(--cream);
   color: var(--ink);
-  font-size: 0.72rem;
-  font-weight: 600;
-  white-space: nowrap;
 }
 
-.guest-row-rsvp-confirmed {
+.guest-rsvp-edit-confirmed {
   background: var(--gold-light);
   color: var(--gold-deep);
 }
 
-.guest-row-rsvp-declined {
+.guest-rsvp-edit-declined {
   background: color-mix(in srgb, var(--error) 12%, transparent);
   color: var(--error);
 }

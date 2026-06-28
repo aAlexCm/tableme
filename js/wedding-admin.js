@@ -150,6 +150,21 @@ function parseSheetRows(rows) {
     })[c]);
   }
 
+  function buildGuestMenuOptionsHtml(menus, currentMenuId) {
+    const unassignedOpt = `<option value="" ${currentMenuId ? '' : 'selected'}>${escapeHtml(t(currentLang, 'unassignedOption'))}</option>`;
+    const options = menus
+      .map((menu) => `<option value="${escapeHtml(menu.id)}" ${menu.id === currentMenuId ? 'selected' : ''}>${escapeHtml(menu.title)}</option>`)
+      .join('');
+    return unassignedOpt + options;
+  }
+
+  function buildGuestRsvpOptionsHtml(currentStatus) {
+    const status = currentStatus || 'pending';
+    return ['pending', 'confirmed', 'declined']
+      .map((value) => `<option value="${value}" ${value === status ? 'selected' : ''}>${escapeHtml(t(currentLang, `guestRsvp${value[0].toUpperCase()}${value.slice(1)}`))}</option>`)
+      .join('');
+  }
+
   function updatePageTitle() {
     document.title = 'TableMe · Guests';
   }
@@ -338,6 +353,22 @@ function parseSheetRows(rows) {
     await renderGuests();
   }
 
+  async function updateGuestMenu(guestId, menuId) {
+    const wedding = await Storage.getWedding(weddingId);
+    if (!wedding) return;
+    const guests = wedding.guests.map((g) => (g.id === guestId ? { ...g, menuId } : g));
+    await Storage.setGuests(weddingId, guests);
+    await renderGuests();
+  }
+
+  async function updateGuestRsvp(guestId, rsvp) {
+    const wedding = await Storage.getWedding(weddingId);
+    if (!wedding) return;
+    const guests = wedding.guests.map((g) => (g.id === guestId ? { ...g, rsvp } : g));
+    await Storage.setGuests(weddingId, guests);
+    await renderGuests();
+  }
+
   function attachRowDragEvents(row) {
     let ghostEl = null;
 
@@ -469,10 +500,7 @@ function parseSheetRows(rows) {
 
       function renderGuestRow(g) {
         const deleteLabel = escapeHtml(t(currentLang, 'deleteBtn'));
-        const menu = (wedding.menus || []).find((m) => m.id === g.menuId);
-        const menuTagHtml = menu ? `<span class="guest-row-menu-tag">${escapeHtml(menu.title)}</span>` : '';
         const rsvp = g.rsvp || 'pending';
-        const rsvpTagHtml = `<span class="guest-row-rsvp-tag guest-row-rsvp-${rsvp}">${escapeHtml(t(currentLang, `guestRsvp${rsvp[0].toUpperCase()}${rsvp.slice(1)}`))}</span>`;
         const li = document.createElement('li');
         li.className = 'guest-row';
         li.draggable = true;
@@ -480,8 +508,8 @@ function parseSheetRows(rows) {
         li.innerHTML = `
           <span class="drag-handle">&#10303;</span>
           <span class="guest-row-name">${escapeHtml(g.name)}</span>
-          ${menuTagHtml}
-          ${rsvpTagHtml}
+          <select class="guest-menu-edit" data-id="${g.id}" aria-label="${escapeHtml(t(currentLang, 'guestMenuLabel'))}">${buildGuestMenuOptionsHtml(wedding.menus || [], g.menuId || '')}</select>
+          <select class="guest-rsvp-edit guest-rsvp-edit-${rsvp}" data-id="${g.id}" aria-label="${escapeHtml(t(currentLang, 'guestRsvpLabel'))}">${buildGuestRsvpOptionsHtml(rsvp)}</select>
           <span class="guest-row-actions">
             <input type="text" class="guest-table-edit" data-id="${g.id}" value="${escapeHtml(g.table)}" aria-label="${escapeHtml(t(currentLang, 'tableLabel'))}" />
             <span class="row-arrows">
@@ -761,9 +789,20 @@ function parseSheetRows(rows) {
   });
 
   guestListEl.addEventListener('change', async (e) => {
-    const input = e.target.closest('.guest-table-edit');
-    if (!input) return;
-    await updateGuestTable(input.dataset.id, input.value);
+    const tableInput = e.target.closest('.guest-table-edit');
+    if (tableInput) {
+      await updateGuestTable(tableInput.dataset.id, tableInput.value);
+      return;
+    }
+    const menuSelect = e.target.closest('.guest-menu-edit');
+    if (menuSelect) {
+      await updateGuestMenu(menuSelect.dataset.id, menuSelect.value);
+      return;
+    }
+    const rsvpSelect = e.target.closest('.guest-rsvp-edit');
+    if (rsvpSelect) {
+      await updateGuestRsvp(rsvpSelect.dataset.id, rsvpSelect.value);
+    }
   });
 
   document.addEventListener('click', (e) => {
