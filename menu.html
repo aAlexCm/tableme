@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>TableMe · Gestion des menus</title>
+  <meta property="og:title" content="TableMe · Gestion des menus" />
+  <meta property="og:description" content="Manage the wedding menus and dishes." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://tableme.app/menu" />
+  <meta property="og:image" content="https://tableme.app/og-image.png" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="TableMe · Gestion des menus" />
+  <meta name="twitter:description" content="Manage the wedding menus and dishes." />
+  <meta name="twitter:image" content="https://tableme.app/og-image.png" />
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="admin-theme">
+  <div class="page page-wide">
+    <div id="lang-switcher-mount" class="lang-switcher-mount"></div>
+
+    <div id="not-found" class="card" hidden>
+      <h2 data-i18n="weddingNotFoundTitle">Mariage introuvable</h2>
+      <p class="muted" data-i18n="weddingNotFoundDesc">Ce lien n'est pas valide ou ce mariage a été supprimé.</p>
+    </div>
+
+    <div id="menu-content" hidden>
+      <nav class="admin-nav admin-nav-stacked">
+        <strong id="menu-wedding-name"></strong>
+        <div class="admin-nav-actions">
+          <a href="#" id="menu-back-link" data-i18n="backToAdminLink">&larr; Retour</a>
+        </div>
+      </nav>
+
+      <div class="card">
+        <h2 data-i18n="menuPageTitle">Gestion des menus</h2>
+
+        <form id="menu-add-form" class="menu-add-form">
+          <button type="submit" class="menu-add-icon" id="menu-add-btn" aria-label="Ajouter un menu">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+          </button>
+          <input type="text" id="menu-add-input" data-i18n-placeholder="menuAddPlaceholder" placeholder="Nom du menu (ex: Menu adulte, Menu enfant, Menu vegan)..." />
+        </form>
+
+        <ul class="menu-card-list" id="menu-card-list"></ul>
+
+        <p class="empty-state" id="menu-empty-state" data-i18n="menuEmptyState" hidden>Aucun menu pour l'instant. Créez-en un ci-dessus !</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="menu-confirm-modal" class="modal-overlay" hidden>
+    <div class="modal-panel">
+      <button type="button" class="modal-close" id="menu-confirm-modal-close" aria-label="Close">&times;</button>
+      <div class="modal-scroll">
+        <h3 data-i18n="todoConfirmDeleteTitle">Confirmer la suppression</h3>
+        <p class="muted" id="menu-confirm-modal-message"></p>
+        <div class="menu-confirm-modal-actions">
+          <button type="button" class="secondary" id="menu-confirm-modal-cancel" data-i18n="cancelBtn">Annuler</button>
+          <button type="button" class="menu-confirm-modal-confirm" id="menu-confirm-modal-confirm" data-i18n="deleteBtn">Supprimer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="js/menu.js"></script>
+</body>
+</html>

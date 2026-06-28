@@ -800,6 +800,8 @@ function parseSheetRows(rows) {
   if (partnersTile) partnersTile.href = `partenaires.html?id=${weddingId}`;
   const todoTile = document.getElementById('todo-tile');
   if (todoTile) todoTile.href = `todo.html?id=${weddingId}`;
+  const menuTile = document.getElementById('menu-tile');
+  if (menuTile) menuTile.href = `menu.html?id=${weddingId}`;
   shareControls.init(weddingId);
   themeSettings.init();
   updatePageTitle();

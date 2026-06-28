@@ -112,6 +112,10 @@ export const Storage = {
     await updateDoc(doc(db, 'weddings', weddingId), { tasks, tasksSeeded: true });
   },
 
+  async setMenus(weddingId, menus) {
+    await updateDoc(doc(db, 'weddings', weddingId), { menus });
+  },
+
   async setTheme(weddingId, theme) {
     await updateDoc(doc(db, 'weddings', weddingId), { theme });
   },
