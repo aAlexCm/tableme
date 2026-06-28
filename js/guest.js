@@ -272,6 +272,7 @@ function trimRouteEnds(points, startRetreat, endRetreat) {
     const wayfindingPanel = isFeatureEnabled(currentWedding, 'wayfindingGps')
       ? buildWayfindingPanel(table ? `table:${table.id}` : null)
       : null;
+    const guestMenu = guest.menuId ? (currentWedding.menus || []).find((m) => m.id === guest.menuId) : null;
 
     const switchEl = document.createElement('div');
     switchEl.className = 'mode-switch table-preview-switch';
@@ -279,6 +280,7 @@ function trimRouteEnds(points, startRetreat, endRetreat) {
       <button type="button" class="mode-btn active" data-view="table">${escapeHtml(t(currentLang, 'tablePreviewViewTable'))}</button>
       <button type="button" class="mode-btn" data-view="list">${escapeHtml(t(currentLang, 'tablePreviewViewList'))}</button>
       ${wayfindingPanel ? `<button type="button" class="mode-btn" data-view="gps">${escapeHtml(t(currentLang, 'tablePreviewViewGps'))}</button>` : ''}
+      ${guestMenu ? `<button type="button" class="mode-btn" data-view="menu">${escapeHtml(t(currentLang, 'tablePreviewViewMenu'))}</button>` : ''}
     `;
     wrap.appendChild(switchEl);
 
@@ -355,6 +357,21 @@ function trimRouteEnds(points, startRetreat, endRetreat) {
       wrap.appendChild(wayfindingPanel);
     }
 
+    let menuPanel = null;
+    if (guestMenu) {
+      menuPanel = document.createElement('div');
+      menuPanel.className = 'table-preview-menu';
+      menuPanel.hidden = true;
+      const dishesHtml = (guestMenu.dishes || [])
+        .map((d) => `<li class="table-preview-menu-dish">${escapeHtml(d.name)}</li>`)
+        .join('');
+      menuPanel.innerHTML = `
+        <p class="table-preview-menu-title">${escapeHtml(guestMenu.title)}</p>
+        <ul class="table-preview-menu-dishes">${dishesHtml || `<li class="table-preview-menu-empty">${escapeHtml(t(currentLang, 'tablePreviewMenuEmpty'))}</li>`}</ul>
+      `;
+      wrap.appendChild(menuPanel);
+    }
+
     switchEl.addEventListener('click', (e) => {
       const btn = e.target.closest('.mode-btn');
       if (!btn) return;
@@ -363,6 +380,7 @@ function trimRouteEnds(points, startRetreat, endRetreat) {
       canvas.hidden = view !== 'table';
       namesWrap.hidden = view !== 'list';
       if (wayfindingPanel) wayfindingPanel.hidden = view !== 'gps';
+      if (menuPanel) menuPanel.hidden = view !== 'menu';
       if (view !== 'table') hideChairTooltip();
     });
 
