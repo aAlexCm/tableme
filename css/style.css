@@ -3000,19 +3000,6 @@ body.admin-theme .toggle-switch input:checked + .toggle-switch-track {
   flex: 0 0 auto;
   width: 30px;
   height: 30px;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.15s ease;
-}
-
-.guest-row-empty:hover .guest-row-empty-fill,
-.guest-row-empty:focus-within .guest-row-empty-fill,
-.guest-row-empty.revealed .guest-row-empty-fill,
-.guest-row-empty:hover .guest-row-empty-delete,
-.guest-row-empty:focus-within .guest-row-empty-delete,
-.guest-row-empty.revealed .guest-row-empty-delete {
-  opacity: 1;
-  pointer-events: auto;
 }
 
 .guest-row-add-seat {

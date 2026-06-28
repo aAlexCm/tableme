@@ -651,6 +651,8 @@ function parseSheetRows(rows) {
   }
 
   function fillEmptySeatForm(tableLabel) {
+    addGuestCard.classList.add('is-open');
+    addGuestToggle.setAttribute('aria-expanded', 'true');
     const singleModeBtn = modeSwitchEl.querySelector('.mode-btn[data-mode="single"]');
     if (singleModeBtn && !singleModeBtn.classList.contains('active')) singleModeBtn.click();
     guestTableInput.value = tableLabel || '';
@@ -828,13 +830,7 @@ function parseSheetRows(rows) {
         return;
       }
       const deleteBtn = e.target.closest('button[data-action="delete-seat"]');
-      if (!deleteBtn) {
-        document.querySelectorAll('.guest-row-empty.revealed').forEach((el) => {
-          if (el !== emptyRow) el.classList.remove('revealed');
-        });
-        emptyRow.classList.toggle('revealed');
-        return;
-      }
+      if (!deleteBtn) return;
       const { id: seatId, tableId } = deleteBtn.dataset;
       const wedding = cachedWedding || (await Storage.getWedding(weddingId));
       if (!wedding) return;
