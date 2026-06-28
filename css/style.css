@@ -3153,6 +3153,52 @@ body.admin-theme .guest-row-drop-target {
   display: none;
 }
 
+.guests-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.guests-title-row h2 {
+  margin: 0;
+}
+
+.guest-rsvp-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.guest-rsvp-summary-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 11px;
+  border-radius: var(--radius-pill);
+  font-size: 0.85rem;
+  font-weight: 700;
+  background: #fdf3d6;
+  color: #92750c;
+}
+
+.guest-rsvp-summary-pill svg {
+  width: 14px;
+  height: 14px;
+}
+
+.guest-rsvp-summary-pill[data-rsvp="confirmed"] {
+  background: #ddf3e3;
+  color: #2f7a4d;
+}
+
+.guest-rsvp-summary-pill[data-rsvp="declined"] {
+  background: #fbdfdf;
+  color: var(--error);
+}
+
 .guest-row-actions {
   display: flex;
   align-items: center;

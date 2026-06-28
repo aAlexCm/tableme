@@ -110,6 +110,7 @@ function parseSheetRows(rows) {
   }
 
   const guestsTitle = document.getElementById('guests-title');
+  const guestRsvpSummaryEl = document.getElementById('guest-rsvp-summary');
   const guestForm = document.getElementById('guest-form');
   const guestNameInput = document.getElementById('guest-name');
   const guestTableInput = document.getElementById('guest-table');
@@ -462,12 +463,32 @@ function parseSheetRows(rows) {
     });
   }
 
+  function renderGuestRsvpSummary(guests) {
+    const realGuests = guests.filter((g) => !g.empty);
+    if (realGuests.length === 0) {
+      guestRsvpSummaryEl.innerHTML = '';
+      return;
+    }
+    const counts = { pending: 0, confirmed: 0, declined: 0 };
+    realGuests.forEach((g) => {
+      const rsvp = g.rsvp || 'pending';
+      counts[rsvp] = (counts[rsvp] || 0) + 1;
+    });
+    guestRsvpSummaryEl.innerHTML = ['confirmed', 'pending', 'declined'].map((rsvp) => `
+      <span class="guest-rsvp-summary-pill" data-rsvp="${rsvp}" aria-label="${escapeHtml(t(currentLang, `guestRsvp${rsvp[0].toUpperCase()}${rsvp.slice(1)}`))}">
+        ${RSVP_ICONS[rsvp]}
+        <span>${counts[rsvp]}</span>
+      </span>
+    `).join('');
+  }
+
   async function renderGuests(weddingOverride) {
     const wedding = weddingOverride || (await Storage.getWedding(weddingId));
     if (!wedding) return;
     cachedWedding = wedding;
 
     guestsTitle.textContent = `${t(currentLang, 'guestsTitlePrefix')}${wedding.name}`;
+    renderGuestRsvpSummary(wedding.guests);
     guestListEl.innerHTML = '';
     guestEmptyEl.hidden = wedding.guests.some((g) => !g.empty);
 
