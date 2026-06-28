@@ -3509,12 +3509,30 @@ select.mini-lang-select {
 @media (max-width: 600px) {
   .theme-settings-preview-banner {
     top: 6px;
-    padding: 18px 20px;
+    padding: 14px 16px;
+    gap: 10px;
+  }
+
+  /* The language switcher is a fixed, always-on-top element pinned to the
+     top-right of the viewport — reserve room for it here so the banner's
+     own title/description text never wraps underneath its pill. */
+  .theme-settings-preview-banner-text {
+    padding-right: 92px;
+  }
+
+  .theme-settings-preview-banner-title {
+    font-size: 0.95rem;
+  }
+
+  .theme-settings-preview-banner-desc {
+    font-size: 0.78rem;
   }
 
   .theme-settings-preview-btn {
     width: 100%;
     justify-content: center;
+    padding: 11px 20px;
+    font-size: 0.85rem;
   }
 }
 
