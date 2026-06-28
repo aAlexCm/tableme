@@ -1,5 +1,6 @@
 import { Storage, generateId } from './storage.js';
 import { applyTranslations, buildLangSwitcher, t } from './i18n.js';
+import { isFeatureEnabled } from './features.js';
 
 const LANG_KEY = 'tableme_wedding_admin_lang';
 
@@ -293,6 +294,11 @@ function escapeHtml(value) {
     notFoundEl.hidden = false;
     applyTranslations(currentLang);
     langMount.appendChild(buildLangSwitcher(currentLang, setLang));
+    return;
+  }
+
+  if (!isFeatureEnabled(wedding, 'menuManagement')) {
+    window.location.replace(`wedding-admin.html?id=${weddingId}`);
     return;
   }
 

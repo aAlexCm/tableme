@@ -919,6 +919,11 @@ function reconcileTables(wedding) {
   if (posterTile) posterTile.href = `poster.html?id=${weddingId}`;
   const todoTile = document.getElementById('todo-tile');
   if (todoTile) todoTile.href = `todo.html?id=${weddingId}`;
+  const menuTile = document.getElementById('menu-tile');
+  if (menuTile) {
+    menuTile.href = `menu.html?id=${weddingId}`;
+    menuTile.hidden = !isFeatureEnabled(wedding, 'menuManagement');
+  }
   tableModalApi.updateLabels();
   updateFullscreenLabel();
   updatePageTitle();

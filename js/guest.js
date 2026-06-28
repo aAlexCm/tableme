@@ -317,7 +317,9 @@ function getCardinalAnchor(center, direction, radius) {
     const wayfindingPanel = isFeatureEnabled(currentWedding, 'wayfindingGps')
       ? buildWayfindingPanel(table ? `table:${table.id}` : null)
       : null;
-    const guestMenu = guest.menuId ? (currentWedding.menus || []).find((m) => m.id === guest.menuId) : null;
+    const guestMenu = guest.menuId && isFeatureEnabled(currentWedding, 'menuManagement')
+      ? (currentWedding.menus || []).find((m) => m.id === guest.menuId)
+      : null;
 
     const switchEl = document.createElement('div');
     switchEl.className = 'mode-switch table-preview-switch';

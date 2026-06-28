@@ -190,6 +190,9 @@ function parseSheetRows(rows) {
 
     floorPlanTabLink.hidden = !isFeatureEnabled(wedding, 'floorPlan');
 
+    const menuTile = document.getElementById('menu-tile');
+    if (menuTile) menuTile.hidden = !isFeatureEnabled(wedding, 'menuManagement');
+
     // Unlike the other gated tiles (which vanish when off), the poster tile
     // stays visible but grayed-out with a contact-us badge — it's a feature
     // the couple can be upsold on, not one that should look like it doesn't exist.
