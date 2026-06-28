@@ -4476,15 +4476,22 @@ body.admin-theme .theme-decoration-position-arrow {
 
 .wayfinding-marker {
   position: absolute;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  transform: translate(-50%, -50%);
   z-index: 1;
 }
 
+/* The route line's start/end points are computed in JS to land exactly on
+   the marker's (left, top) anchor — so the icon/shape must be centered on
+   that same anchor directly, via their own transform. Previously the whole
+   icon+label stack was centered as one flex column, which silently shifted
+   the icon away from the anchor whenever the label was visible (active
+   markers only), making the line appear to touch the icon off-center. The
+   label is now positioned independently below the icon so it can never
+   affect where the icon itself sits. */
 .wayfinding-marker-shape {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform: translate(-50%, -50%);
   width: 16px;
   height: 16px;
   border-radius: 50%;
@@ -4504,6 +4511,10 @@ body.admin-theme .theme-decoration-position-arrow {
 }
 
 .wayfinding-marker-icon {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform: translate(-50%, -50%);
   display: flex;
   color: var(--sage-deep);
 }
@@ -4516,8 +4527,14 @@ body.admin-theme .theme-decoration-position-arrow {
 /* Only the active from/to markers get an inline label (see the override
    below) — with every landmark/table labeled at once, text overlapped as
    soon as two points were close together. Everything else is identified
-   via the legend underneath the map instead. */
+   via the legend underneath the map instead. Positioned independently of
+   the icon/shape (see comment on .wayfinding-marker-shape above) so it
+   never shifts the anchor the route line attaches to. */
 .wayfinding-marker-label {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translate(-50%, 13px);
   display: none;
   font-family: var(--guest-font-body);
   font-size: 0.68rem;
