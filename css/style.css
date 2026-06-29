@@ -1243,6 +1243,10 @@ nav.admin-nav.admin-nav-stacked {
   margin-top: 16px;
 }
 
+.invitation-link-row .icon-btn {
+  flex: 0 0 34px;
+}
+
 .invitation-link-display {
   flex: 1 1 auto;
   min-width: 0;
