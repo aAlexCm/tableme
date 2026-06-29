@@ -1254,12 +1254,15 @@ nav.admin-nav.admin-nav-stacked {
 .invitation-phone-screen {
   /* top/bottom + height:auto doesn't reliably stretch a replaced element
      like <iframe> across browsers — it falls back to the intrinsic 150px
-     default height instead. Explicit width/height (not bottom) avoids that. */
+     default height instead. Explicit width/height (not bottom) avoids that.
+     Insets are measured pixel-for-pixel from images/phone-frame.png itself
+     (its visible phone shape isn't centered in the canvas — there's more
+     shadow padding on the left than the right), not guessed/symmetric. */
   position: absolute;
-  top: 7%;
-  left: 3.5%;
-  width: 93%;
-  height: 88%;
+  top: 5.5%;
+  left: 3%;
+  width: 96.5%;
+  height: 91.7%;
   display: block;
   border: none;
   border-radius: 32px;
