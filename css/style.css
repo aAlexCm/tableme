@@ -40,20 +40,21 @@
    viewport, the gap shows through to <html>'s default (white) background
    instead of the page's own, looking like a hard line cutting across
    whatever happens to sit near the bottom of the screen at that moment.
-   Giving <html> the same background is a static, always-correct safety net
-   regardless of why/when that gap opens up. --guest-bg defaults to --cream
-   and gets overridden per-wedding on guest-facing pages, so this tracks
-   whichever theme is actually in use. */
+   The background lives here (not on body) so it stays the document's
+   canvas background: body has none of its own, which lets elements like
+   .guest-decoration-layer (negative z-index) keep painting above the
+   canvas instead of being covered by a separate, opaque body box.
+   --guest-bg defaults to --cream and gets overridden per-wedding on
+   guest-facing pages, so this tracks whichever theme is actually in use. */
 html {
   background: var(--guest-bg);
+  background-image: radial-gradient(circle at 50% 0%, #ffffff 0%, var(--guest-bg) 60%);
 }
 
 body {
   margin: 0;
   font-family: 'Inter', sans-serif;
   font-weight: 400;
-  background: var(--cream);
-  background-image: radial-gradient(circle at 50% 0%, #ffffff 0%, var(--cream) 60%);
   color: var(--ink);
   min-height: 100vh;
   min-height: 100dvh;
@@ -6493,8 +6494,6 @@ body.admin-theme h3 {
 /* Guest theme: index.html reads colors from the --guest-* variables (set above, and
    overridden per-wedding at runtime by js/guest.js) instead of the shared --gold/--sage scheme. */
 body.guest-theme {
-  background: var(--guest-bg);
-  background-image: radial-gradient(circle at 50% 0%, #ffffff 0%, var(--guest-bg) 60%);
   color: var(--guest-text);
   font-family: var(--guest-font-body);
 }
