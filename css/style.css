@@ -3712,6 +3712,12 @@ h2 {
   background: var(--sage-light);
 }
 
+.lang-switcher-icon {
+  display: flex;
+  align-items: center;
+  color: var(--gold);
+}
+
 .lang-switcher-current-short {
   display: none;
 }
@@ -5604,9 +5610,20 @@ body.admin-theme .theme-decoration-position-arrow {
     display: inline;
   }
 
+  /* Text-only + a faint border was easy to miss as a tappable control on a
+     small screen — a stronger tint plus the globe icon makes it read as a
+     "change language" button at a glance, not just a label. */
   .lang-switcher-trigger {
-    padding: 5px 10px;
-    font-size: 0.66rem;
+    padding: 7px 12px;
+    font-size: 0.7rem;
+    background: var(--gold-light);
+    border-color: var(--gold);
+    box-shadow: 0 6px 16px rgba(138, 109, 60, 0.18);
+  }
+
+  .lang-switcher-icon svg {
+    width: 16px;
+    height: 16px;
   }
 
   .table-preview-switch .mode-btn {

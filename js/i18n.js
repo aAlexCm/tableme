@@ -1517,7 +1517,7 @@ export function buildLangSwitcher(currentLang, onChange) {
   trigger.setAttribute('aria-haspopup', 'listbox');
   trigger.setAttribute('aria-expanded', 'false');
   trigger.setAttribute('aria-label', 'Langue / Language / Limbă');
-  trigger.innerHTML = `<span class="lang-switcher-current">${LANG_LABELS[selected]}</span><span class="lang-switcher-current-short">${selected.toUpperCase()}</span><span class="lang-switcher-chevron">&#9662;</span>`;
+  trigger.innerHTML = `<span class="lang-switcher-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 0 1 0 18"/><path d="M12 3a14 14 0 0 0 0 18"/></svg></span><span class="lang-switcher-current">${LANG_LABELS[selected]}</span><span class="lang-switcher-current-short">${selected.toUpperCase()}</span><span class="lang-switcher-chevron">&#9662;</span>`;
 
   const menu = document.createElement('ul');
   menu.className = 'lang-switcher-menu';
