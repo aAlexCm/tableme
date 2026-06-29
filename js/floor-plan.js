@@ -27,17 +27,19 @@ function nextTableLabel(tables) {
   return String(n);
 }
 
-function reconcileTables(wedding) {
-  const tables = Array.isArray(wedding.tables) ? wedding.tables.map((tb) => ({ ...tb })) : [];
-  const existingLabels = new Set(tables.map((tb) => tb.label));
-  const usedLabels = [...new Set(wedding.guests.map((g) => g.table).filter(Boolean))];
+// Pure function of (tables, usedLabels) so it can be re-run by a Firestore
+// transaction against whatever's actually on the server, not just the tables
+// array fetched at page-load time.
+function reconcileTables(tables, usedLabels) {
+  const next = (Array.isArray(tables) ? tables : []).map((tb) => ({ ...tb }));
+  const existingLabels = new Set(next.map((tb) => tb.label));
   let changed = false;
   let i = 0;
   usedLabels.forEach((label) => {
     if (!existingLabels.has(label)) {
       const col = i % 4;
       const row = Math.floor(i / 4);
-      tables.push({
+      next.push({
         id: generateId(),
         label,
         shape: 'round',
@@ -50,7 +52,7 @@ function reconcileTables(wedding) {
       i += 1;
     }
   });
-  return { tables, changed };
+  return { tables: next, changed };
 }
 
 (async function () {
@@ -239,16 +241,27 @@ function reconcileTables(wedding) {
   async function fetchWeddingData() {
     wedding = await Storage.getWedding(weddingId);
     if (!wedding) return;
-    const { tables, changed } = reconcileTables(wedding);
-    let positionsChanged = false;
-    tables.forEach((tb) => {
-      const before = `${tb.x},${tb.y}`;
-      clampTablePosition(tb);
-      if (`${tb.x},${tb.y}` !== before) positionsChanged = true;
-    });
-    wedding.tables = tables;
+    const usedLabels = [...new Set(wedding.guests.map((g) => g.table).filter(Boolean))];
+    function reconcileAndClamp(currentTables) {
+      const { tables, changed } = reconcileTables(currentTables, usedLabels);
+      let positionsChanged = false;
+      tables.forEach((tb) => {
+        const before = `${tb.x},${tb.y}`;
+        clampTablePosition(tb);
+        if (`${tb.x},${tb.y}` !== before) positionsChanged = true;
+      });
+      return { tables, changed: changed || positionsChanged };
+    }
+    const local = reconcileAndClamp(wedding.tables);
+    wedding.tables = local.tables;
     wedding.landmarks = Array.isArray(wedding.landmarks) ? wedding.landmarks : [];
-    if (changed || positionsChanged) await Storage.setTables(weddingId, tables);
+    if (local.changed) {
+      try {
+        await Storage.mutateTables(weddingId, (fresh) => reconcileAndClamp(fresh).tables);
+      } catch (err) {
+        console.error('mutateTables failed', err);
+      }
+    }
   }
 
   function renderAll() {
@@ -263,14 +276,22 @@ function reconcileTables(wedding) {
   }
 
   async function setGuestTable(guestId, tableLabel) {
-    const guests = wedding.guests.map((g) => (g.id === guestId ? { ...g, table: tableLabel } : g));
-    await Storage.setGuests(weddingId, guests);
+    try {
+      await Storage.mutateGuests(weddingId, (guests) => guests.map((g) => (g.id === guestId ? { ...g, table: tableLabel } : g)));
+    } catch (err) {
+      console.error('mutateGuests failed', err);
+      alert(t(currentLang, 'saveErrorRetry'));
+    }
     await refreshAll();
   }
 
   async function rotateTableInline(table) {
-    const tables = wedding.tables.map((tb) => (tb.id === table.id ? { ...tb, rotated: !tb.rotated } : tb));
-    await Storage.setTables(weddingId, tables);
+    try {
+      await Storage.mutateTables(weddingId, (tables) => tables.map((tb) => (tb.id === table.id ? { ...tb, rotated: !tb.rotated } : tb)));
+    } catch (err) {
+      console.error('mutateTables failed', err);
+      alert(t(currentLang, 'saveErrorRetry'));
+    }
     await refreshAll();
   }
 
@@ -316,7 +337,13 @@ function reconcileTables(wedding) {
       const wasMoved = moved;
       cleanup();
       if (wasMoved) {
-        await Storage.setTables(weddingId, wedding.tables);
+        const { x, y } = table;
+        try {
+          await Storage.mutateTables(weddingId, (tables) => tables.map((tb) => (tb.id === table.id ? { ...tb, x, y } : tb)));
+        } catch (err) {
+          console.error('mutateTables failed', err);
+          alert(t(currentLang, 'saveErrorRetry'));
+        }
       } else {
         await tableModalApi.open(table.id);
       }
@@ -396,32 +423,48 @@ function reconcileTables(wedding) {
     const sourceSlot = Number(sourceChairEl.dataset.slot);
     const targetSlot = Number(targetChairEl.dataset.slot);
     if (!Number.isInteger(sourceSlot) || !Number.isInteger(targetSlot)) return;
+    const sourceLabel = sourceTable.label;
+    const targetLabel = targetTable.label;
 
-    const buckets = buildTableBuckets(wedding.guests);
-    const sourceBucket = buckets.get(sourceTable.label) || [];
-    const targetBucket = buckets.get(targetTable.label) || [];
-    buckets.set(sourceTable.label, sourceBucket);
-    buckets.set(targetTable.label, targetBucket);
-    const sourceGuest = sourceBucket[sourceSlot];
-    if (!sourceGuest || sourceGuest.empty) return;
-    const targetOccupant = targetBucket[targetSlot];
+    let movedGuestId = null;
+    // Captures only table labels + chair slots (DOM-derived, stable), so this
+    // is safe to re-run against whatever the latest server guests array is.
+    function mutate(guests) {
+      const buckets = buildTableBuckets(guests);
+      const sourceBucket = buckets.get(sourceLabel) || [];
+      const targetBucket = buckets.get(targetLabel) || [];
+      buckets.set(sourceLabel, sourceBucket);
+      buckets.set(targetLabel, targetBucket);
+      const sourceGuest = sourceBucket[sourceSlot];
+      if (!sourceGuest || sourceGuest.empty) return guests;
+      const targetOccupant = targetBucket[targetSlot];
 
-    if (targetOccupant && !targetOccupant.empty) {
-      sourceBucket[sourceSlot] = { ...targetOccupant, table: sourceTable.label };
-      targetBucket[targetSlot] = { ...sourceGuest, table: targetTable.label };
-    } else {
-      while (targetBucket.length <= targetSlot) {
-        targetBucket.push({ id: generateId(), table: targetTable.label, empty: true });
+      if (targetOccupant && !targetOccupant.empty) {
+        sourceBucket[sourceSlot] = { ...targetOccupant, table: sourceLabel };
+        targetBucket[targetSlot] = { ...sourceGuest, table: targetLabel };
+      } else {
+        while (targetBucket.length <= targetSlot) {
+          targetBucket.push({ id: generateId(), table: targetLabel, empty: true });
+        }
+        targetBucket[targetSlot] = { ...sourceGuest, table: targetLabel };
+        sourceBucket[sourceSlot] = { id: generateId(), table: sourceLabel, empty: true };
       }
-      targetBucket[targetSlot] = { ...sourceGuest, table: targetTable.label };
-      sourceBucket[sourceSlot] = { id: generateId(), table: sourceTable.label, empty: true };
+
+      movedGuestId = sourceGuest.id;
+      const newGuests = [];
+      buckets.forEach((bucket) => newGuests.push(...trimTrailingEmpties(bucket)));
+      return newGuests;
     }
 
-    const newGuests = [];
-    buckets.forEach((bucket) => newGuests.push(...trimTrailingEmpties(bucket)));
-    await Storage.setGuests(weddingId, newGuests);
+    try {
+      await Storage.mutateGuests(weddingId, mutate);
+    } catch (err) {
+      console.error('mutateGuests failed', err);
+      alert(t(currentLang, 'saveErrorRetry'));
+      return;
+    }
     await refreshAll();
-    flashDroppedGuest(sourceGuest.id);
+    if (movedGuestId) flashDroppedGuest(movedGuestId);
   }
 
   function flashDroppedGuest(guestId) {
@@ -608,8 +651,12 @@ function reconcileTables(wedding) {
   }
 
   async function deleteLandmarkInline(landmark) {
-    const landmarks = wedding.landmarks.filter((lm) => lm.id !== landmark.id);
-    await Storage.setLandmarks(weddingId, landmarks);
+    try {
+      await Storage.mutateLandmarks(weddingId, (landmarks) => landmarks.filter((lm) => lm.id !== landmark.id));
+    } catch (err) {
+      console.error('mutateLandmarks failed', err);
+      alert(t(currentLang, 'saveErrorRetry'));
+    }
     await refreshAll();
   }
 
@@ -655,7 +702,13 @@ function reconcileTables(wedding) {
       const wasMoved = moved;
       cleanup();
       if (wasMoved) {
-        await Storage.setLandmarks(weddingId, wedding.landmarks);
+        const { x, y } = landmark;
+        try {
+          await Storage.mutateLandmarks(weddingId, (landmarks) => landmarks.map((lm) => (lm.id === landmark.id ? { ...lm, x, y } : lm)));
+        } catch (err) {
+          console.error('mutateLandmarks failed', err);
+          alert(t(currentLang, 'saveErrorRetry'));
+        }
       }
     }
 
@@ -740,20 +793,31 @@ function reconcileTables(wedding) {
   }
 
   addTableBtn.addEventListener('click', async () => {
-    const label = nextTableLabel(wedding.tables || []);
-    const newTable = {
-      id: generateId(),
-      label,
-      shape: 'round',
-      x: 50 + (Math.random() * 16 - 8),
-      y: 50 + (Math.random() * 16 - 8),
-      seats: null,
-    };
-    clampTablePosition(newTable);
-    const tables = [...(wedding.tables || []), newTable];
-    await Storage.setTables(weddingId, tables);
+    const newTableId = generateId();
+    // Re-derives the next free label from whatever's actually on the server
+    // each attempt, so two near-simultaneous "add table" clicks (two tabs,
+    // two devices) can't both land on the same label.
+    function mutate(tables) {
+      const newTable = {
+        id: newTableId,
+        label: nextTableLabel(tables || []),
+        shape: 'round',
+        x: 50 + (Math.random() * 16 - 8),
+        y: 50 + (Math.random() * 16 - 8),
+        seats: null,
+      };
+      clampTablePosition(newTable);
+      return [...(tables || []), newTable];
+    }
+    try {
+      await Storage.mutateTables(weddingId, mutate);
+    } catch (err) {
+      console.error('mutateTables failed', err);
+      alert(t(currentLang, 'saveErrorRetry'));
+      return;
+    }
     await refreshAll();
-    await tableModalApi.open(newTable.id);
+    await tableModalApi.open(newTableId);
   });
 
   unassignedListEl.addEventListener('change', async (e) => {
@@ -778,8 +842,13 @@ function reconcileTables(wedding) {
       y: 50 + (Math.random() * 16 - 8),
     };
     clampLandmarkPosition(newLandmark);
-    const landmarks = [...(wedding.landmarks || []), newLandmark];
-    await Storage.setLandmarks(weddingId, landmarks);
+    try {
+      await Storage.mutateLandmarks(weddingId, (landmarks) => [...(landmarks || []), newLandmark]);
+    } catch (err) {
+      console.error('mutateLandmarks failed', err);
+      alert(t(currentLang, 'saveErrorRetry'));
+      return;
+    }
     await refreshAll();
   });
 

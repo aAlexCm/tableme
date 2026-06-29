@@ -697,11 +697,19 @@ function escapeHtml(value) {
 
   async function addCategory(name) {
     if (!name || !name.trim()) return;
-    customCategories = [...customCategories, { id: generateId(), label: name.trim() }];
+    const trimmed = name.trim();
+    const newCategoryId = generateId();
+    const mutate = (categories) => [...(categories || []), { id: newCategoryId, label: trimmed }];
+    customCategories = mutate(customCategories);
     wedding.customCategories = customCategories;
     render();
     renderCategoriesModalList();
-    await Storage.setCustomCategories(weddingId, customCategories);
+    try {
+      await Storage.mutateCustomCategories(weddingId, mutate);
+    } catch (err) {
+      console.error('mutateCustomCategories failed', err);
+      alert(t(currentLang, 'saveErrorRetry'));
+    }
   }
 
   async function deleteCategory(catId) {
@@ -712,17 +720,23 @@ function escapeHtml(value) {
       ? t(currentLang, 'confirmDeleteCategoryWithTasks', cat.label, count)
       : t(currentLang, 'confirmDeleteCategory', cat.label);
     if (!(await showConfirmModal(message))) return;
-    customCategories = customCategories.filter((c) => c.id !== catId);
+    const mutateCats = (categories) => (categories || []).filter((c) => c.id !== catId);
+    const mutateTasksFn = (tasks) => (tasks || []).filter((task) => task.category !== catId);
+    customCategories = mutateCats(customCategories);
     wedding.customCategories = customCategories;
-    const tasks = (wedding.tasks || []).filter((task) => task.category !== catId);
-    wedding.tasks = tasks;
+    wedding.tasks = mutateTasksFn(wedding.tasks);
     if (categoryFilter === catId) categoryFilter = 'all';
     render();
     renderCategoriesModalList();
-    await Promise.all([
-      Storage.setCustomCategories(weddingId, customCategories),
-      Storage.setTasks(weddingId, tasks),
-    ]);
+    try {
+      await Promise.all([
+        Storage.mutateCustomCategories(weddingId, mutateCats),
+        Storage.mutateTasks(weddingId, mutateTasksFn),
+      ]);
+    } catch (err) {
+      console.error('deleteCategory save failed', err);
+      alert(t(currentLang, 'saveErrorRetry'));
+    }
   }
 
   async function commitTaskEdit(taskId, rowEl) {
@@ -739,7 +753,7 @@ function escapeHtml(value) {
       render();
       return;
     }
-    const tasks = (wedding.tasks || []).map((task) => {
+    const mutate = (tasks) => (tasks || []).map((task) => {
       if (task.id !== taskId) return task;
       const updated = { ...task, category: newCategory || task.category };
       if (newText !== taskText(task, currentLang)) {
@@ -749,9 +763,14 @@ function escapeHtml(value) {
       }
       return updated;
     });
-    wedding.tasks = tasks;
+    wedding.tasks = mutate(wedding.tasks);
     render();
-    await Storage.setTasks(weddingId, tasks);
+    try {
+      await Storage.mutateTasks(weddingId, mutate);
+    } catch (err) {
+      console.error('mutateTasks failed', err);
+      alert(t(currentLang, 'saveErrorRetry'));
+    }
   }
 
   addFormEl.addEventListener('submit', async (e) => {
@@ -759,11 +778,17 @@ function escapeHtml(value) {
     const text = addInputEl.value.trim();
     if (!text) return;
     const category = addCategoryEl.value || CATEGORIES[0].id;
-    const tasks = [...(wedding.tasks || []), { id: generateId(), text, category, done: false }];
-    wedding.tasks = tasks;
+    const newTask = { id: generateId(), text, category, done: false };
+    const mutate = (tasks) => [...(tasks || []), newTask];
+    wedding.tasks = mutate(wedding.tasks);
     addInputEl.value = '';
     render();
-    await Storage.setTasks(weddingId, tasks);
+    try {
+      await Storage.mutateTasks(weddingId, mutate);
+    } catch (err) {
+      console.error('mutateTasks failed', err);
+      alert(t(currentLang, 'saveErrorRetry'));
+    }
   });
 
   statusFiltersEl.addEventListener('click', (e) => {
@@ -817,20 +842,30 @@ function escapeHtml(value) {
     const taskId = row.dataset.id;
 
     if (e.target.closest('.todo-row-check')) {
-      const tasks = (wedding.tasks || []).map((task) => (task.id === taskId ? { ...task, done: !task.done } : task));
-      wedding.tasks = tasks;
+      const mutate = (tasks) => (tasks || []).map((task) => (task.id === taskId ? { ...task, done: !task.done } : task));
+      wedding.tasks = mutate(wedding.tasks);
       render();
-      await Storage.setTasks(weddingId, tasks);
+      try {
+        await Storage.mutateTasks(weddingId, mutate);
+      } catch (err) {
+        console.error('mutateTasks failed', err);
+        alert(t(currentLang, 'saveErrorRetry'));
+      }
       return;
     }
 
     if (e.target.closest('.todo-row-delete')) {
       const task = (wedding.tasks || []).find((task) => task.id === taskId);
       if (!task || !(await showConfirmModal(t(currentLang, 'confirmDeleteTask', taskText(task, currentLang))))) return;
-      const tasks = (wedding.tasks || []).filter((task) => task.id !== taskId);
-      wedding.tasks = tasks;
+      const mutate = (tasks) => (tasks || []).filter((task) => task.id !== taskId);
+      wedding.tasks = mutate(wedding.tasks);
       render();
-      await Storage.setTasks(weddingId, tasks);
+      try {
+        await Storage.mutateTasks(weddingId, mutate);
+      } catch (err) {
+        console.error('mutateTasks failed', err);
+        alert(t(currentLang, 'saveErrorRetry'));
+      }
       return;
     }
 
@@ -902,10 +937,15 @@ function escapeHtml(value) {
     wedding.tasksSeeded = true;
     await Storage.seedTasks(weddingId, wedding.tasks);
   } else {
-    const migrated = (wedding.tasks || []).map((task) => repairDefaultTaskCategory(migrateLegacyDefaultTask(task)));
+    const migrateFn = (tasks) => (tasks || []).map((task) => repairDefaultTaskCategory(migrateLegacyDefaultTask(task)));
+    const migrated = migrateFn(wedding.tasks);
     if (migrated.some((task, i) => task !== wedding.tasks[i])) {
       wedding.tasks = migrated;
-      await Storage.setTasks(weddingId, migrated);
+      try {
+        await Storage.mutateTasks(weddingId, migrateFn);
+      } catch (err) {
+        console.error('mutateTasks failed', err);
+      }
     }
   }
 

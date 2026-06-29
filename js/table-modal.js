@@ -146,8 +146,12 @@ export function createTableModal({ weddingId, getLang, onChange }) {
   }
 
   async function setGuestTable(guestId, tableLabel) {
-    const guests = wedding.guests.map((g) => (g.id === guestId ? { ...g, table: tableLabel } : g));
-    await Storage.setGuests(weddingId, guests);
+    try {
+      await Storage.mutateGuests(weddingId, (guests) => guests.map((g) => (g.id === guestId ? { ...g, table: tableLabel } : g)));
+    } catch (err) {
+      console.error('mutateGuests failed', err);
+      alert(t(getLang(), 'saveErrorRetry'));
+    }
     await notifyChange();
   }
 
@@ -179,18 +183,34 @@ export function createTableModal({ weddingId, getLang, onChange }) {
       tableLabelInput.value = table.label;
       return;
     }
-    const oldLabel = table.label;
-    const tables = wedding.tables.map((tb) => (tb.id === table.id ? { ...tb, label: newLabel } : tb));
-    const guests = wedding.guests.map((g) => (g.table === oldLabel ? { ...g, table: newLabel } : g));
-    await Storage.setBoard(weddingId, { guests, tables });
+    const tableId = table.id;
+    function mutate(guests, tables) {
+      const tb = tables.find((t) => t.id === tableId);
+      if (!tb) return { guests, tables };
+      const oldLabel = tb.label;
+      return {
+        tables: tables.map((t) => (t.id === tableId ? { ...t, label: newLabel } : t)),
+        guests: guests.map((g) => (g.table === oldLabel ? { ...g, table: newLabel } : g)),
+      };
+    }
+    try {
+      await Storage.mutateGuestsAndTables(weddingId, mutate);
+    } catch (err) {
+      console.error('mutateGuestsAndTables failed', err);
+      alert(t(lang, 'saveErrorRetry'));
+    }
     await notifyChange();
   });
 
   shapeRadios.forEach((radio) => {
     radio.addEventListener('change', async () => {
       if (!radio.checked) return;
-      const tables = wedding.tables.map((tb) => (tb.id === activeTableId ? { ...tb, shape: radio.value } : tb));
-      await Storage.setTables(weddingId, tables);
+      try {
+        await Storage.mutateTables(weddingId, (tables) => tables.map((tb) => (tb.id === activeTableId ? { ...tb, shape: radio.value } : tb)));
+      } catch (err) {
+        console.error('mutateTables failed', err);
+        alert(t(getLang(), 'saveErrorRetry'));
+      }
       await notifyChange();
     });
   });
@@ -198,16 +218,24 @@ export function createTableModal({ weddingId, getLang, onChange }) {
   tableRotateBtn.addEventListener('click', async () => {
     const table = wedding.tables.find((tb) => tb.id === activeTableId);
     if (!table) return;
-    const tables = wedding.tables.map((tb) => (tb.id === activeTableId ? { ...tb, rotated: !tb.rotated } : tb));
-    await Storage.setTables(weddingId, tables);
+    try {
+      await Storage.mutateTables(weddingId, (tables) => tables.map((tb) => (tb.id === activeTableId ? { ...tb, rotated: !tb.rotated } : tb)));
+    } catch (err) {
+      console.error('mutateTables failed', err);
+      alert(t(getLang(), 'saveErrorRetry'));
+    }
     await notifyChange();
   });
 
   tableSeatsInput.addEventListener('change', async () => {
     const value = tableSeatsInput.value.trim();
     const seats = value === '' ? null : Math.max(0, parseInt(value, 10) || 0);
-    const tables = wedding.tables.map((tb) => (tb.id === activeTableId ? { ...tb, seats } : tb));
-    await Storage.setTables(weddingId, tables);
+    try {
+      await Storage.mutateTables(weddingId, (tables) => tables.map((tb) => (tb.id === activeTableId ? { ...tb, seats } : tb)));
+    } catch (err) {
+      console.error('mutateTables failed', err);
+      alert(t(getLang(), 'saveErrorRetry'));
+    }
     await notifyChange();
   });
 
@@ -226,11 +254,24 @@ export function createTableModal({ weddingId, getLang, onChange }) {
     if (!table) return;
     const affected = wedding.guests.filter((g) => g.table === table.label && !g.empty).length;
     if (!confirm(t(lang, 'confirmDeleteTable', affected))) return;
-    const tables = wedding.tables.filter((tb) => tb.id !== table.id);
-    const guests = wedding.guests
-      .filter((g) => !(g.empty && g.table === table.label))
-      .map((g) => (g.table === table.label ? { ...g, table: '' } : g));
-    await Storage.setBoard(weddingId, { guests, tables });
+    const tableId = table.id;
+    function mutate(guests, tables) {
+      const tb = tables.find((t) => t.id === tableId);
+      if (!tb) return { guests, tables };
+      return {
+        tables: tables.filter((t) => t.id !== tableId),
+        guests: guests
+          .filter((g) => !(g.empty && g.table === tb.label))
+          .map((g) => (g.table === tb.label ? { ...g, table: '' } : g)),
+      };
+    }
+    try {
+      await Storage.mutateGuestsAndTables(weddingId, mutate);
+    } catch (err) {
+      console.error('mutateGuestsAndTables failed', err);
+      alert(t(lang, 'saveErrorRetry'));
+      return;
+    }
     close();
     if (onChange) await onChange();
   });
@@ -248,7 +289,13 @@ export function createTableModal({ weddingId, getLang, onChange }) {
     if (!name) return;
     const table = wedding.tables.find((tb) => tb.id === activeTableId);
     if (!table) return;
-    await Storage.addGuest(weddingId, name, table.label);
+    try {
+      await Storage.addGuest(weddingId, name, table.label);
+    } catch (err) {
+      console.error('addGuest failed', err);
+      alert(t(getLang(), 'saveErrorRetry'));
+      return;
+    }
     tableAddNewInput.value = '';
     await notifyChange();
   }
@@ -264,7 +311,12 @@ export function createTableModal({ weddingId, getLang, onChange }) {
   tableModalGuestList.addEventListener('click', async (e) => {
     const btn = e.target.closest('button[data-action="delete-guest"]');
     if (!btn) return;
-    await Storage.deleteGuest(weddingId, btn.dataset.id);
+    try {
+      await Storage.deleteGuest(weddingId, btn.dataset.id);
+    } catch (err) {
+      console.error('deleteGuest failed', err);
+      alert(t(getLang(), 'saveErrorRetry'));
+    }
     await notifyChange();
   });
 

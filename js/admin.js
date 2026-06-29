@@ -99,7 +99,14 @@ const ICONS = {
   }
 
   async function renderWeddings() {
-    const weddings = await Storage.getWeddings();
+    let weddings;
+    try {
+      weddings = await Storage.getWeddings();
+    } catch (err) {
+      console.error('getWeddings failed', err);
+      alert(t(currentLang, 'saveErrorRetry'));
+      return;
+    }
     weddingListEl.innerHTML = '';
     weddingEmptyEl.hidden = weddings.length > 0;
 
@@ -141,7 +148,13 @@ const ICONS = {
     e.preventDefault();
     const name = weddingNameInput.value.trim();
     if (!name) return;
-    await Storage.addWedding(name, weddingDateInput.value, weddingLangSelect.value);
+    try {
+      await Storage.addWedding(name, weddingDateInput.value, weddingLangSelect.value);
+    } catch (err) {
+      console.error('addWedding failed', err);
+      alert(t(currentLang, 'saveErrorRetry'));
+      return;
+    }
     weddingForm.reset();
     populateWeddingLangSelect();
     await renderWeddings();
@@ -167,7 +180,13 @@ const ICONS = {
     if (action === 'delete') {
       const wedding = await Storage.getWedding(id);
       if (wedding && confirm(t(currentLang, 'confirmDeleteWedding', wedding.name))) {
-        await Storage.deleteWedding(id);
+        try {
+          await Storage.deleteWedding(id);
+        } catch (err) {
+          console.error('deleteWedding failed', err);
+          alert(t(currentLang, 'saveErrorRetry'));
+          return;
+        }
         await renderWeddings();
       }
     } else if (action === 'copy-admin-link') {
@@ -187,7 +206,12 @@ const ICONS = {
   weddingListEl.addEventListener('change', async (e) => {
     const select = e.target.closest('.mini-lang-select');
     if (!select) return;
-    await Storage.updateWeddingLang(select.dataset.id, select.value);
+    try {
+      await Storage.updateWeddingLang(select.dataset.id, select.value);
+    } catch (err) {
+      console.error('updateWeddingLang failed', err);
+      alert(t(currentLang, 'saveErrorRetry'));
+    }
   });
 
   async function openFeaturesModal(weddingId) {
@@ -239,7 +263,13 @@ const ICONS = {
     const wedding = await Storage.getWedding(activeFeaturesWeddingId);
     if (!wedding) return;
     const features = { ...(wedding.features || {}), [checkbox.dataset.featureKey]: checkbox.checked };
-    await Storage.setFeatures(activeFeaturesWeddingId, features);
+    try {
+      await Storage.setFeatures(activeFeaturesWeddingId, features);
+    } catch (err) {
+      console.error('setFeatures failed', err);
+      alert(t(currentLang, 'saveErrorRetry'));
+      checkbox.checked = !checkbox.checked;
+    }
   });
 
   function populateSelect(select, items, selectedName, placeholderText) {
@@ -340,7 +370,13 @@ const ICONS = {
       region: locationRegionSelect.value,
       city: locationCitySelect.value,
     };
-    await Storage.setLocation(activeLocationWeddingId, location);
+    try {
+      await Storage.setLocation(activeLocationWeddingId, location);
+    } catch (err) {
+      console.error('setLocation failed', err);
+      alert(t(currentLang, 'saveErrorRetry'));
+      return;
+    }
     closeLocationModal();
     await renderWeddings();
   });
@@ -371,7 +407,13 @@ const ICONS = {
   dateForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     if (!activeDateWeddingId) return;
-    await Storage.updateWeddingDate(activeDateWeddingId, dateModalInput.value);
+    try {
+      await Storage.updateWeddingDate(activeDateWeddingId, dateModalInput.value);
+    } catch (err) {
+      console.error('updateWeddingDate failed', err);
+      alert(t(currentLang, 'saveErrorRetry'));
+      return;
+    }
     closeDateModal();
     await renderWeddings();
   });

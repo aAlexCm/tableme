@@ -240,7 +240,10 @@ function fontFamilyFor(fontKey) {
   function scheduleSave() {
     clearTimeout(saveTimer);
     saveTimer = setTimeout(() => {
-      Storage.setPoster(weddingId, poster);
+      Storage.setPoster(weddingId, poster).catch((err) => {
+        console.error('setPoster failed', err);
+        alert(t(currentLang, 'saveErrorRetry'));
+      });
     }, 500);
   }
 

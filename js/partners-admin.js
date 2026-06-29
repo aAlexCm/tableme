@@ -338,10 +338,21 @@ function readAndResizeImage(file) {
   }
 
   async function renderPartnerList() {
-    let partners = await Storage.getPartners();
+    let partners;
+    try {
+      partners = await Storage.getPartners();
+    } catch (err) {
+      console.error('getPartners failed', err);
+      alert(t(currentLang, 'saveErrorRetry'));
+      return;
+    }
     partners.sort((a, b) => (a.order ?? Infinity) - (b.order ?? Infinity) || a.name.localeCompare(b.name));
     if (partners.some((p) => typeof p.order !== 'number')) {
-      await Promise.all(partners.map((p, i) => (p.order === i ? null : Storage.updatePartner(p.id, { order: i }))));
+      try {
+        await Promise.all(partners.map((p, i) => (p.order === i ? null : Storage.updatePartner(p.id, { order: i }))));
+      } catch (err) {
+        console.error('updatePartner (order fixup) failed', err);
+      }
       partners = partners.map((p, i) => ({ ...p, order: i }));
     }
     partnersCache = partners;
@@ -474,7 +485,13 @@ function readAndResizeImage(file) {
     } else if (action === 'delete') {
       const partner = partnersCache.find((p) => p.id === id);
       if (partner && confirm(t(currentLang, 'confirmDeletePartner', partner.name))) {
-        await Storage.deletePartner(id);
+        try {
+          await Storage.deletePartner(id);
+        } catch (err) {
+          console.error('deletePartner failed', err);
+          alert(t(currentLang, 'saveErrorRetry'));
+          return;
+        }
         if (editingPartnerId === id) resetForm();
         await renderPartnerList();
       }
@@ -484,15 +501,25 @@ function readAndResizeImage(file) {
       if (idx < 0 || swapIdx < 0 || swapIdx >= partnersCache.length) return;
       const a = partnersCache[idx];
       const b = partnersCache[swapIdx];
-      await Storage.updatePartner(a.id, { order: b.order });
-      await Storage.updatePartner(b.id, { order: a.order });
+      try {
+        await Storage.updatePartner(a.id, { order: b.order });
+        await Storage.updatePartner(b.id, { order: a.order });
+      } catch (err) {
+        console.error('updatePartner failed', err);
+        alert(t(currentLang, 'saveErrorRetry'));
+      }
       await renderPartnerList();
     }
   });
 
   seedExamplesBtn.addEventListener('click', async () => {
-    for (let i = 0; i < EXAMPLE_PARTNERS.length; i++) {
-      await Storage.addPartner({ ...EXAMPLE_PARTNERS[i], order: i });
+    try {
+      for (let i = 0; i < EXAMPLE_PARTNERS.length; i++) {
+        await Storage.addPartner({ ...EXAMPLE_PARTNERS[i], order: i });
+      }
+    } catch (err) {
+      console.error('addPartner failed', err);
+      alert(t(currentLang, 'saveErrorRetry'));
     }
     await renderPartnerList();
   });
@@ -516,13 +543,19 @@ function readAndResizeImage(file) {
     const hasContact = Object.values(contacts).some(Boolean);
     if (!partner.name || !partner.geo.country || !hasContact) return;
 
-    if (editingPartnerId) {
-      partner.order = editingPartnerOrder ?? 0;
-      await Storage.updatePartner(editingPartnerId, partner);
-    } else {
-      const maxOrder = partnersCache.reduce((max, p) => Math.max(max, typeof p.order === 'number' ? p.order : -1), -1);
-      partner.order = maxOrder + 1;
-      await Storage.addPartner(partner);
+    try {
+      if (editingPartnerId) {
+        partner.order = editingPartnerOrder ?? 0;
+        await Storage.updatePartner(editingPartnerId, partner);
+      } else {
+        const maxOrder = partnersCache.reduce((max, p) => Math.max(max, typeof p.order === 'number' ? p.order : -1), -1);
+        partner.order = maxOrder + 1;
+        await Storage.addPartner(partner);
+      }
+    } catch (err) {
+      console.error('savePartner failed', err);
+      alert(t(currentLang, 'saveErrorRetry'));
+      return;
     }
     resetForm();
     await renderPartnerList();

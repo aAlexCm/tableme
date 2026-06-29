@@ -8,6 +8,7 @@ import {
   addDoc,
   updateDoc,
   deleteDoc,
+  runTransaction,
 } from 'https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js';
 
 export function generateId() {
@@ -26,6 +27,39 @@ export function normalize(str) {
 const weddingsCol = collection(db, 'weddings');
 const partnersCol = collection(db, 'partners');
 const partnerClicksCol = collection(db, 'partnerClicks');
+
+// Every list-shaped field below (guests, tables, tasks, customCategories,
+// menus, landmarks) can be edited from several pages, and sometimes from two
+// tabs/devices at once. A plain updateDoc(fullArray) is a blind overwrite: it
+// has no idea what's on the server right now, so two near-simultaneous edits
+// can silently stomp each other (the second write wins, the first is lost).
+// runTransaction re-reads the field at write time and retries automatically
+// if another write landed in between, so `mutate` must be a pure function of
+// the current array — it can run more than once per call.
+async function mutateField(weddingId, fieldName, mutate, extraFields) {
+  const ref = doc(db, 'weddings', weddingId);
+  let result;
+  await runTransaction(db, async (tx) => {
+    const snap = await tx.get(ref);
+    if (!snap.exists()) throw new Error(`wedding ${weddingId} not found`);
+    result = mutate(snap.data()[fieldName] || []);
+    tx.update(ref, { [fieldName]: result, ...(extraFields || {}) });
+  });
+  return result;
+}
+
+async function mutateGuestsAndTables(weddingId, mutate) {
+  const ref = doc(db, 'weddings', weddingId);
+  let result;
+  await runTransaction(db, async (tx) => {
+    const snap = await tx.get(ref);
+    if (!snap.exists()) throw new Error(`wedding ${weddingId} not found`);
+    const data = snap.data();
+    result = mutate(data.guests || [], data.tables || []);
+    tx.update(ref, { guests: result.guests, tables: result.tables });
+  });
+  return result;
+}
 
 export const Storage = {
   async getWeddings() {
@@ -60,65 +94,63 @@ export const Storage = {
     await updateDoc(doc(db, 'weddings', weddingId), { poster });
   },
 
+  // `mutate` receives the *current server* guests array and must return the
+  // next array — see the comment on mutateField above for why this can't
+  // just be a precomputed array.
+  async mutateGuests(weddingId, mutate) {
+    return mutateField(weddingId, 'guests', mutate);
+  },
+
+  async mutateTables(weddingId, mutate) {
+    return mutateField(weddingId, 'tables', mutate);
+  },
+
+  async mutateGuestsAndTables(weddingId, mutate) {
+    return mutateGuestsAndTables(weddingId, mutate);
+  },
+
+  async mutateLandmarks(weddingId, mutate) {
+    return mutateField(weddingId, 'landmarks', mutate);
+  },
+
+  async mutateTasks(weddingId, mutate) {
+    return mutateField(weddingId, 'tasks', mutate);
+  },
+
+  async mutateCustomCategories(weddingId, mutate) {
+    return mutateField(weddingId, 'customCategories', mutate);
+  },
+
+  // Separate from mutateTasks: marks the wedding as having received its
+  // one-time default checklist, so an empty list later (the couple cleared
+  // everything) is never confused with "never seeded" again.
+  async seedTasks(weddingId, tasks) {
+    return mutateField(weddingId, 'tasks', () => tasks, { tasksSeeded: true });
+  },
+
+  async mutateMenus(weddingId, mutate) {
+    return mutateField(weddingId, 'menus', mutate);
+  },
+
   async addGuest(weddingId, name, table, phone) {
-    const wedding = await this.getWedding(weddingId);
-    if (!wedding) return null;
     const guest = { id: generateId(), name, table };
     if (phone) guest.phone = phone;
-    const guests = [...wedding.guests, guest];
-    await updateDoc(doc(db, 'weddings', weddingId), { guests });
+    await this.mutateGuests(weddingId, (guests) => [...guests, guest]);
     return guest;
   },
 
   async addGuests(weddingId, entries) {
-    const wedding = await this.getWedding(weddingId);
-    if (!wedding) return [];
     const newGuests = entries.map((e) => {
       const guest = { id: generateId(), name: e.name, table: e.table };
       if (e.phone) guest.phone = e.phone;
       return guest;
     });
-    const guests = [...wedding.guests, ...newGuests];
-    await updateDoc(doc(db, 'weddings', weddingId), { guests });
+    await this.mutateGuests(weddingId, (guests) => [...guests, ...newGuests]);
     return newGuests;
   },
 
   async deleteGuest(weddingId, guestId) {
-    const wedding = await this.getWedding(weddingId);
-    if (!wedding) return;
-    const guests = wedding.guests.filter((g) => g.id !== guestId);
-    await updateDoc(doc(db, 'weddings', weddingId), { guests });
-  },
-
-  async setGuests(weddingId, guests) {
-    await updateDoc(doc(db, 'weddings', weddingId), { guests });
-  },
-
-  async setTables(weddingId, tables) {
-    await updateDoc(doc(db, 'weddings', weddingId), { tables });
-  },
-
-  async setLandmarks(weddingId, landmarks) {
-    await updateDoc(doc(db, 'weddings', weddingId), { landmarks });
-  },
-
-  async setTasks(weddingId, tasks) {
-    await updateDoc(doc(db, 'weddings', weddingId), { tasks });
-  },
-
-  async setCustomCategories(weddingId, customCategories) {
-    await updateDoc(doc(db, 'weddings', weddingId), { customCategories });
-  },
-
-  // Separate from setTasks: marks the wedding as having received its
-  // one-time default checklist, so an empty list later (the couple cleared
-  // everything) is never confused with "never seeded" again.
-  async seedTasks(weddingId, tasks) {
-    await updateDoc(doc(db, 'weddings', weddingId), { tasks, tasksSeeded: true });
-  },
-
-  async setMenus(weddingId, menus) {
-    await updateDoc(doc(db, 'weddings', weddingId), { menus });
+    await this.mutateGuests(weddingId, (guests) => guests.filter((g) => g.id !== guestId));
   },
 
   async setTheme(weddingId, theme) {
@@ -131,10 +163,6 @@ export const Storage = {
 
   async setLocation(weddingId, location) {
     await updateDoc(doc(db, 'weddings', weddingId), { location });
-  },
-
-  async setBoard(weddingId, { guests, tables }) {
-    await updateDoc(doc(db, 'weddings', weddingId), { guests, tables });
   },
 
   async getPartners() {

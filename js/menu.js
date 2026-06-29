@@ -146,10 +146,19 @@ function escapeHtml(value) {
     listEl.innerHTML = menus.map((menu) => renderMenuCard(menu)).join('');
   }
 
-  async function persistMenus(menus) {
-    wedding.menus = menus;
+  // `mutate` is applied to the local cache for an instant-feeling edit, then
+  // re-applied by Storage.mutateMenus inside a Firestore transaction against
+  // whatever's actually on the server, so a near-simultaneous edit from
+  // another tab/device never gets silently overwritten by this one.
+  async function persistMenus(mutate) {
+    wedding.menus = mutate(wedding.menus || []);
     render();
-    await Storage.setMenus(weddingId, menus);
+    try {
+      await Storage.mutateMenus(weddingId, mutate);
+    } catch (err) {
+      console.error('mutateMenus failed', err);
+      alert(t(currentLang, 'saveErrorRetry'));
+    }
   }
 
   addFormEl.addEventListener('submit', async (e) => {
@@ -157,8 +166,8 @@ function escapeHtml(value) {
     const title = addInputEl.value.trim();
     if (!title) return;
     addInputEl.value = '';
-    const menus = [...(wedding.menus || []), { id: generateId(), title, dishes: [] }];
-    await persistMenus(menus);
+    const newMenu = { id: generateId(), title, dishes: [] };
+    await persistMenus((menus) => [...(menus || []), newMenu]);
   });
 
   listEl.addEventListener('submit', async (e) => {
@@ -169,12 +178,12 @@ function escapeHtml(value) {
     const name = input.value.trim();
     if (!name) return;
     const menuId = form.dataset.menuId;
-    const menus = (wedding.menus || []).map((menu) => (
+    const newDish = { id: generateId(), name };
+    await persistMenus((menus) => (menus || []).map((menu) => (
       menu.id === menuId
-        ? { ...menu, dishes: [...(menu.dishes || []), { id: generateId(), name }] }
+        ? { ...menu, dishes: [...(menu.dishes || []), newDish] }
         : menu
-    ));
-    await persistMenus(menus);
+    )));
   });
 
   listEl.addEventListener('click', async (e) => {
@@ -186,8 +195,7 @@ function escapeHtml(value) {
 
     if (e.target.closest('.menu-card-delete')) {
       if (!(await showConfirmModal(t(currentLang, 'confirmDeleteMenu', menu.title)))) return;
-      const menus = (wedding.menus || []).filter((m) => m.id !== menuId);
-      await persistMenus(menus);
+      await persistMenus((menus) => (menus || []).filter((m) => m.id !== menuId));
       return;
     }
 
@@ -207,10 +215,9 @@ function escapeHtml(value) {
     const dishId = dishRow.dataset.dishId;
 
     if (e.target.closest('.menu-dish-delete')) {
-      const menus = (wedding.menus || []).map((m) => (
+      await persistMenus((menus) => (menus || []).map((m) => (
         m.id === menuId ? { ...m, dishes: (m.dishes || []).filter((d) => d.id !== dishId) } : m
-      ));
-      await persistMenus(menus);
+      )));
       return;
     }
 
@@ -232,8 +239,7 @@ function escapeHtml(value) {
       render();
       return;
     }
-    const menus = (wedding.menus || []).map((m) => (m.id === menuId ? { ...m, title: newTitle } : m));
-    await persistMenus(menus);
+    await persistMenus((menus) => (menus || []).map((m) => (m.id === menuId ? { ...m, title: newTitle } : m)));
   }
 
   async function commitDishEdit(menuId, dishId, inputEl) {
@@ -243,12 +249,11 @@ function escapeHtml(value) {
       render();
       return;
     }
-    const menus = (wedding.menus || []).map((m) => (
+    await persistMenus((menus) => (menus || []).map((m) => (
       m.id === menuId
         ? { ...m, dishes: (m.dishes || []).map((d) => (d.id === dishId ? { ...d, name: newName } : d)) }
         : m
-    ));
-    await persistMenus(menus);
+    )));
   }
 
   listEl.addEventListener('focusout', async (e) => {

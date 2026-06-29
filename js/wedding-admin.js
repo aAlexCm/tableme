@@ -289,51 +289,58 @@ function parseSheetRows(rows) {
     const sourceId = sourceRow.dataset.id;
     const targetId = targetRow.dataset.id;
     const targetIsEmpty = targetRow.classList.contains('guest-row-empty');
+    // A synthetic trailing placeholder (beyond the persisted bucket) has no id
+    // to look up — the row's actual position in its list is the target slot.
+    const targetSlot = [...targetRow.parentElement.children].indexOf(targetRow);
 
-    const buckets = buildTableBuckets(wedding.guests);
-    const sourceBucket = buckets.get(sourceTableKey) || [];
-    const sourceIdx = sourceBucket.findIndex((g) => g.id === sourceId);
-    if (sourceIdx === -1) return;
-    const sourceGuest = sourceBucket[sourceIdx];
-    const targetBucket = buckets.get(targetTableKey) || [];
-    buckets.set(sourceTableKey, sourceBucket);
-    buckets.set(targetTableKey, targetBucket);
+    // Captures only DOM-derived ids/positions above, so this is safe to run
+    // more than once against whatever the latest server guests array turns
+    // out to be — mutateGuests below re-runs it if another write raced in.
+    function mutate(guests) {
+      const buckets = buildTableBuckets(guests);
+      const sourceBucket = buckets.get(sourceTableKey) || [];
+      const sourceIdx = sourceBucket.findIndex((g) => g.id === sourceId);
+      if (sourceIdx === -1) return guests;
+      const sourceGuest = sourceBucket[sourceIdx];
+      const targetBucket = buckets.get(targetTableKey) || [];
+      buckets.set(sourceTableKey, sourceBucket);
+      buckets.set(targetTableKey, targetBucket);
 
-    if (!targetIsEmpty) {
-      const targetIdx = targetBucket.findIndex((g) => g.id === targetId);
-      if (targetIdx === -1) return;
-      const targetGuest = targetBucket[targetIdx];
-      sourceBucket[sourceIdx] = { ...targetGuest, table: sourceTableKey };
-      targetBucket[targetIdx] = { ...sourceGuest, table: targetTableKey };
-    } else {
-      // A synthetic trailing placeholder (beyond the persisted bucket) has
-      // no id to look up — using the row's actual position in its list as
-      // the target slot, and padding up to it, makes the guest land exactly
-      // where they were dropped instead of always one slot too early.
-      const targetSlot = [...targetRow.parentElement.children].indexOf(targetRow);
-      while (targetBucket.length <= targetSlot) {
-        targetBucket.push({ id: generateId(), table: targetTableKey, empty: true });
+      if (!targetIsEmpty) {
+        const targetIdx = targetBucket.findIndex((g) => g.id === targetId);
+        if (targetIdx === -1) return guests;
+        const targetGuest = targetBucket[targetIdx];
+        sourceBucket[sourceIdx] = { ...targetGuest, table: sourceTableKey };
+        targetBucket[targetIdx] = { ...sourceGuest, table: targetTableKey };
+      } else {
+        while (targetBucket.length <= targetSlot) {
+          targetBucket.push({ id: generateId(), table: targetTableKey, empty: true });
+        }
+        targetBucket[targetSlot] = { ...sourceGuest, table: targetTableKey };
+        // Read everything needed from sourceBucket before mutating it — when
+        // source and target are the same table this is the same array.
+        sourceBucket[sourceIdx] = { id: generateId(), table: sourceTableKey, empty: true };
       }
-      targetBucket[targetSlot] = { ...sourceGuest, table: targetTableKey };
-      // Read everything needed from sourceBucket before mutating it — when
-      // source and target are the same table this is the same array.
-      sourceBucket[sourceIdx] = { id: generateId(), table: sourceTableKey, empty: true };
+
+      const newGuests = [];
+      buckets.forEach((bucket) => newGuests.push(...trimTrailingEmpties(bucket)));
+      return newGuests;
     }
 
-    const newGuests = [];
-    buckets.forEach((bucket) => newGuests.push(...trimTrailingEmpties(bucket)));
     // Render immediately from the locally-computed result instead of waiting
     // on a write + a re-fetch round trip — that double network hop is what
     // made the drop feel like it landed a full second late.
-    await renderGuests({ ...wedding, guests: newGuests });
-    await saveGuestsWithRetry(newGuests);
+    await renderGuests({ ...wedding, guests: mutate(wedding.guests) });
+    await saveGuestsWithRetry(mutate);
   }
 
   // Same fix as moveGuestToContainer above: build off cachedWedding and render
   // immediately, then write in the background, instead of fetch + write + fetch.
-  // That extra read-before-write also meant two rapid edits could each read a
-  // stale snapshot and overwrite each other's change — going through the single
-  // in-memory cachedWedding instead removes that race for same-tab edits.
+  // The write itself goes through Storage.mutateGuests, a Firestore transaction
+  // that re-applies `mutate` to whatever's actually on the server — so even two
+  // edits landing at nearly the same time (same tab, another tab, another
+  // device) both survive instead of the second one silently overwriting the
+  // first.
   async function updateGuestTable(guestId, newTable) {
     const table = newTable.trim();
     if (!table) {
@@ -342,32 +349,32 @@ function parseSheetRows(rows) {
     }
     const wedding = cachedWedding || (await Storage.getWedding(weddingId));
     if (!wedding) return;
-    const guests = wedding.guests.map((g) => (g.id === guestId ? { ...g, table } : g));
-    await renderGuests({ ...wedding, guests });
-    await saveGuestsWithRetry(guests);
+    const mutate = (guests) => guests.map((g) => (g.id === guestId ? { ...g, table } : g));
+    await renderGuests({ ...wedding, guests: mutate(wedding.guests) });
+    await saveGuestsWithRetry(mutate);
   }
 
   async function updateGuestMenu(guestId, menuId) {
     const wedding = cachedWedding || (await Storage.getWedding(weddingId));
     if (!wedding) return;
-    const guests = wedding.guests.map((g) => (g.id === guestId ? { ...g, menuId } : g));
-    await renderGuests({ ...wedding, guests });
-    await saveGuestsWithRetry(guests);
+    const mutate = (guests) => guests.map((g) => (g.id === guestId ? { ...g, menuId } : g));
+    await renderGuests({ ...wedding, guests: mutate(wedding.guests) });
+    await saveGuestsWithRetry(mutate);
   }
 
   async function updateGuestRsvp(guestId, rsvp) {
     const wedding = cachedWedding || (await Storage.getWedding(weddingId));
     if (!wedding) return;
-    const guests = wedding.guests.map((g) => (g.id === guestId ? { ...g, rsvp } : g));
-    await renderGuests({ ...wedding, guests });
-    await saveGuestsWithRetry(guests);
+    const mutate = (guests) => guests.map((g) => (g.id === guestId ? { ...g, rsvp } : g));
+    await renderGuests({ ...wedding, guests: mutate(wedding.guests) });
+    await saveGuestsWithRetry(mutate);
   }
 
-  async function saveGuestsWithRetry(guests) {
+  async function saveGuestsWithRetry(mutate) {
     try {
-      await Storage.setGuests(weddingId, guests);
+      await Storage.mutateGuests(weddingId, mutate);
     } catch (err) {
-      console.error('setGuests failed', err);
+      console.error('mutateGuests failed', err);
       alert(t(currentLang, 'saveErrorRetry'));
       await renderGuests();
     }
@@ -681,7 +688,13 @@ function parseSheetRows(rows) {
     const table = guestTableInput.value.trim();
     const phone = combinePhone(guestPhoneCodeSelect.value, guestPhoneInput.value);
     if (!name || !table) return;
-    await Storage.addGuest(weddingId, name, table, phone);
+    try {
+      await Storage.addGuest(weddingId, name, table, phone);
+    } catch (err) {
+      console.error('addGuest failed', err);
+      alert(t(currentLang, 'saveErrorRetry'));
+      return;
+    }
     guestForm.reset();
     await renderGuests();
   });
@@ -712,7 +725,13 @@ function parseSheetRows(rows) {
       bulkAddFeedbackEl.textContent = t(currentLang, 'bulkAddEmpty');
       return;
     }
-    await Storage.addGuests(weddingId, entries);
+    try {
+      await Storage.addGuests(weddingId, entries);
+    } catch (err) {
+      console.error('addGuests failed', err);
+      bulkAddFeedbackEl.textContent = t(currentLang, 'saveErrorRetry');
+      return;
+    }
     bulkAddTextarea.value = '';
     bulkAddFeedbackEl.textContent =
       t(currentLang, 'bulkAddSuccess', entries.length) + (skipped > 0 ? t(currentLang, 'bulkAddSkipped', skipped) : '');
@@ -805,18 +824,31 @@ function parseSheetRows(rows) {
       if (action === 'edit-table') {
         await tableModalApi.open(tableId);
       } else if (action === 'delete-table') {
-        const wedding = await Storage.getWedding(weddingId);
+        const wedding = cachedWedding || (await Storage.getWedding(weddingId));
         if (!wedding) return;
         const table = (wedding.tables || []).find((tb) => tb.id === tableId);
         if (!table) return;
         const affected = wedding.guests.filter((g) => g.table === table.label && !g.empty).length;
         if (!confirm(t(currentLang, 'confirmDeleteTable', affected))) return;
-        const tables = wedding.tables.filter((tb) => tb.id !== table.id);
-        const guests = wedding.guests
-          .filter((g) => !(g.empty && g.table === table.label))
-          .map((g) => (g.table === table.label ? { ...g, table: '' } : g));
-        await Storage.setBoard(weddingId, { guests, tables });
-        await renderGuests();
+        function mutate(guests, tables) {
+          const tb = tables.find((t) => t.id === tableId);
+          if (!tb) return { guests, tables };
+          return {
+            tables: tables.filter((t) => t.id !== tableId),
+            guests: guests
+              .filter((g) => !(g.empty && g.table === tb.label))
+              .map((g) => (g.table === tb.label ? { ...g, table: '' } : g)),
+          };
+        }
+        const optimistic = mutate(wedding.guests, wedding.tables);
+        await renderGuests({ ...wedding, ...optimistic });
+        try {
+          await Storage.mutateGuestsAndTables(weddingId, mutate);
+        } catch (err) {
+          console.error('mutateGuestsAndTables failed', err);
+          alert(t(currentLang, 'saveErrorRetry'));
+          await renderGuests();
+        }
       }
       return;
     }
@@ -828,12 +860,17 @@ function parseSheetRows(rows) {
       if (!wedding) return;
       const table = (wedding.tables || []).find((tb) => tb.id === tableId);
       if (!table) return;
-      const currentSeats = table.seats != null ? table.seats : DEFAULT_SEATS;
-      const tables = wedding.tables.map((tb) => (
-        tb.id === tableId ? { ...tb, seats: currentSeats + 1 } : tb
+      const mutateTables = (tables) => tables.map((tb) => (
+        tb.id === tableId ? { ...tb, seats: (tb.seats != null ? tb.seats : DEFAULT_SEATS) + 1 } : tb
       ));
-      await renderGuests({ ...wedding, tables });
-      await Storage.setTables(weddingId, tables);
+      await renderGuests({ ...wedding, tables: mutateTables(wedding.tables) });
+      try {
+        await Storage.mutateTables(weddingId, mutateTables);
+      } catch (err) {
+        console.error('mutateTables failed', err);
+        alert(t(currentLang, 'saveErrorRetry'));
+        await renderGuests();
+      }
       return;
     }
 
@@ -851,16 +888,27 @@ function parseSheetRows(rows) {
       if (!wedding) return;
       const table = (wedding.tables || []).find((tb) => tb.id === tableId);
       if (!table) return;
-      const currentSeats = table.seats != null ? table.seats : DEFAULT_SEATS;
-      const tables = wedding.tables.map((tb) => (
-        tb.id === tableId ? { ...tb, seats: Math.max(0, currentSeats - 1) } : tb
-      ));
       // A synthetic trailing placeholder has no matching entry in
       // wedding.guests — filtering it out is then simply a no-op, which is
       // exactly right since there's nothing real to remove.
-      const guests = wedding.guests.filter((g) => g.id !== seatId);
-      await renderGuests({ ...wedding, tables, guests });
-      await Storage.setBoard(weddingId, { guests, tables });
+      function mutate(guests, tables) {
+        const tb = tables.find((t) => t.id === tableId);
+        if (!tb) return { guests, tables };
+        const currentSeats = tb.seats != null ? tb.seats : DEFAULT_SEATS;
+        return {
+          tables: tables.map((t) => (t.id === tableId ? { ...t, seats: Math.max(0, currentSeats - 1) } : t)),
+          guests: guests.filter((g) => g.id !== seatId),
+        };
+      }
+      const optimistic = mutate(wedding.guests, wedding.tables);
+      await renderGuests({ ...wedding, ...optimistic });
+      try {
+        await Storage.mutateGuestsAndTables(weddingId, mutate);
+      } catch (err) {
+        console.error('mutateGuestsAndTables failed', err);
+        alert(t(currentLang, 'saveErrorRetry'));
+        await renderGuests();
+      }
       return;
     }
 
@@ -876,7 +924,12 @@ function parseSheetRows(rows) {
     if (!btn) return;
     const { action, id } = btn.dataset;
     if (action === 'delete-guest') {
-      await Storage.deleteGuest(weddingId, id);
+      try {
+        await Storage.deleteGuest(weddingId, id);
+      } catch (err) {
+        console.error('deleteGuest failed', err);
+        alert(t(currentLang, 'saveErrorRetry'));
+      }
       await renderGuests();
     } else if (action === 'toggle-more') {
       const menu = btn.nextElementSibling;

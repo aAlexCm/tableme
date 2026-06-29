@@ -107,11 +107,16 @@ export function createGuestModal({ weddingId, getLang, onChange }) {
     if (onChange) await onChange();
   }
 
-  async function saveGuests(guests) {
+  // `mutate` is applied locally first (against the modal's cached `wedding`,
+  // for an instant-feeling edit) and then handed to Storage.mutateGuests,
+  // which re-applies it inside a Firestore transaction against whatever's
+  // actually on the server — so a near-simultaneous edit from another tab,
+  // device, or page never gets silently overwritten by this one.
+  async function saveGuests(mutate) {
     try {
-      await Storage.setGuests(weddingId, guests);
+      await Storage.mutateGuests(weddingId, mutate);
     } catch (err) {
-      console.error('setGuests failed', err);
+      console.error('mutateGuests failed', err);
       alert(t(getLang(), 'saveErrorRetry'));
     }
     await notifyChange();
@@ -154,8 +159,7 @@ export function createGuestModal({ weddingId, getLang, onChange }) {
       return;
     }
     if (newName === guest.name) return;
-    const guests = wedding.guests.map((g) => (g.id === guest.id ? { ...g, name: newName } : g));
-    await saveGuests(guests);
+    await saveGuests((guests) => guests.map((g) => (g.id === guest.id ? { ...g, name: newName } : g)));
   });
 
   rsvpGroup.addEventListener('click', async (e) => {
@@ -165,8 +169,7 @@ export function createGuestModal({ weddingId, getLang, onChange }) {
     if (!guest) return;
     const rsvp = btn.dataset.rsvp;
     if (rsvp === (guest.rsvp || 'pending')) return;
-    const guests = wedding.guests.map((g) => (g.id === guest.id ? { ...g, rsvp } : g));
-    await saveGuests(guests);
+    await saveGuests((guests) => guests.map((g) => (g.id === guest.id ? { ...g, rsvp } : g)));
   });
 
   phoneInput.addEventListener('keydown', (e) => {
@@ -178,8 +181,7 @@ export function createGuestModal({ weddingId, getLang, onChange }) {
     if (!guest) return;
     const newPhone = combinePhone(phoneCodeSelect.value, phoneInput.value);
     if (newPhone === (guest.phone || '')) return;
-    const guests = wedding.guests.map((g) => (g.id === guest.id ? { ...g, phone: newPhone } : g));
-    await saveGuests(guests);
+    await saveGuests((guests) => guests.map((g) => (g.id === guest.id ? { ...g, phone: newPhone } : g)));
   }
 
   phoneInput.addEventListener('change', savePhone);
@@ -188,22 +190,26 @@ export function createGuestModal({ weddingId, getLang, onChange }) {
   tableSelect.addEventListener('change', async () => {
     const guest = activeGuest();
     if (!guest) return;
-    const guests = wedding.guests.map((g) => (g.id === guest.id ? { ...g, table: tableSelect.value } : g));
-    await saveGuests(guests);
+    await saveGuests((guests) => guests.map((g) => (g.id === guest.id ? { ...g, table: tableSelect.value } : g)));
   });
 
   menuSelect.addEventListener('change', async () => {
     const guest = activeGuest();
     if (!guest) return;
-    const guests = wedding.guests.map((g) => (g.id === guest.id ? { ...g, menuId: menuSelect.value } : g));
-    await saveGuests(guests);
+    await saveGuests((guests) => guests.map((g) => (g.id === guest.id ? { ...g, menuId: menuSelect.value } : g)));
   });
 
   deleteBtn.addEventListener('click', async () => {
     const guest = activeGuest();
     if (!guest) return;
     if (!confirm(t(getLang(), 'confirmDeleteGuest', guest.name))) return;
-    await Storage.deleteGuest(weddingId, guest.id);
+    try {
+      await Storage.deleteGuest(weddingId, guest.id);
+    } catch (err) {
+      console.error('deleteGuest failed', err);
+      alert(t(getLang(), 'saveErrorRetry'));
+      return;
+    }
     close();
     if (onChange) await onChange();
   });

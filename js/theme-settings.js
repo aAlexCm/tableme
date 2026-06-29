@@ -247,6 +247,15 @@ function readAndResizeImage(file) {
     `).join('');
   }
 
+  async function saveTheme(theme) {
+    try {
+      await Storage.setTheme(weddingId, theme);
+    } catch (err) {
+      console.error('setTheme failed', err);
+      alert(t(currentLang, 'saveErrorRetry'));
+    }
+  }
+
   themePresetGridEl.addEventListener('click', async (e) => {
     const btn = e.target.closest('.theme-preset-option');
     if (!btn) return;
@@ -255,7 +264,7 @@ function readAndResizeImage(file) {
     const theme = wedding.theme || getDefaultTheme();
     const fonts = theme.fonts || getDefaultTheme().fonts;
     const decoration = theme.decoration || getDefaultDecoration();
-    await Storage.setTheme(weddingId, { preset: preset.id, colors: { ...preset.colors }, fonts, decoration });
+    await saveTheme({ preset: preset.id, colors: { ...preset.colors }, fonts, decoration });
     await render();
     flagGuestLinkUpdated();
   });
@@ -265,7 +274,7 @@ function readAndResizeImage(file) {
     if (!btn) return;
     const theme = wedding.theme || getDefaultTheme();
     const fonts = { ...(theme.fonts || getDefaultTheme().fonts), title: btn.dataset.fontTitle };
-    await Storage.setTheme(weddingId, { ...theme, fonts });
+    await saveTheme({ ...theme, fonts });
     await render();
     flagGuestLinkUpdated();
   });
@@ -275,7 +284,7 @@ function readAndResizeImage(file) {
     if (!btn) return;
     const theme = wedding.theme || getDefaultTheme();
     const fonts = { ...(theme.fonts || getDefaultTheme().fonts), body: btn.dataset.fontBody };
-    await Storage.setTheme(weddingId, { ...theme, fonts });
+    await saveTheme({ ...theme, fonts });
     await render();
     flagGuestLinkUpdated();
   });
@@ -291,7 +300,7 @@ function readAndResizeImage(file) {
     const fonts = theme.fonts || getDefaultTheme().fonts;
     const decoration = theme.decoration || getDefaultDecoration();
     const colors = { ...theme.colors, [input.dataset.key]: input.value };
-    await Storage.setTheme(weddingId, { preset: 'custom', colors, fonts, decoration });
+    await saveTheme({ preset: 'custom', colors, fonts, decoration });
     wedding.theme = { preset: 'custom', colors, fonts, decoration };
     themePresetGridEl.querySelectorAll('.theme-preset-option').forEach((b) => b.classList.remove('active'));
     flagGuestLinkUpdated();
@@ -308,7 +317,7 @@ function readAndResizeImage(file) {
       positions: prevDecoration.positions,
       customImage: key === 'custom' ? prevDecoration.customImage || null : null,
     };
-    await Storage.setTheme(weddingId, { ...theme, decoration });
+    await saveTheme({ ...theme, decoration });
     await render();
     flagGuestLinkUpdated();
   });
@@ -323,7 +332,7 @@ function readAndResizeImage(file) {
     const theme = wedding.theme || getDefaultTheme();
     const prevDecoration = normalizeDecoration(theme.decoration);
     const decoration = { ...prevDecoration, element: 'custom', customImage: dataUrl };
-    await Storage.setTheme(weddingId, { ...theme, decoration });
+    await saveTheme({ ...theme, decoration });
     await render();
     flagGuestLinkUpdated();
   });
@@ -331,7 +340,7 @@ function readAndResizeImage(file) {
   decorationRemoveBtn.addEventListener('click', async () => {
     const theme = wedding.theme || getDefaultTheme();
     const decoration = { ...getDefaultDecoration() };
-    await Storage.setTheme(weddingId, { ...theme, decoration });
+    await saveTheme({ ...theme, decoration });
     await render();
     flagGuestLinkUpdated();
   });
@@ -348,7 +357,7 @@ function readAndResizeImage(file) {
       ? prevDecoration.positions.filter((p) => p !== key)
       : [...prevDecoration.positions, key];
     const decoration = { ...prevDecoration, positions };
-    await Storage.setTheme(weddingId, { ...theme, decoration });
+    await saveTheme({ ...theme, decoration });
     await render();
     flagGuestLinkUpdated();
   });
