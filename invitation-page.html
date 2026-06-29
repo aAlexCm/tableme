@@ -4,6 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Invitation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700&family=Parisienne&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     html, body {
       margin: 0;
@@ -108,82 +111,10 @@
       transform: translateX(-50%);
       cursor: ns-resize;
     }
-
-    .text-toolbar {
-      position: fixed;
-      z-index: 60;
-      display: none;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 8px;
-      max-width: calc(100vw - 16px);
-      border-radius: 8px;
-      background: #1c1c1e;
-      box-shadow: 0 10px 26px rgba(0, 0, 0, 0.3);
-      font-family: 'Inter', sans-serif;
-    }
-
-    .text-toolbar:not([hidden]) {
-      display: flex;
-    }
-
-    .text-toolbar button {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 28px;
-      height: 28px;
-      padding: 0;
-      border: none;
-      border-radius: 6px;
-      background: none;
-      color: #fff;
-      cursor: pointer;
-      font-size: 0.85rem;
-      font-weight: 700;
-    }
-
-    .text-toolbar button:hover {
-      background: rgba(255, 255, 255, 0.12);
-    }
-
-    .text-toolbar button.active {
-      background: #2563eb;
-    }
-
-    .text-toolbar input[type='number'] {
-      width: 46px;
-      height: 28px;
-      padding: 0 4px;
-      border: none;
-      border-radius: 6px;
-      text-align: center;
-      font-size: 0.78rem;
-    }
-
-    .text-toolbar input[type='color'] {
-      width: 28px;
-      height: 28px;
-      padding: 2px;
-      border: none;
-      border-radius: 6px;
-      background: none;
-    }
   </style>
 </head>
 <body>
   <div id="canvas-root"></div>
-
-  <div class="text-toolbar" id="text-toolbar" hidden>
-    <button type="button" id="bold-btn"><b>B</b></button>
-    <button type="button" id="italic-btn"><i>I</i></button>
-    <button type="button" id="align-left-btn">&#8676;</button>
-    <button type="button" id="align-center-btn">&#8644;</button>
-    <button type="button" id="align-right-btn">&#8677;</button>
-    <input type="number" id="size-input" min="8" max="120" />
-    <input type="color" id="color-input" />
-    <button type="button" id="delete-btn">&#10005;</button>
-  </div>
 
   <script type="module" src="js/invitation-page.js"></script>
 </body>

@@ -64,6 +64,55 @@
             <button type="button" class="icon-btn" id="invitation-share-link-btn" data-i18n-aria-label="invitationShareLinkLabel" aria-label="Partager le lien" hidden></button>
           </div>
         </div>
+
+        <aside class="invitation-text-settings" id="invitation-text-settings" hidden>
+          <div class="invitation-text-settings-header">
+            <p class="invitation-text-settings-title" data-i18n="invitationTextSettingsTitle">Paramètres du texte</p>
+            <button type="button" class="icon-btn" id="invitation-settings-close-btn" data-i18n-aria-label="invitationCloseSettingsLabel" aria-label="Fermer">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18"/><path d="M6 6l12 12"/></svg>
+            </button>
+          </div>
+
+          <div class="invitation-text-settings-section">
+            <label class="invitation-text-settings-label" data-i18n="invitationFontLabel" for="invitation-font-select">Police</label>
+            <select id="invitation-font-select">
+              <option value="Georgia, 'Times New Roman', serif">Georgia</option>
+              <option value="'Playfair Display', serif">Playfair Display</option>
+              <option value="'Cormorant Garamond', serif">Cormorant Garamond</option>
+              <option value="'Parisienne', cursive">Parisienne</option>
+              <option value="'Inter', sans-serif">Inter</option>
+            </select>
+          </div>
+
+          <div class="invitation-text-settings-section">
+            <label class="invitation-text-settings-label" data-i18n="invitationFontSizeLabel" for="invitation-size-range">Taille de police</label>
+            <div class="invitation-text-settings-size-row">
+              <input type="range" id="invitation-size-range" min="8" max="120" />
+              <input type="number" id="invitation-size-number" min="8" max="120" />
+            </div>
+          </div>
+
+          <div class="invitation-text-settings-section invitation-text-settings-row">
+            <button type="button" class="invitation-text-settings-toggle" id="invitation-bold-btn" data-i18n-aria-label="invitationBoldLabel" aria-label="Gras"><b>B</b></button>
+            <button type="button" class="invitation-text-settings-toggle" id="invitation-italic-btn" data-i18n-aria-label="invitationItalicLabel" aria-label="Italique"><i>I</i></button>
+            <button type="button" class="invitation-text-settings-toggle" id="invitation-underline-btn" data-i18n-aria-label="invitationUnderlineLabel" aria-label="Souligné"><u>S</u></button>
+            <input type="color" id="invitation-color-input" data-i18n-aria-label="invitationTextColorLabel" aria-label="Couleur du texte" />
+          </div>
+
+          <div class="invitation-text-settings-section invitation-text-settings-row">
+            <button type="button" class="invitation-text-settings-toggle" id="invitation-align-left-btn" data-i18n-aria-label="invitationAlignLeftLabel" aria-label="Aligner à gauche">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="15" y2="12"/><line x1="3" y1="18" x2="18" y2="18"/></svg>
+            </button>
+            <button type="button" class="invitation-text-settings-toggle" id="invitation-align-center-btn" data-i18n-aria-label="invitationAlignCenterLabel" aria-label="Centrer">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="6" y1="12" x2="18" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+            </button>
+            <button type="button" class="invitation-text-settings-toggle" id="invitation-align-right-btn" data-i18n-aria-label="invitationAlignRightLabel" aria-label="Aligner à droite">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="9" y1="12" x2="21" y2="12"/><line x1="6" y1="18" x2="21" y2="18"/></svg>
+            </button>
+          </div>
+
+          <button type="button" class="invitation-text-settings-delete" id="invitation-delete-widget-btn" data-i18n="invitationDeleteWidgetBtn">Supprimer</button>
+        </aside>
       </div>
     </div>
   </div>

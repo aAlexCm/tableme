@@ -11,6 +11,84 @@ const ICONS = {
   share: '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>',
 };
 
+// The Text Settings panel lives here (not inside the phone-frame iframe —
+// there's no room for a real side panel in a 320px mockup). invitation-page.js
+// calls window.onInvitationWidgetSelected/Deselected on us when a widget is
+// (de)selected; we call back into its exposed window functions to apply
+// changes. Both pages are same-origin, so direct calls work fine.
+function wireTextSettingsPanel(phoneScreenEl) {
+  const panel = document.getElementById('invitation-text-settings');
+  const fontSelect = document.getElementById('invitation-font-select');
+  const sizeRange = document.getElementById('invitation-size-range');
+  const sizeNumber = document.getElementById('invitation-size-number');
+  const boldBtn = document.getElementById('invitation-bold-btn');
+  const italicBtn = document.getElementById('invitation-italic-btn');
+  const underlineBtn = document.getElementById('invitation-underline-btn');
+  const colorInput = document.getElementById('invitation-color-input');
+  const alignLeftBtn = document.getElementById('invitation-align-left-btn');
+  const alignCenterBtn = document.getElementById('invitation-align-center-btn');
+  const alignRightBtn = document.getElementById('invitation-align-right-btn');
+  const deleteBtn = document.getElementById('invitation-delete-widget-btn');
+  const closeBtn = document.getElementById('invitation-settings-close-btn');
+
+  let currentWidget = null;
+
+  function applyProps(props) {
+    phoneScreenEl.contentWindow?.updateSelectedWidgetProps?.(props);
+  }
+
+  window.onInvitationWidgetSelected = (widget) => {
+    currentWidget = widget;
+    panel.hidden = false;
+    fontSelect.value = widget.fontFamily;
+    sizeRange.value = widget.fontSize;
+    sizeNumber.value = widget.fontSize;
+    colorInput.value = widget.color;
+    boldBtn.classList.toggle('active', widget.bold);
+    italicBtn.classList.toggle('active', widget.italic);
+    underlineBtn.classList.toggle('active', widget.underline);
+    alignLeftBtn.classList.toggle('active', widget.align === 'left');
+    alignCenterBtn.classList.toggle('active', widget.align === 'center');
+    alignRightBtn.classList.toggle('active', widget.align === 'right');
+  };
+
+  window.onInvitationWidgetDeselected = () => {
+    currentWidget = null;
+    panel.hidden = true;
+  };
+
+  fontSelect.addEventListener('change', () => applyProps({ fontFamily: fontSelect.value }));
+
+  sizeRange.addEventListener('input', () => {
+    sizeNumber.value = sizeRange.value;
+    applyProps({ fontSize: Number(sizeRange.value) });
+  });
+  sizeNumber.addEventListener('input', () => {
+    const value = Number(sizeNumber.value);
+    if (value > 0) {
+      sizeRange.value = value;
+      applyProps({ fontSize: value });
+    }
+  });
+
+  boldBtn.addEventListener('click', () => applyProps({ bold: !currentWidget?.bold }));
+  italicBtn.addEventListener('click', () => applyProps({ italic: !currentWidget?.italic }));
+  underlineBtn.addEventListener('click', () => applyProps({ underline: !currentWidget?.underline }));
+  colorInput.addEventListener('input', () => applyProps({ color: colorInput.value }));
+
+  alignLeftBtn.addEventListener('click', () => applyProps({ align: 'left' }));
+  alignCenterBtn.addEventListener('click', () => applyProps({ align: 'center' }));
+  alignRightBtn.addEventListener('click', () => applyProps({ align: 'right' }));
+
+  deleteBtn.addEventListener('click', () => {
+    phoneScreenEl.contentWindow?.deleteSelectedWidget?.();
+  });
+
+  closeBtn.addEventListener('click', () => {
+    phoneScreenEl.contentWindow?.deselectInvitationWidget?.();
+  });
+}
+
 (async function () {
   const params = new URLSearchParams(window.location.search);
   const weddingId = params.get('id');
@@ -84,6 +162,8 @@ const ICONS = {
   addTextBtn.addEventListener('click', () => {
     phoneScreenEl.contentWindow?.addTextWidget?.();
   });
+
+  wireTextSettingsPanel(phoneScreenEl);
 
   copyLinkBtn.innerHTML = ICONS.copy;
   copyLinkBtn.addEventListener('click', () => {

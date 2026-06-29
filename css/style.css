@@ -1301,6 +1301,142 @@ nav.admin-nav.admin-nav-stacked {
   text-overflow: ellipsis;
 }
 
+/* Wix-style "Text Settings" panel — lives in the parent page (not the
+   iframe) since a real side panel needs more room than a 320px phone mockup
+   has. invitation.js shows/hides it and syncs its fields via direct calls
+   into invitation-page.js's exposed window functions (same-origin iframe). */
+.invitation-text-settings {
+  flex: 0 0 auto;
+  width: 240px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 18px;
+  border-radius: var(--radius);
+  background: var(--paper);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.1);
+}
+
+.invitation-text-settings-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.invitation-text-settings-title {
+  margin: 0;
+  font-family: 'Playfair Display', serif;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--charcoal);
+}
+
+.invitation-text-settings-header .icon-btn {
+  flex: 0 0 28px;
+  width: 28px;
+  height: 28px;
+}
+
+.invitation-text-settings-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.invitation-text-settings-section:first-of-type {
+  padding-top: 0;
+  border-top: none;
+}
+
+.invitation-text-settings-label {
+  font-size: 0.72rem;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.invitation-text-settings-size-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.invitation-text-settings-size-row input[type='range'] {
+  flex: 1 1 auto;
+  accent-color: var(--gold);
+}
+
+.invitation-text-settings-size-row input[type='number'] {
+  flex: 0 0 56px;
+  width: 56px;
+  padding: 4px 6px;
+  text-align: center;
+  font-size: 0.82rem;
+}
+
+.invitation-text-settings-row {
+  flex-direction: row;
+  align-items: center;
+}
+
+.invitation-text-settings-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1 1 auto;
+  height: 36px;
+  padding: 0;
+  border-radius: var(--radius-sm);
+  background: var(--paper);
+  border: 1px solid rgba(15, 23, 42, 0.14);
+  color: var(--ink);
+  box-shadow: none;
+  font-size: 0.9rem;
+}
+
+.invitation-text-settings-toggle:hover {
+  background: rgba(15, 23, 42, 0.04);
+  box-shadow: none;
+  transform: none;
+}
+
+.invitation-text-settings-toggle.active {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: #fff;
+}
+
+.invitation-text-settings-row input[type='color'] {
+  flex: 0 0 36px;
+  width: 36px;
+  height: 36px;
+  padding: 2px;
+  border-radius: var(--radius-sm);
+}
+
+.invitation-text-settings-delete {
+  width: 100%;
+  padding-top: 14px;
+  border-top: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: var(--radius-sm);
+  background: none;
+  box-shadow: none;
+  color: var(--error);
+  font-weight: 600;
+  text-align: center;
+}
+
+.invitation-text-settings-delete:hover {
+  background: color-mix(in srgb, var(--error) 8%, transparent);
+  box-shadow: none;
+  transform: none;
+}
+
 @media (max-width: 760px) {
   .invitation-workspace {
     flex-direction: column;
@@ -1312,6 +1448,10 @@ nav.admin-nav.admin-nav-stacked {
   }
 
   .invitation-canvas-area {
+    width: 100%;
+  }
+
+  .invitation-text-settings {
     width: 100%;
   }
 

@@ -7,15 +7,7 @@ const isEditMode = params.get('edit') === '1';
 initErrorLogging({ page: 'invitation-page', weddingId });
 
 const canvasRoot = document.getElementById('canvas-root');
-const toolbarEl = document.getElementById('text-toolbar');
-const boldBtn = document.getElementById('bold-btn');
-const italicBtn = document.getElementById('italic-btn');
-const alignLeftBtn = document.getElementById('align-left-btn');
-const alignCenterBtn = document.getElementById('align-center-btn');
-const alignRightBtn = document.getElementById('align-right-btn');
-const sizeInput = document.getElementById('size-input');
-const colorInput = document.getElementById('color-input');
-const deleteBtn = document.getElementById('delete-btn');
+const DEFAULT_FONT_FAMILY = "Georgia, 'Times New Roman', serif";
 
 let widgets = [];
 let selectedId = null;
@@ -40,8 +32,10 @@ function normalizeWidget(w) {
     width: typeof w.width === 'number' ? w.width : undefined,
     text: typeof w.text === 'string' ? w.text : 'Votre texte ici',
     fontSize: typeof w.fontSize === 'number' ? w.fontSize : 20,
+    fontFamily: typeof w.fontFamily === 'string' ? w.fontFamily : DEFAULT_FONT_FAMILY,
     bold: !!w.bold,
     italic: !!w.italic,
+    underline: !!w.underline,
     align: ['left', 'center', 'right'].includes(w.align) ? w.align : 'left',
     color: w.color || '#2c2420',
   };
@@ -53,11 +47,25 @@ function applyTextStyle(node, w) {
   node.style.width = w.width ? `${w.width}px` : '';
   const content = node.querySelector('.widget-text-content');
   if (!content) return;
+  content.style.fontFamily = w.fontFamily;
   content.style.fontSize = `${w.fontSize}px`;
   content.style.fontWeight = w.bold ? '700' : '400';
   content.style.fontStyle = w.italic ? 'italic' : 'normal';
+  content.style.textDecoration = w.underline ? 'underline' : 'none';
   content.style.textAlign = w.align;
   content.style.color = w.color;
+}
+
+// The Text Settings panel lives in the parent page (invitation.html), not in
+// this iframe — there's no room for a real Wix-style side panel inside a
+// 320px-wide phone mockup. Both pages are same-origin, so we just call
+// functions on window.parent directly instead of postMessage.
+function notifyParentSelected(w) {
+  window.parent.onInvitationWidgetSelected?.({ ...w });
+}
+
+function notifyParentDeselected() {
+  window.parent.onInvitationWidgetDeselected?.();
 }
 
 function deselect() {
@@ -66,14 +74,7 @@ function deselect() {
   canvasRoot.querySelectorAll('.widget').forEach((n) => {
     n.classList.remove('selected', 'is-editing');
   });
-  toolbarEl.hidden = true;
-}
-
-function positionToolbar(node) {
-  const rect = node.getBoundingClientRect();
-  const maxLeft = Math.max(8, window.innerWidth - toolbarEl.offsetWidth - 8);
-  toolbarEl.style.left = `${Math.min(maxLeft, Math.max(8, rect.left))}px`;
-  toolbarEl.style.top = `${Math.max(8, rect.top - toolbarEl.offsetHeight - 10)}px`;
+  notifyParentDeselected();
 }
 
 function blurActiveEditing(exceptId) {
@@ -95,16 +96,7 @@ function selectWidget(id) {
   canvasRoot.querySelectorAll('.widget').forEach((n) => {
     n.classList.toggle('selected', n.dataset.id === id);
   });
-  boldBtn.classList.toggle('active', w.bold);
-  italicBtn.classList.toggle('active', w.italic);
-  alignLeftBtn.classList.toggle('active', w.align === 'left');
-  alignCenterBtn.classList.toggle('active', w.align === 'center');
-  alignRightBtn.classList.toggle('active', w.align === 'right');
-  sizeInput.value = w.fontSize;
-  colorInput.value = w.color;
-  toolbarEl.hidden = false;
-  const node = canvasRoot.querySelector(`[data-id="${id}"]`);
-  if (node) positionToolbar(node);
+  notifyParentSelected(w);
 }
 
 function updateSelected(mutator) {
@@ -113,13 +105,27 @@ function updateSelected(mutator) {
   mutator(w);
   const node = canvasRoot.querySelector(`[data-id="${selectedId}"]`);
   if (node) applyTextStyle(node, w);
-  boldBtn.classList.toggle('active', w.bold);
-  italicBtn.classList.toggle('active', w.italic);
-  alignLeftBtn.classList.toggle('active', w.align === 'left');
-  alignCenterBtn.classList.toggle('active', w.align === 'center');
-  alignRightBtn.classList.toggle('active', w.align === 'right');
+  notifyParentSelected(w);
   scheduleSave();
 }
+
+// Exposed for the parent page's Text Settings panel to call directly.
+window.updateSelectedWidgetProps = function updateSelectedWidgetProps(props) {
+  updateSelected((w) => Object.assign(w, props));
+};
+
+window.deleteSelectedWidget = function deleteSelectedWidget() {
+  if (!selectedId) return;
+  widgets = widgets.filter((w) => w.id !== selectedId);
+  const node = canvasRoot.querySelector(`[data-id="${selectedId}"]`);
+  if (node) node.remove();
+  deselect();
+  scheduleSave();
+};
+
+window.deselectInvitationWidget = function deselectInvitationWidget() {
+  deselect();
+};
 
 // Pointer Events so dragging/resizing works with touch input too.
 function wirePointerDrag(handle, onStart) {
@@ -183,7 +189,6 @@ function wireWidthResize(handle, node, w, { side }) {
           w.width = nextWidth;
         }
         applyTextStyle(node, w);
-        positionToolbar(node);
       },
       onEnd() {
         scheduleSave();
@@ -203,8 +208,7 @@ function wireFontSizeResize(handle, node, w) {
         const dy = ev.clientY - startY;
         w.fontSize = Math.min(120, Math.max(8, Math.round(startSize + dy / 2)));
         applyTextStyle(node, w);
-        positionToolbar(node);
-        if (selectedId === w.id) sizeInput.value = w.fontSize;
+        if (selectedId === w.id) notifyParentSelected(w);
       },
       onEnd() {
         scheduleSave();
@@ -291,7 +295,6 @@ function createTextNode(w) {
         w.y = Math.max(0, startTop + dy);
         node.style.left = `${w.x}px`;
         node.style.top = `${w.y}px`;
-        positionToolbar(node);
       }
       function onUp(ev) {
         if (ev.pointerId !== pointerId) return;
@@ -344,28 +347,8 @@ window.addTextWidget = function addTextWidget() {
 
 if (isEditMode) {
   document.addEventListener('pointerdown', (e) => {
-    if (e.target.closest('.widget') || e.target.closest('.text-toolbar')) return;
+    if (e.target.closest('.widget')) return;
     deselect();
-  });
-
-  boldBtn.addEventListener('click', () => updateSelected((w) => { w.bold = !w.bold; }));
-  italicBtn.addEventListener('click', () => updateSelected((w) => { w.italic = !w.italic; }));
-  alignLeftBtn.addEventListener('click', () => updateSelected((w) => { w.align = 'left'; }));
-  alignCenterBtn.addEventListener('click', () => updateSelected((w) => { w.align = 'center'; }));
-  alignRightBtn.addEventListener('click', () => updateSelected((w) => { w.align = 'right'; }));
-  sizeInput.addEventListener('input', () => updateSelected((w) => {
-    const value = Number(sizeInput.value);
-    if (value > 0) w.fontSize = value;
-  }));
-  colorInput.addEventListener('input', () => updateSelected((w) => { w.color = colorInput.value; }));
-
-  deleteBtn.addEventListener('click', () => {
-    if (!selectedId) return;
-    widgets = widgets.filter((w) => w.id !== selectedId);
-    const node = canvasRoot.querySelector(`[data-id="${selectedId}"]`);
-    if (node) node.remove();
-    deselect();
-    scheduleSave();
   });
 
   document.addEventListener('keydown', (e) => {
@@ -373,7 +356,7 @@ if (isEditMode) {
     if (!selectedId) return;
     if (e.target.closest('[contenteditable="true"]')) return;
     e.preventDefault();
-    deleteBtn.click();
+    window.deleteSelectedWidget();
   });
 }
 
