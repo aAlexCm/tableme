@@ -1265,7 +1265,7 @@ nav.admin-nav.admin-nav-stacked {
   height: 91.7%;
   display: block;
   border: none;
-  border-radius: 32px;
+  border-radius: 0;
   background: #f2f2f6;
 }
 
