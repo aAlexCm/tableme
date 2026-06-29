@@ -159,6 +159,10 @@ Le bouton "Imprimer" de poster.html a été retiré (2026-06-28) après plusieur
 
 `body.admin-theme .card { padding: 36px; }` (non médiaquerée) a une spécificité (0,2,1) plus élevée qu'un override à une seule classe + `:not()` comme `.add-guest-card:not(.is-open) { padding: ... }` (0,2,0). Un override mobile-only sur `.card` perdra silencieusement face à cette règle sauf à augmenter sa spécificité (ex. préfixer par un `#id`). Toujours vérifier le `padding`/style calculé via `getComputedStyle`, pas seulement une capture d'écran.
 
+### `[hidden]` perd contre un `display` non conditionnel de la même classe
+
+Un élément cible par `el.hidden = true/false` ne se cache que si AUCUNE règle d'auteur ne fixe `display` sans condition sur ce même élément — `[hidden] { display:none }` est une règle du user-agent stylesheet, toujours perdante face à une règle d'auteur de spécificité égale ou supérieure (ex. `.ma-classe { display: flex; }`). Repéré le 2026-06-30 sur `.invitation-text-settings` (le panneau "Paramètres du texte" restait visible en permanence, même sans widget sélectionné). **Pattern à appliquer pour tout élément togglé via l'attribut `hidden`** : mettre `display: none` dans la règle de base, puis `.ma-classe:not([hidden]) { display: flex; }` pour l'état visible — jamais `display: flex` directement dans la règle de base.
+
 ## 8. Sécurité / accès
 
 - `js/auth-guard.js` (Google sign-in popup) + `firestore.rules` (`isSuperAdmin()` = email dans une allow-list, actuellement `boagiualexandru@gmail.com` uniquement) protègent `admin.html`/`partners-admin.html` et les opérations `list`/`create`/`delete` sur `weddings`, toutes les écritures sur `partners`, et la lecture de `partnerClicks`/`appLogs`.
