@@ -115,6 +115,10 @@ export const Storage = {
     await updateDoc(doc(db, 'weddings', weddingId), { poster });
   },
 
+  async setInvitation(weddingId, invitation) {
+    await updateDoc(doc(db, 'weddings', weddingId), { invitation });
+  },
+
   // `mutate` receives the *current server* guests array and must return the
   // next array — see the comment on mutateField above for why this can't
   // just be a precomputed array.
