@@ -3220,6 +3220,15 @@ body.admin-theme .guest-row-contact-icon:hover {
   cursor: pointer;
 }
 
+/* The select itself is shrunk to an invisible icon-sized circle so only the
+   icon overlay shows — but its dropdown <option> list inherits the same
+   font-size:0/transparent unless reset, which on Windows Chrome renders the
+   popup with blank, unreadable rows (macOS happened to mask this). */
+.guest-rsvp-edit-wrap select option {
+  font-size: 1rem;
+  color: initial;
+}
+
 .guest-rsvp-edit-wrap .guest-row-mobile-icon {
   display: flex;
   position: absolute;
@@ -5654,6 +5663,14 @@ body.admin-theme .theme-decoration-position-arrow {
     font-size: 0;
     color: transparent;
     background: transparent;
+  }
+
+  /* Same fix as .guest-rsvp-edit-wrap select option above — without this,
+     the dropdown's own popup list (not just the closed circle) inherits
+     font-size:0 and renders blank on Windows Chrome. */
+  .guest-menu-edit-wrap select option {
+    font-size: 1rem;
+    color: initial;
   }
 
   .guest-menu-edit-wrap .guest-row-mobile-icon {
