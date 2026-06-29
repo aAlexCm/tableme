@@ -1,4 +1,5 @@
 import { Storage } from './storage.js';
+import { initErrorLogging } from './error-log.js';
 import { applyTranslations, buildLangSwitcher, t } from './i18n.js';
 import {
   GUEST_THEME_PRESETS,
@@ -68,6 +69,7 @@ function readAndResizeImage(file) {
 (async function () {
   const params = new URLSearchParams(window.location.search);
   const weddingId = params.get('id');
+  initErrorLogging({ page: 'theme-settings', weddingId });
 
   let currentLang = localStorage.getItem(LANG_KEY) || 'fr';
   let wedding = null;

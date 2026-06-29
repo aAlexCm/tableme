@@ -33,6 +33,11 @@ const ICONS = {
   const weddingLangSelect = document.getElementById('wedding-lang');
   const weddingListEl = document.getElementById('wedding-list');
   const weddingEmptyEl = document.getElementById('wedding-empty');
+  let weddingNameById = {};
+
+  const logsListEl = document.getElementById('logs-list');
+  const logsEmptyEl = document.getElementById('logs-empty');
+  const logsClearBtn = document.getElementById('logs-clear-btn');
 
   const featuresModal = document.getElementById('features-modal');
   const featuresModalClose = document.getElementById('features-modal-close');
@@ -95,7 +100,10 @@ const ICONS = {
     updatePageTitle();
     // Logged-out visitors see the login form, not the wedding list — calling
     // this while logged out would just throw a permissions error.
-    if (!adminContentEl.hidden) renderWeddings();
+    if (!adminContentEl.hidden) {
+      renderWeddings();
+      renderLogs();
+    }
   }
 
   async function renderWeddings() {
@@ -109,6 +117,7 @@ const ICONS = {
     }
     weddingListEl.innerHTML = '';
     weddingEmptyEl.hidden = weddings.length > 0;
+    weddingNameById = Object.fromEntries(weddings.map((w) => [w.id, w.name]));
 
     weddings.forEach((w) => {
       const li = document.createElement('li');
@@ -143,6 +152,47 @@ const ICONS = {
       weddingListEl.appendChild(li);
     });
   }
+
+  async function renderLogs() {
+    let logs;
+    try {
+      logs = await Storage.getAppLogs();
+    } catch (err) {
+      console.warn('getAppLogs failed', err);
+      return;
+    }
+    logsListEl.innerHTML = '';
+    logsEmptyEl.hidden = logs.length > 0;
+
+    logs.forEach((log) => {
+      const li = document.createElement('li');
+      li.className = 'app-log-item';
+      const dateLabel = log.createdAt ? new Date(log.createdAt).toLocaleString('fr-FR') : '';
+      const weddingLabel = log.weddingId ? (weddingNameById[log.weddingId] || log.weddingId) : t(currentLang, 'logsNoWedding');
+      li.innerHTML = `
+        <div class="app-log-meta">
+          <span class="app-log-date">${escapeHtml(dateLabel)}</span>
+          <span class="app-log-page">${escapeHtml(log.page || '')}</span>
+          <span class="app-log-wedding">${escapeHtml(weddingLabel)}</span>
+        </div>
+        <div class="app-log-message">${escapeHtml(log.message || '')}</div>
+        ${log.extra ? `<pre class="app-log-extra">${escapeHtml(log.extra)}</pre>` : ''}
+      `;
+      logsListEl.appendChild(li);
+    });
+  }
+
+  logsClearBtn.addEventListener('click', async () => {
+    if (!confirm(t(currentLang, 'logsConfirmClear'))) return;
+    try {
+      await Storage.clearAppLogs();
+    } catch (err) {
+      console.error('clearAppLogs failed', err);
+      alert(t(currentLang, 'saveErrorRetry'));
+      return;
+    }
+    await renderLogs();
+  });
 
   weddingForm.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -434,6 +484,7 @@ const ICONS = {
     adminContentEl.hidden = false;
     populateWeddingLangSelect();
     await renderWeddings();
+    await renderLogs();
   }
 
   loginGoogleBtn.addEventListener('click', async () => {

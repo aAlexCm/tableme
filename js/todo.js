@@ -1,4 +1,5 @@
 import { Storage, generateId } from './storage.js';
+import { initErrorLogging } from './error-log.js';
 import { applyTranslations, buildLangSwitcher, t } from './i18n.js';
 
 const LANG_KEY = 'tableme_wedding_admin_lang';
@@ -413,6 +414,7 @@ function escapeHtml(value) {
 (async function () {
   const params = new URLSearchParams(window.location.search);
   const weddingId = params.get('id');
+  initErrorLogging({ page: 'todo', weddingId });
 
   let currentLang = localStorage.getItem(LANG_KEY) || 'fr';
   let wedding = null;

@@ -1,4 +1,5 @@
 import { Storage } from './storage.js';
+import { initErrorLogging } from './error-log.js';
 import { applyTranslations, buildLangSwitcher, t } from './i18n.js';
 import { isFeatureEnabled } from './features.js';
 import { PARTNER_CATEGORIES, PARTNER_ICONS, CONTACT_CHANNELS, buildContactHref, matchesLocation } from './partners.js';
@@ -18,6 +19,7 @@ function escapeHtml(value) {
 (async function () {
   const params = new URLSearchParams(window.location.search);
   const weddingId = params.get('id');
+  initErrorLogging({ page: 'partners-page', weddingId });
 
   let currentLang = localStorage.getItem(LANG_KEY) || 'fr';
 

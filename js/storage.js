@@ -10,6 +10,9 @@ import {
   deleteDoc,
   runTransaction,
   onSnapshot,
+  query,
+  orderBy,
+  limit,
 } from 'https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js';
 
 export function generateId() {
@@ -28,6 +31,7 @@ export function normalize(str) {
 const weddingsCol = collection(db, 'weddings');
 const partnersCol = collection(db, 'partners');
 const partnerClicksCol = collection(db, 'partnerClicks');
+const appLogsCol = collection(db, 'appLogs');
 
 // Every list-shaped field below (guests, tables, tasks, customCategories,
 // menus, landmarks) can be edited from several pages, and sometimes from two
@@ -213,5 +217,27 @@ export const Storage = {
   async getPartnerClicks() {
     const snap = await getDocs(partnerClicksCol);
     return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  },
+
+  // Best-effort error reporting from any page (couple admin or guest-facing).
+  // Must never throw and must never call console.error itself — error-log.js
+  // forwards console.error here, so logging an error with console.error would
+  // recurse forever.
+  async logAppError(event) {
+    try {
+      await addDoc(appLogsCol, { ...event, createdAt: Date.now() });
+    } catch (err) {
+      console.warn('logAppError failed', err);
+    }
+  },
+
+  async getAppLogs() {
+    const snap = await getDocs(query(appLogsCol, orderBy('createdAt', 'desc'), limit(200)));
+    return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  },
+
+  async clearAppLogs() {
+    const snap = await getDocs(appLogsCol);
+    await Promise.all(snap.docs.map((d) => deleteDoc(d.ref)));
   },
 };

@@ -1,4 +1,5 @@
 import { Storage, generateId } from './storage.js';
+import { initErrorLogging } from './error-log.js';
 import { applyTranslations, buildLangSwitcher, t } from './i18n.js';
 import { wireColorHexPair } from './color-hex.js';
 import { isFeatureEnabled } from './features.js';
@@ -160,6 +161,7 @@ function fontFamilyFor(fontKey) {
 (async function () {
   const params = new URLSearchParams(window.location.search);
   const weddingId = params.get('id');
+  initErrorLogging({ page: 'poster', weddingId });
 
   let currentLang = localStorage.getItem(LANG_KEY) || 'fr';
 

@@ -1,4 +1,5 @@
 import { Storage, generateId } from './storage.js';
+import { initErrorLogging } from './error-log.js';
 import { applyTranslations, buildLangSwitcher, t } from './i18n.js';
 import { createTableModal, ICONS } from './table-modal.js';
 import { createShareControls } from './share-controls.js';
@@ -59,6 +60,7 @@ function reconcileTables(tables, usedLabels) {
 (async function () {
   const params = new URLSearchParams(window.location.search);
   const weddingId = params.get('id');
+  initErrorLogging({ page: 'floor-plan', weddingId });
 
   let currentLang = localStorage.getItem(LANG_KEY) || 'fr';
   let wedding = null;

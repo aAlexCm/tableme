@@ -34,5 +34,14 @@ service cloud.firestore {
       allow create: if true;
       allow read: if isSuperAdmin();
     }
+
+    // Couples and guests both run JS that can fail (a Firestore write
+    // rejected, an unhandled exception) — they need to report that without
+    // any auth, the same as partnerClicks above. Only the superadmin panel
+    // reads or clears the log.
+    match /appLogs/{logId} {
+      allow create: if true;
+      allow read, delete: if isSuperAdmin();
+    }
   }
 }

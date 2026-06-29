@@ -1,4 +1,5 @@
 import { Storage } from './storage.js';
+import { initErrorLogging } from './error-log.js';
 import { applyTranslations, buildLangSwitcher, t, LANGS } from './i18n.js';
 import { applyGuestTheme, applyGuestFonts, getDefaultTheme } from './guest-themes.js';
 import { applyGuestDecoration } from './guest-decorations.js';
@@ -28,6 +29,7 @@ function escapeHtml(value) {
 (async function () {
   const params = new URLSearchParams(window.location.search);
   const weddingId = params.get('id');
+  initErrorLogging({ page: 'rsvp', weddingId });
   const guestId = params.get('guest');
 
   const titleEl = document.getElementById('wedding-title');

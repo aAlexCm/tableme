@@ -1,4 +1,5 @@
 import { Storage, generateId } from './storage.js';
+import { initErrorLogging } from './error-log.js';
 import { applyTranslations, buildLangSwitcher, t } from './i18n.js';
 import { createTableModal } from './table-modal.js';
 import { createGuestModal } from './guest-modal.js';
@@ -66,6 +67,7 @@ function parseSheetRows(rows) {
 (async function () {
   const params = new URLSearchParams(window.location.search);
   const weddingId = params.get('id');
+  initErrorLogging({ page: 'wedding-admin', weddingId });
 
   let currentLang = localStorage.getItem(LANG_KEY) || 'fr';
   let draggedRow = null;

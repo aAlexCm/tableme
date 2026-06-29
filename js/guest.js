@@ -1,4 +1,5 @@
 import { Storage, normalize } from './storage.js';
+import { initErrorLogging } from './error-log.js';
 import { applyTranslations, buildLangSwitcher, t, LANGS } from './i18n.js';
 import { DEFAULT_SEATS, getRectShapeSize, getTableReach, buildChairs } from './table-shape.js';
 import { getLandmarkType } from './landmarks.js';
@@ -255,6 +256,7 @@ function getCardinalAnchor(center, direction, radius) {
 (async function () {
   const params = new URLSearchParams(window.location.search);
   const weddingId = params.get('id');
+  initErrorLogging({ page: 'guest', weddingId });
 
   const titleEl = document.getElementById('wedding-title');
   const subtitleEl = document.getElementById('wedding-subtitle');
