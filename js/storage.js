@@ -9,6 +9,7 @@ import {
   updateDoc,
   deleteDoc,
   runTransaction,
+  onSnapshot,
 } from 'https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js';
 
 export function generateId() {
@@ -71,6 +72,22 @@ export const Storage = {
     if (!id) return null;
     const snap = await getDoc(doc(db, 'weddings', id));
     return snap.exists() ? { id: snap.id, ...snap.data() } : null;
+  },
+
+  // Live updates for pages that need to react to changes made elsewhere —
+  // e.g. a guest confirming their RSVP from their own link should show up
+  // in the admin's guest list without a manual reload. Returns the
+  // unsubscribe function; errors (offline, etc.) are forwarded to onError
+  // rather than thrown, since there's no caller awaiting this.
+  subscribeToWedding(id, onUpdate, onError) {
+    return onSnapshot(
+      doc(db, 'weddings', id),
+      (snap) => onUpdate(snap.exists() ? { id: snap.id, ...snap.data() } : null),
+      (err) => {
+        console.error('subscribeToWedding failed', err);
+        if (onError) onError(err);
+      },
+    );
   },
 
   async addWedding(name, date, lang = 'fr') {

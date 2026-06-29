@@ -1095,4 +1095,19 @@ function parseSheetRows(rows) {
   langMount.appendChild(buildLangSwitcher(currentLang, setLang));
   applyTranslations(currentLang);
   await renderGuests();
+
+  // Keeps the guest list in sync with changes made elsewhere — most
+  // importantly a guest confirming/declining via their own RSVP link, which
+  // should show up here live instead of needing a manual reload. The first
+  // snapshot fires immediately with what we just rendered above, so it's
+  // skipped to avoid a redundant render.
+  let isFirstSnapshot = true;
+  Storage.subscribeToWedding(weddingId, (liveWedding) => {
+    if (isFirstSnapshot) {
+      isFirstSnapshot = false;
+      return;
+    }
+    if (!liveWedding) return;
+    renderGuests(liveWedding);
+  });
 })();
