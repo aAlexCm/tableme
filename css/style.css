@@ -1188,6 +1188,34 @@ nav.admin-nav.admin-nav-stacked {
   color: var(--ink);
 }
 
+.invitation-toolbox-tools {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.invitation-tool-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 10px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  text-align: left;
+  border-radius: var(--radius-sm);
+  background: none;
+  box-shadow: none;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  color: var(--ink);
+}
+
+.invitation-tool-btn:hover {
+  background: rgba(15, 23, 42, 0.04);
+  box-shadow: none;
+  transform: none;
+}
+
 .invitation-canvas-area {
   position: relative;
   flex: 1;

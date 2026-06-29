@@ -70,10 +70,20 @@ const ICONS = {
   backLinkEl.href = `wedding-admin.html?id=${weddingId}`;
   document.title = 'TableMe · Digital invitation';
 
-  const invitationUrl = `${window.location.origin}${window.location.pathname.replace(/[^/]+$/, '')}invitation-page.html?id=${weddingId}`;
-  phoneScreenEl.src = invitationUrl;
+  const basePath = `${window.location.origin}${window.location.pathname.replace(/[^/]+$/, '')}`;
+  const invitationUrl = `${basePath}invitation-page.html?id=${weddingId}`;
+  // The iframe gets its own ?edit=1 flag so invitation-page.js knows to load
+  // its drag/resize/contenteditable widget chrome — the public link above
+  // must stay edit-chrome-free, since any guest who opens it could otherwise
+  // rearrange or delete the couple's content.
+  phoneScreenEl.src = `${basePath}invitation-page.html?id=${weddingId}&edit=1`;
   linkDisplayEl.href = invitationUrl;
   linkDisplayEl.textContent = invitationUrl;
+
+  const addTextBtn = document.getElementById('invitation-add-text-btn');
+  addTextBtn.addEventListener('click', () => {
+    phoneScreenEl.contentWindow?.addTextWidget?.();
+  });
 
   copyLinkBtn.innerHTML = ICONS.copy;
   copyLinkBtn.addEventListener('click', () => {
