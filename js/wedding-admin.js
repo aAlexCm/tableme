@@ -147,6 +147,7 @@ function parseSheetRows(rows) {
   });
 
   const contactModalApi = createContactModal({
+    weddingId,
     getLang: () => currentLang,
   });
 

@@ -5324,11 +5324,6 @@ body.admin-theme .theme-decoration-position-arrow {
   white-space: nowrap;
 }
 
-.contact-modal-empty {
-  color: #998c77;
-  font-size: 0.85rem;
-  font-style: italic;
-}
 
 .table-modal-row .field:first-child {
   flex: 1.4;
@@ -6314,6 +6309,106 @@ body.guest-theme .mode-btn.active {
 .error-msg {
   color: var(--guest-text);
   font-family: var(--guest-font-body);
+}
+
+.rsvp-greeting {
+  margin-bottom: 4px;
+  font-family: var(--guest-font-title);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--guest-title);
+}
+
+.rsvp-choice-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.rsvp-choice-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  height: auto;
+  padding: 12px 16px;
+  background: var(--guest-input-bg);
+  color: var(--guest-text);
+  border: 1.5px solid transparent;
+  border-radius: var(--radius-sm);
+  font-family: var(--guest-font-body);
+  font-size: 0.92rem;
+  font-weight: 600;
+  text-align: left;
+  box-shadow: none;
+}
+
+.rsvp-choice-btn:hover {
+  filter: none;
+  transform: none;
+  box-shadow: none;
+  background: color-mix(in srgb, var(--guest-accent) 14%, var(--guest-input-bg));
+}
+
+.rsvp-choice-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--guest-card-bg);
+  color: var(--guest-text);
+  opacity: 0.6;
+}
+
+.rsvp-choice-btn.active[data-rsvp="confirmed"] {
+  background: #ddf3e3;
+  color: #2f7a4d;
+  border-color: #2f7a4d;
+}
+
+.rsvp-choice-btn.active[data-rsvp="confirmed"] .rsvp-choice-icon {
+  background: #fff;
+  color: #2f7a4d;
+  opacity: 1;
+}
+
+.rsvp-choice-btn.active[data-rsvp="declined"] {
+  background: #fbdfdf;
+  color: #b3433f;
+  border-color: #b3433f;
+}
+
+.rsvp-choice-btn.active[data-rsvp="declined"] .rsvp-choice-icon {
+  background: #fff;
+  color: #b3433f;
+  opacity: 1;
+}
+
+.rsvp-choice-btn.active[data-rsvp="pending"] {
+  background: #fdf3d6;
+  color: #92750c;
+  border-color: #92750c;
+}
+
+.rsvp-choice-btn.active[data-rsvp="pending"] .rsvp-choice-icon {
+  background: #fff;
+  color: #92750c;
+  opacity: 1;
+}
+
+.rsvp-thanks {
+  margin-top: 16px;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--guest-input-bg);
+  color: var(--guest-text);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-align: center;
 }
 
 .table-preview {

@@ -7,6 +7,9 @@
     { "source": "/ro", "destination": "/index" },
     { "source": "/guest/fr", "destination": "/guest" },
     { "source": "/guest/en", "destination": "/guest" },
-    { "source": "/guest/ro", "destination": "/guest" }
+    { "source": "/guest/ro", "destination": "/guest" },
+    { "source": "/rsvp/fr", "destination": "/rsvp" },
+    { "source": "/rsvp/en", "destination": "/rsvp" },
+    { "source": "/rsvp/ro", "destination": "/rsvp" }
   ]
 }

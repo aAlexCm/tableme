@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>TableMe · RSVP</title>
+  <meta property="og:title" content="TableMe · RSVP" />
+  <meta property="og:description" content="Confirm your attendance for the wedding." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://tableme.app/rsvp" />
+  <meta property="og:image" content="https://tableme.app/og-image.png" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="TableMe · RSVP" />
+  <meta name="twitter:description" content="Confirm your attendance for the wedding." />
+  <meta name="twitter:image" content="https://tableme.app/og-image.png" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700&family=EB+Garamond:ital,wght@0,500;0,600;0,700&family=Parisienne&family=Inter:wght@300;400;500;600;700&family=Work+Sans:wght@300;400;500;600;700&family=Source+Sans+3:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body class="guest-theme">
+  <div class="page">
+    <div id="lang-switcher-mount" class="lang-switcher-mount"></div>
+
+    <header class="hero invite-hero">
+      <div id="guest-decoration" class="guest-decoration-layer"></div>
+      <h1 id="wedding-title" class="script-title"></h1>
+    </header>
+
+    <div id="no-wedding" class="card" hidden>
+      <h2 data-i18n="invalidLinkTitle">Lien invalide</h2>
+      <p class="muted" data-i18n="invalidLinkDesc">Ce lien n'est pas valide. Merci d'utiliser le lien fourni par les mariés.</p>
+    </div>
+
+    <div id="connection-error" class="card" hidden>
+      <h2 data-i18n="connectionErrorTitle">Connexion impossible</h2>
+      <p class="muted" data-i18n="connectionErrorDesc">Nous n'avons pas pu joindre le serveur. Vérifiez votre connexion internet, puis réessayez.</p>
+      <button type="button" class="secondary" id="connection-error-retry" data-i18n="connectionErrorRetry">Réessayer</button>
+    </div>
+
+    <div id="rsvp-section" class="card" hidden>
+      <p id="rsvp-greeting" class="rsvp-greeting"></p>
+      <p class="muted" data-i18n="rsvpIncentive">Merci de nous dire si tu pourras être des nôtres.</p>
+
+      <div class="rsvp-choice-group" id="rsvp-choice-group" role="group">
+        <button type="button" class="rsvp-choice-btn" data-rsvp="confirmed">
+          <span class="rsvp-choice-icon" id="rsvp-icon-confirmed" aria-hidden="true"></span>
+          <span data-i18n="rsvpConfirmBtn">Je confirme</span>
+        </button>
+        <button type="button" class="rsvp-choice-btn" data-rsvp="declined">
+          <span class="rsvp-choice-icon" id="rsvp-icon-declined" aria-hidden="true"></span>
+          <span data-i18n="rsvpDeclineBtn">Je ne pourrai pas venir</span>
+        </button>
+        <button type="button" class="rsvp-choice-btn" data-rsvp="pending">
+          <span class="rsvp-choice-icon" id="rsvp-icon-pending" aria-hidden="true"></span>
+          <span data-i18n="rsvpPendingBtn">Je ne sais pas encore</span>
+        </button>
+      </div>
+
+      <p id="rsvp-thanks" class="rsvp-thanks" hidden></p>
+    </div>
+  </div>
+
+  <script type="module" src="/js/rsvp.js"></script>
+</body>
+</html>
