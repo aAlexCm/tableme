@@ -3152,9 +3152,12 @@ body.admin-theme .guest-row-drop-target {
   justify-content: center;
   width: 22px;
   height: 22px;
+  padding: 0;
+  border: none;
   border-radius: 50%;
   color: var(--sage-deep);
   background: var(--sage-light);
+  box-shadow: none;
   transition: color 0.15s ease, background 0.15s ease;
 }
 
@@ -5254,6 +5257,72 @@ body.admin-theme .theme-decoration-position-arrow {
   transform: none;
   box-shadow: none;
   background: #fbdfdf;
+}
+
+.contact-modal-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.contact-modal-action {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--sage-light);
+  text-align: left;
+  text-decoration: none;
+  transition: background 0.15s ease;
+}
+
+.contact-modal-action:hover {
+  background: color-mix(in srgb, var(--gold) 16%, var(--sage-light));
+}
+
+.contact-modal-action-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--paper);
+  color: var(--sage-deep);
+}
+
+.contact-modal-action-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow: hidden;
+}
+
+.contact-modal-action-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  color: var(--sage-deep);
+}
+
+.contact-modal-action-value {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--charcoal);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.contact-modal-empty {
+  color: #998c77;
+  font-size: 0.85rem;
+  font-style: italic;
 }
 
 .table-modal-row .field:first-child {

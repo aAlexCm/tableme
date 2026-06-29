@@ -2,6 +2,7 @@ import { Storage, generateId } from './storage.js';
 import { applyTranslations, buildLangSwitcher, t } from './i18n.js';
 import { createTableModal } from './table-modal.js';
 import { createGuestModal } from './guest-modal.js';
+import { createContactModal } from './contact-modal.js';
 import { createShareControls } from './share-controls.js';
 import { isFeatureEnabled } from './features.js';
 import { buildCountryCodeOptionsHtml, combinePhone, DEFAULT_COUNTRY_CODE_BY_LANG } from './phone-codes.js';
@@ -19,6 +20,7 @@ const ICONS = {
   cross: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="M6 6l12 12"/></svg>',
   clock: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>',
   phone: '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>',
+  contact: '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M5 16c0-1.5 1.5-3 4-3s4 1.5 4 3"/><path d="M15 9h4"/><path d="M15 13h4"/></svg>',
 };
 
 const RSVP_ICONS = {
@@ -142,6 +144,10 @@ function parseSheetRows(rows) {
     weddingId,
     getLang: () => currentLang,
     onChange: renderGuests,
+  });
+
+  const contactModalApi = createContactModal({
+    getLang: () => currentLang,
   });
 
   const shareControls = createShareControls({
@@ -543,7 +549,7 @@ function parseSheetRows(rows) {
           <span class="drag-handle">&#10303;</span>
           <span class="guest-row-name">${escapeHtml(g.name)}</span>
           <span class="guest-row-contact">
-            ${g.phone ? `<a class="guest-row-contact-icon" href="tel:${escapeHtml(g.phone)}" title="${escapeHtml(g.phone)}" aria-label="${escapeHtml(t(currentLang, 'guestPhoneLabel'))}: ${escapeHtml(g.phone)}">${ICONS.phone}</a>` : ''}
+            ${g.phone ? `<button type="button" class="guest-row-contact-icon" data-action="open-contact" data-id="${g.id}" title="${escapeHtml(t(currentLang, 'contactBtnLabel'))}" aria-label="${escapeHtml(t(currentLang, 'contactBtnLabel'))}">${ICONS.contact}</button>` : ''}
           </span>
           <span class="guest-menu-edit-wrap" data-has-menu="${g.menuId ? '1' : '0'}">
             <span class="guest-row-mobile-icon" aria-hidden="true">${ICONS.cutlery}</span>
@@ -956,6 +962,10 @@ function parseSheetRows(rows) {
       });
       menu.hidden = !willOpen;
       btn.setAttribute('aria-expanded', String(willOpen));
+    } else if (action === 'open-contact') {
+      const wedding = cachedWedding || (await Storage.getWedding(weddingId));
+      const guest = wedding && wedding.guests.find((g) => g.id === id);
+      if (guest) contactModalApi.open(guest);
     }
   });
 
