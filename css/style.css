@@ -2993,6 +2993,16 @@ body.admin-theme .toggle-switch input:checked + .toggle-switch-track {
   display: flex;
   align-items: center;
   gap: 6px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+
+.guest-row-empty:hover .guest-row-empty-actions,
+.guest-row-empty:focus-within .guest-row-empty-actions,
+.guest-row-empty.revealed .guest-row-empty-actions {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .guest-row-empty-fill,
@@ -3446,6 +3456,35 @@ body.admin-theme .guest-row-contact-icon:hover {
 
 .guest-row-more-delete svg {
   flex-shrink: 0;
+}
+
+/* Keep the row to a glance: name + RSVP status only. The phone, menu pill
+   and "..." actions are real but secondary, so they collapse to zero width
+   (not just invisible — that would still leave the name squeezed) and only
+   reappear on hover/focus, or via a tap on the row toggling .revealed for
+   touch screens, which have no hover. */
+.guest-row-contact,
+.guest-menu-edit-wrap,
+.guest-row-more {
+  opacity: 0;
+  max-width: 0;
+  overflow: hidden;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+
+.guest-row:hover .guest-row-contact,
+.guest-row:hover .guest-menu-edit-wrap,
+.guest-row:hover .guest-row-more,
+.guest-row:focus-within .guest-row-contact,
+.guest-row:focus-within .guest-menu-edit-wrap,
+.guest-row:focus-within .guest-row-more,
+.guest-row.revealed .guest-row-contact,
+.guest-row.revealed .guest-menu-edit-wrap,
+.guest-row.revealed .guest-row-more {
+  opacity: 1;
+  max-width: none;
+  pointer-events: auto;
 }
 
 .actions {

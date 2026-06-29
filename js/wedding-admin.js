@@ -882,7 +882,13 @@ function parseSheetRows(rows) {
         return;
       }
       const deleteBtn = e.target.closest('button[data-action="delete-seat"]');
-      if (!deleteBtn) return;
+      if (!deleteBtn) {
+        document.querySelectorAll('.revealed').forEach((el) => {
+          if (el !== emptyRow) el.classList.remove('revealed');
+        });
+        emptyRow.classList.toggle('revealed');
+        return;
+      }
       const { id: seatId, tableId } = deleteBtn.dataset;
       const wedding = cachedWedding || (await Storage.getWedding(weddingId));
       if (!wedding) return;
@@ -921,7 +927,17 @@ function parseSheetRows(rows) {
     }
 
     const btn = e.target.closest('button');
-    if (!btn) return;
+    if (!btn) {
+      // Selects (menu/rsvp) aren't buttons but should open normally, never
+      // get treated as a reveal tap — only an empty patch of the row toggles
+      // the hidden menu/more controls into view.
+      if (e.target.closest('select') || e.target.closest('.guest-rsvp-edit-wrap') || e.target.closest('.guest-menu-edit-wrap')) return;
+      document.querySelectorAll('.revealed').forEach((el) => {
+        if (el !== row) el.classList.remove('revealed');
+      });
+      row.classList.toggle('revealed');
+      return;
+    }
     const { action, id } = btn.dataset;
     if (action === 'delete-guest') {
       try {
@@ -969,6 +985,12 @@ function parseSheetRows(rows) {
     }
     if (!e.target.closest('.table-group-title-row')) {
       document.querySelectorAll('.table-group-title-row.revealed').forEach((el) => el.classList.remove('revealed'));
+    }
+    if (!e.target.closest('.guest-row')) {
+      document.querySelectorAll('.guest-row.revealed').forEach((el) => el.classList.remove('revealed'));
+    }
+    if (!e.target.closest('.guest-row-empty')) {
+      document.querySelectorAll('.guest-row-empty.revealed').forEach((el) => el.classList.remove('revealed'));
     }
     if (!e.target.closest('#guest-search') && !guestSearchQuery) {
       guestSearchEl.classList.remove('is-open');
