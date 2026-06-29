@@ -3692,6 +3692,13 @@ h2 {
 }
 
 .lang-switcher-trigger {
+  position: relative;
+  /* Higher than .lang-switcher-menu (z-index: 20) — the menu sits just 8px
+     above the trigger (mobile opens upward), so the menu's own shadow
+     bleeds through that gap onto the trigger's top edge. Painting the
+     trigger above the menu means its opaque background just covers that
+     bleed instead of showing a visible shadow line across the button. */
+  z-index: 21;
   display: flex;
   align-items: center;
   gap: 7px;
