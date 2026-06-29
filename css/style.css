@@ -1234,6 +1234,31 @@ nav.admin-nav.admin-nav-stacked {
   background: #ffffff;
 }
 
+.invitation-link-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  max-width: 320px;
+  margin-top: 16px;
+}
+
+.invitation-link-display {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 8px 14px;
+  border-radius: var(--radius-pill);
+  background: var(--paper);
+  border: 1px solid rgba(138, 150, 120, 0.3);
+  color: var(--ink);
+  font-family: 'Inter', monospace;
+  font-size: 0.78rem;
+  text-decoration: none;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
 @media (max-width: 760px) {
   .invitation-workspace {
     flex-direction: column;
@@ -1251,6 +1276,10 @@ nav.admin-nav.admin-nav-stacked {
   .invitation-phone-frame {
     width: 280px;
     height: 580px;
+  }
+
+  .invitation-link-row {
+    max-width: 280px;
   }
 }
 
