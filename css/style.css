@@ -1265,7 +1265,10 @@ nav.admin-nav.admin-nav-stacked {
   height: 91.7%;
   display: block;
   border: none;
-  border-radius: 0;
+  /* Square top (clears the notch/status-bar area easily) but the bottom
+     inset sits inside the artwork's own corner curve (measured ~10% of the
+     frame's width) — a square bottom corner pokes past that curve. */
+  border-radius: 0 0 32px 32px;
   background: #f2f2f6;
 }
 
