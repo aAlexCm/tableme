@@ -3594,6 +3594,21 @@ h2 {
     right: 22px;
     margin-left: 0;
   }
+
+  /* The 3 mode buttons' natural widths (icon+label+padding) add up to more
+     than the card's content width on a phone, so .mode-switch overflows
+     past the row's right edge instead of just looking off-center. Making it
+     span the full row and its buttons share that width equally fixes the
+     overflow (and centering falls out for free). */
+  .add-guest-card.is-open #add-mode-switch {
+    width: 100%;
+    margin: 0;
+  }
+
+  .add-guest-card.is-open #add-mode-switch .mode-btn {
+    flex: 1 1 0;
+    padding: 0 6px;
+  }
 }
 
 .empty-state {
