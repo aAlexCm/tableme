@@ -1,6 +1,6 @@
 import { Storage, normalize } from './storage.js';
 import { applyTranslations, buildLangSwitcher, t, LANGS } from './i18n.js';
-import { DEFAULT_SEATS, getRectShapeSize, buildChairs } from './table-shape.js';
+import { DEFAULT_SEATS, getRectShapeSize, getTableReach, buildChairs } from './table-shape.js';
 import { getLandmarkType } from './landmarks.js';
 import { applyGuestTheme, applyGuestFonts, getDefaultTheme } from './guest-themes.js';
 import { applyGuestDecoration } from './guest-decorations.js';
@@ -333,6 +333,15 @@ function getCardinalAnchor(center, direction, radius) {
 
     const canvas = document.createElement('div');
     canvas.className = 'table-preview-canvas';
+    // The canvas has a fixed default height (180px) that's enough for a round
+    // table or a horizontal rectangle, but a rectangle rotated to vertical
+    // swaps its long axis (which grows with seat count) onto the height —
+    // past a certain seat count that's taller than 180px, and the table
+    // shape + chairs would spill out past the canvas's rounded background.
+    // Growing the canvas to fit the actual reach (never shrinking below the
+    // existing default) keeps the common cases pixel-identical.
+    const reach = getTableReach({ shape, seats: seatCount, rotated: table?.rotated });
+    canvas.style.height = `${Math.max(180, reach.y * 2 + 24)}px`;
 
     const unitEl = document.createElement('div');
     unitEl.className = 'table-unit';
