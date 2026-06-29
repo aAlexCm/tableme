@@ -3,6 +3,7 @@ import { applyTranslations, buildLangSwitcher, t } from './i18n.js';
 import { createTableModal } from './table-modal.js';
 import { createGuestModal } from './guest-modal.js';
 import { createContactModal } from './contact-modal.js';
+import { applyContactMailto } from './contact-mailto.js';
 import { createShareControls } from './share-controls.js';
 import { isFeatureEnabled } from './features.js';
 import { buildCountryCodeOptionsHtml, combinePhone, DEFAULT_COUNTRY_CODE_BY_LANG } from './phone-codes.js';
@@ -225,6 +226,7 @@ function parseSheetRows(rows) {
     applyTranslations(lang);
     shareControls.updateLabels();
     tableModalApi.updateLabels();
+    applyContactMailto(document.getElementById('contact-link'), lang);
     updatePageTitle();
     renderGuests();
   }
@@ -1091,6 +1093,7 @@ function parseSheetRows(rows) {
   shareControls.init(weddingId);
   updatePageTitle();
   applyFeatureGating(wedding);
+  applyContactMailto(document.getElementById('contact-link'), currentLang);
 
   langMount.appendChild(buildLangSwitcher(currentLang, setLang));
   applyTranslations(currentLang);

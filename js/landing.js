@@ -1,4 +1,5 @@
 import { applyTranslations, buildLangSwitcher, LANGS } from './i18n.js';
+import { applyContactMailto } from './contact-mailto.js';
 
 const LANG_KEY = 'tableme_landing_lang';
 
@@ -18,11 +19,13 @@ const LANG_KEY = 'tableme_landing_lang';
     currentLang = lang;
     sessionStorage.setItem(LANG_KEY, lang);
     applyTranslations(lang);
+    applyContactMailto(document.getElementById('landing-contact-btn'), lang);
     history.replaceState(null, '', '/' + lang);
   }
 
   langMount.appendChild(buildLangSwitcher(currentLang, setLang));
   applyTranslations(currentLang);
+  applyContactMailto(document.getElementById('landing-contact-btn'), currentLang);
 
   const navToggle = document.getElementById('landing-nav-toggle');
   const navLinks = document.getElementById('landing-nav-links');

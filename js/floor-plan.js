@@ -5,6 +5,7 @@ import { createShareControls } from './share-controls.js';
 import { DEFAULT_SEATS, getRectShapeSize, getTableReach, buildChairs } from './table-shape.js';
 import { LANDMARK_TYPES, getLandmarkType } from './landmarks.js';
 import { isFeatureEnabled } from './features.js';
+import { applyContactMailto } from './contact-mailto.js';
 
 const LANG_KEY = 'tableme_wedding_admin_lang';
 
@@ -217,6 +218,7 @@ function reconcileTables(tables, usedLabels) {
     applyTranslations(lang);
     tableModalApi.updateLabels();
     shareControls.updateLabels();
+    applyContactMailto(document.getElementById('contact-link'), lang);
     updateFullscreenLabel();
     updatePageTitle();
     renderLandmarkPicker();
@@ -1003,6 +1005,7 @@ function reconcileTables(tables, usedLabels) {
     menuTile.hidden = !isFeatureEnabled(wedding, 'menuManagement');
   }
   tableModalApi.updateLabels();
+  applyContactMailto(document.getElementById('contact-link'), currentLang);
   updateFullscreenLabel();
   updatePageTitle();
   renderLandmarkPicker();
