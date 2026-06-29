@@ -3487,6 +3487,16 @@ body.admin-theme .guest-row-contact-icon:hover {
   pointer-events: auto;
 }
 
+/* .guest-row-more's overflow:hidden above only exists to make the zero-width
+   collapse trick work — once revealed it must go back to visible, or the
+   "..." dropdown menu (an absolutely-positioned child) gets clipped by that
+   same box and silently fails to show. */
+.guest-row:hover .guest-row-more,
+.guest-row:focus-within .guest-row-more,
+.guest-row.revealed .guest-row-more {
+  overflow: visible;
+}
+
 .actions {
   display: flex;
   flex-wrap: wrap;
