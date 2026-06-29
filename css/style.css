@@ -81,6 +81,11 @@ body {
 
 header.hero {
   position: relative;
+  /* Gives the negative z-index .guest-decoration-layer its own stacking
+     context, scoped to this element's children only — so it can never again
+     end up hidden behind an ancestor's background (e.g. body/html), no
+     matter what gets added there later. */
+  isolation: isolate;
   text-align: center;
   margin-bottom: 44px;
   padding: 12px 50px;
