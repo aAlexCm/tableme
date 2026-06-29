@@ -3723,8 +3723,18 @@ h2 {
   cursor: pointer;
 }
 
+/* Without resetting these, the generic button:hover rule (a much bigger
+   lift + shadow, meant for the gold gradient CTA buttons) wins on
+   specificity and applies here too — normally invisible on desktop since
+   the mouse moves off again right away, but mobile browsers can latch
+   :hover on for as long as a tapped element stays focused (e.g. while its
+   own dropdown is open), making that oversized shadow show up and overflow
+   past the bottom of a short viewport. */
 .lang-switcher-trigger:hover {
   background: var(--sage-light);
+  filter: none;
+  transform: none;
+  box-shadow: 0 4px 12px rgba(138, 109, 60, 0.1);
 }
 
 .lang-switcher-icon {
@@ -5612,25 +5622,20 @@ body.admin-theme .theme-decoration-position-arrow {
     right: 12px;
   }
 
-  /* The base box-shadow (0 16px 36px, pointing down) was tuned for the
-     desktop dropdown which opens *below* its trigger — shadow falling away
-     from it makes sense there. On mobile the menu flips to open *above*
-     the trigger instead, but the shadow direction never flipped with it,
-     so it pointed straight down into the trigger through the 8px gap
-     (visible as a dark smear/line across the button). Flipping the
-     vertical offset negative points the shadow up and away instead,
-     matching the new direction the menu actually opens in. */
+  /* Several attempts at tuning this shadow's size/direction all still
+     produced a visible hard-edged smear on real mobile browsers (most
+     likely interacting with the address bar collapsing/expanding on tap,
+     which we can't reproduce or control from CSS) — dropping the shadow
+     entirely on mobile sidesteps the whole problem. The tint + border
+     already carry the "this is a button" visual weight on their own. */
   .lang-switcher-menu {
     top: auto;
     bottom: calc(100% + 8px);
-    box-shadow: 0 -10px 24px rgba(138, 109, 60, 0.16);
+    box-shadow: none;
   }
 
-  /* Same flip as above, for admin-theme's own (otherwise still
-     downward-pointing) override of this shadow — needs at least the same
-     selector specificity to actually win over that rule. */
   body.admin-theme .lang-switcher-menu {
-    box-shadow: 0 -8px 20px rgba(15, 23, 42, 0.15);
+    box-shadow: none;
   }
 
   .lang-switcher-current {
@@ -5643,17 +5648,13 @@ body.admin-theme .theme-decoration-position-arrow {
 
   /* Text-only + a faint border was easy to miss as a tappable control on a
      small screen — a stronger tint plus the globe icon makes it read as a
-     "change language" button at a glance, not just a label. The shadow
-     stays small on purpose: the button sits only 12px from the bottom of
-     the viewport, and a wider blur (e.g. 16px) doesn't have room to fade
-     out before hitting the screen edge — it gets hard-clipped there
-     instead, which reads as a stray line under the button. */
+     "change language" button at a glance, not just a label. */
   .lang-switcher-trigger {
     padding: 7px 12px;
     font-size: 0.7rem;
     background: var(--gold-light);
     border-color: var(--gold);
-    box-shadow: 0 2px 6px rgba(138, 109, 60, 0.18);
+    box-shadow: none;
   }
 
   .lang-switcher-icon svg {
