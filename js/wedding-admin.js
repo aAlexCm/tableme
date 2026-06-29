@@ -220,6 +220,19 @@ function parseSheetRows(rows) {
       if (posterEnabled) posterTile.href = `poster.html?id=${weddingId}`;
       else posterTile.removeAttribute('href');
     }
+
+    // Same grayed-out + contact-us pattern as the poster tile above — still
+    // under construction, so it stays off by default until enabled per couple.
+    const invitationTile = document.getElementById('invitation-tile');
+    const invitationTileBadge = document.getElementById('invitation-tile-badge');
+    if (invitationTile) {
+      const invitationEnabled = isFeatureEnabled(wedding, 'digitalInvitation');
+      invitationTile.classList.toggle('is-disabled', !invitationEnabled);
+      invitationTile.setAttribute('aria-disabled', String(!invitationEnabled));
+      if (invitationTileBadge) invitationTileBadge.hidden = invitationEnabled;
+      if (invitationEnabled) invitationTile.href = `invitation.html?id=${weddingId}`;
+      else invitationTile.removeAttribute('href');
+    }
   }
 
   function setLang(lang) {

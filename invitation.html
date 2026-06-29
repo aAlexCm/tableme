@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>TableMe · Digital invitation</title>
+  <meta property="og:title" content="TableMe · Digital invitation" />
+  <meta property="og:description" content="A digital invitation to send directly to your wedding guests." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://tableme.app/invitation" />
+  <meta property="og:image" content="https://tableme.app/og-image.png" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="TableMe · Digital invitation" />
+  <meta name="twitter:description" content="A digital invitation to send directly to your wedding guests." />
+  <meta name="twitter:image" content="https://tableme.app/og-image.png" />
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="admin-theme">
+  <div class="page">
+    <div id="lang-switcher-mount" class="lang-switcher-mount"></div>
+
+    <div id="not-found" class="card" hidden>
+      <h2 data-i18n="weddingNotFoundTitle">Mariage introuvable</h2>
+      <p class="muted" data-i18n="weddingNotFoundDesc">Ce lien n'est pas valide ou ce mariage a été supprimé.</p>
+    </div>
+
+    <div id="connection-error" class="card" hidden>
+      <h2 data-i18n="connectionErrorTitle">Connexion impossible</h2>
+      <p class="muted" data-i18n="connectionErrorDesc">Nous n'avons pas pu joindre le serveur. Vérifiez votre connexion internet, puis réessayez.</p>
+      <button type="button" class="secondary" id="connection-error-retry" data-i18n="connectionErrorRetry">Réessayer</button>
+    </div>
+
+    <div id="invitation-content" hidden>
+      <nav class="admin-nav admin-nav-stacked">
+        <strong id="invitation-wedding-name"></strong>
+        <div class="admin-nav-actions">
+          <a href="#" id="invitation-back-link" data-i18n="backToAdminLink">&larr; Retour</a>
+        </div>
+      </nav>
+    </div>
+  </div>
+
+  <script type="module" src="/js/invitation.js"></script>
+</body>
+</html>

@@ -51,6 +51,14 @@ export const FEATURE_FLAGS = [
     default: true,
     icon: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h0a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></svg>',
   },
+  // Still under construction (blank page for now) — default off so no
+  // wedding sees it until the superadmin turns it on per couple for testing.
+  {
+    key: 'digitalInvitation',
+    labelKey: 'featureDigitalInvitation',
+    default: false,
+    icon: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-9.18 5.5a2 2 0 0 1-2.04 0L2 7"/></svg>',
+  },
 ];
 
 export function isFeatureEnabled(wedding, key) {

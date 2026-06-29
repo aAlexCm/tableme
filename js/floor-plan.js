@@ -999,6 +999,18 @@ function reconcileTables(tables, usedLabels) {
   }
   const posterTile = document.getElementById('poster-tile');
   if (posterTile) posterTile.href = `poster.html?id=${weddingId}`;
+  // Same grayed-out + contact-us pattern as the wedding-admin tools grid —
+  // still under construction, so it stays off by default until enabled per couple.
+  const invitationTile = document.getElementById('invitation-tile');
+  const invitationTileBadge = document.getElementById('invitation-tile-badge');
+  if (invitationTile) {
+    const invitationEnabled = isFeatureEnabled(wedding, 'digitalInvitation');
+    invitationTile.classList.toggle('is-disabled', !invitationEnabled);
+    invitationTile.setAttribute('aria-disabled', String(!invitationEnabled));
+    if (invitationTileBadge) invitationTileBadge.hidden = invitationEnabled;
+    if (invitationEnabled) invitationTile.href = `invitation.html?id=${weddingId}`;
+    else invitationTile.removeAttribute('href');
+  }
   const todoTile = document.getElementById('todo-tile');
   if (todoTile) todoTile.href = `todo.html?id=${weddingId}`;
   const menuTile = document.getElementById('menu-tile');
