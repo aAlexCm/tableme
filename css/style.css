@@ -5293,6 +5293,11 @@ body.admin-theme .theme-decoration-position-arrow {
   color: var(--sage-deep);
 }
 
+.contact-modal-action-icon-whatsapp {
+  color: #25d366;
+  background: rgba(37, 211, 102, 0.14);
+}
+
 .contact-modal-action-text {
   display: flex;
   flex-direction: column;
