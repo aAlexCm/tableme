@@ -3692,13 +3692,6 @@ h2 {
 }
 
 .lang-switcher-trigger {
-  position: relative;
-  /* Higher than .lang-switcher-menu (z-index: 20) — the menu sits just 8px
-     above the trigger (mobile opens upward), so the menu's own shadow
-     bleeds through that gap onto the trigger's top edge. Painting the
-     trigger above the menu means its opaque background just covers that
-     bleed instead of showing a visible shadow line across the button. */
-  z-index: 21;
   display: flex;
   align-items: center;
   gap: 7px;
@@ -5604,9 +5597,25 @@ body.admin-theme .theme-decoration-position-arrow {
     right: 12px;
   }
 
+  /* The base box-shadow (0 16px 36px, pointing down) was tuned for the
+     desktop dropdown which opens *below* its trigger — shadow falling away
+     from it makes sense there. On mobile the menu flips to open *above*
+     the trigger instead, but the shadow direction never flipped with it,
+     so it pointed straight down into the trigger through the 8px gap
+     (visible as a dark smear/line across the button). Flipping the
+     vertical offset negative points the shadow up and away instead,
+     matching the new direction the menu actually opens in. */
   .lang-switcher-menu {
     top: auto;
     bottom: calc(100% + 8px);
+    box-shadow: 0 -10px 24px rgba(138, 109, 60, 0.16);
+  }
+
+  /* Same flip as above, for admin-theme's own (otherwise still
+     downward-pointing) override of this shadow — needs at least the same
+     selector specificity to actually win over that rule. */
+  body.admin-theme .lang-switcher-menu {
+    box-shadow: 0 -8px 20px rgba(15, 23, 42, 0.15);
   }
 
   .lang-switcher-current {
