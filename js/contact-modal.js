@@ -20,6 +20,13 @@ function buildRsvpUrl(weddingId, guestId, lang) {
   return `${window.location.origin}${window.location.pathname.replace(/[^/]+$/, '')}rsvp/${lang}?id=${weddingId}&guest=${guestId}`;
 }
 
+// The wedding-wide table-finder page (same link as "Page invité" in the
+// share tools) — once a guest has confirmed, this is what's actually useful
+// to send them, not the RSVP page.
+function buildGuestUrl(weddingId, lang) {
+  return `${window.location.origin}${window.location.pathname.replace(/[^/]+$/, '')}guest/${lang}?id=${weddingId}`;
+}
+
 function escapeHtml(value) {
   return String(value).replace(/[&<>"']/g, (c) => ({
     '&': '&amp;',
@@ -40,10 +47,47 @@ export function createContactModal({ weddingId, getLang }) {
   const titleEl = document.getElementById('contact-modal-title');
   const actionsEl = document.getElementById('contact-modal-actions');
 
+  // The copy button is a sibling of the <a>, not nested in it, so it can
+  // have its own click behaviour instead of also navigating.
+  function buildLinkActionHtml(url, label) {
+    return `
+      <div class="contact-modal-action">
+        <a class="contact-modal-action-open" href="${escapeHtml(url)}" target="_blank" rel="noopener">
+          <span class="contact-modal-action-icon" aria-hidden="true">${ICONS.link}</span>
+          <span class="contact-modal-action-text">
+            <span class="contact-modal-action-label">${escapeHtml(label)}</span>
+            <span class="contact-modal-action-value">${escapeHtml(url.replace(/^https?:\/\//, ''))}</span>
+          </span>
+        </a>
+        <button type="button" class="contact-modal-action-copy" data-copy-url="${escapeHtml(url)}" title="${escapeHtml(t(getLang(), 'contactModalCopyLinkLabel'))}" aria-label="${escapeHtml(t(getLang(), 'contactModalCopyLinkLabel'))}">${ICONS.copy}</button>
+      </div>
+    `;
+  }
+
+  function buildMessageActionsHtml(guest, message, smsLabel, whatsappLabel) {
+    const encodedMessage = encodeURIComponent(message);
+    return `
+      <a class="contact-modal-action" href="sms:${escapeHtml(guest.phone)}?&body=${encodedMessage}">
+        <span class="contact-modal-action-icon" aria-hidden="true">${ICONS.sms}</span>
+        <span class="contact-modal-action-text">
+          <span class="contact-modal-action-value">${escapeHtml(smsLabel)}</span>
+        </span>
+      </a>
+      <a class="contact-modal-action" href="https://wa.me/${digitsOnly(guest.phone)}?text=${encodedMessage}" target="_blank" rel="noopener">
+        <span class="contact-modal-action-icon contact-modal-action-icon-whatsapp" aria-hidden="true">${ICONS.whatsapp}</span>
+        <span class="contact-modal-action-text">
+          <span class="contact-modal-action-value">${escapeHtml(whatsappLabel)}</span>
+        </span>
+      </a>
+    `;
+  }
+
   function buildActionsHtml(guest) {
     const lang = getLang();
     const actions = [];
-    const rsvpUrl = buildRsvpUrl(weddingId, guest.id, lang);
+    const rsvp = guest.rsvp || 'pending';
+    const firstName = (guest.name || '').trim().split(/\s+/)[0] || guest.name;
+
     if (guest.phone) {
       actions.push(`
         <a class="contact-modal-action" href="tel:${escapeHtml(guest.phone)}">
@@ -55,44 +99,28 @@ export function createContactModal({ weddingId, getLang }) {
         </a>
       `);
     }
-    // RSVP reminders only make sense while we're still waiting on an answer
-    // — once confirmed or declined there's nothing left to chase.
-    if (guest.phone && (guest.rsvp || 'pending') === 'pending') {
-      const firstName = (guest.name || '').trim().split(/\s+/)[0] || guest.name;
-      const message = `${t(lang, 'contactModalReminderMessage', firstName)}\n\n${rsvpUrl}`;
-      const encodedMessage = encodeURIComponent(message);
-      actions.push(`
-        <a class="contact-modal-action" href="sms:${escapeHtml(guest.phone)}?&body=${encodedMessage}">
-          <span class="contact-modal-action-icon" aria-hidden="true">${ICONS.sms}</span>
-          <span class="contact-modal-action-text">
-            <span class="contact-modal-action-value">${escapeHtml(t(lang, 'contactModalSmsLabel'))}</span>
-          </span>
-        </a>
-        <a class="contact-modal-action" href="https://wa.me/${digitsOnly(guest.phone)}?text=${encodedMessage}" target="_blank" rel="noopener">
-          <span class="contact-modal-action-icon contact-modal-action-icon-whatsapp" aria-hidden="true">${ICONS.whatsapp}</span>
-          <span class="contact-modal-action-text">
-            <span class="contact-modal-action-value">${escapeHtml(t(lang, 'contactModalWhatsappLabel'))}</span>
-          </span>
-        </a>
-      `);
+
+    if (rsvp === 'confirmed') {
+      // Once confirmed, chasing an RSVP makes no sense — what's actually
+      // useful is getting them their table, so the SMS/WhatsApp buttons (and
+      // the link row below) point at the guest table-finder page instead.
+      const guestUrl = buildGuestUrl(weddingId, lang);
+      if (guest.phone) {
+        const message = `${t(lang, 'contactModalGuestLinkMessage', firstName)}\n\n${guestUrl}`;
+        actions.push(buildMessageActionsHtml(guest, message, t(lang, 'contactModalSendSmsLabel'), t(lang, 'contactModalSendWhatsappLabel')));
+      }
+      actions.push(buildLinkActionHtml(guestUrl, t(lang, 'contactModalGuestLinkLabel')));
+    } else {
+      // Still pending (or declined, in case they change their mind) — the
+      // RSVP page is what's useful to chase or revisit.
+      const rsvpUrl = buildRsvpUrl(weddingId, guest.id, lang);
+      if (guest.phone && rsvp === 'pending') {
+        const message = `${t(lang, 'contactModalReminderMessage', firstName)}\n\n${rsvpUrl}`;
+        actions.push(buildMessageActionsHtml(guest, message, t(lang, 'contactModalSmsLabel'), t(lang, 'contactModalWhatsappLabel')));
+      }
+      actions.push(buildLinkActionHtml(rsvpUrl, t(lang, 'contactModalRsvpLinkLabel')));
     }
-    // Always available, regardless of phone/RSVP state — a direct way to
-    // reach the guest's own confirmation page without going through a
-    // messaging app at all (share it however you like). The copy button is
-    // a sibling, not nested in the <a>, so it can have its own click
-    // behaviour instead of also navigating.
-    actions.push(`
-      <div class="contact-modal-action">
-        <a class="contact-modal-action-open" href="${escapeHtml(rsvpUrl)}" target="_blank" rel="noopener">
-          <span class="contact-modal-action-icon" aria-hidden="true">${ICONS.link}</span>
-          <span class="contact-modal-action-text">
-            <span class="contact-modal-action-label">${escapeHtml(t(lang, 'contactModalRsvpLinkLabel'))}</span>
-            <span class="contact-modal-action-value">${escapeHtml(rsvpUrl.replace(/^https?:\/\//, ''))}</span>
-          </span>
-        </a>
-        <button type="button" class="contact-modal-action-copy" data-copy-url="${escapeHtml(rsvpUrl)}" title="${escapeHtml(t(lang, 'contactModalCopyLinkLabel'))}" aria-label="${escapeHtml(t(lang, 'contactModalCopyLinkLabel'))}">${ICONS.copy}</button>
-      </div>
-    `);
+
     return actions;
   }
 
