@@ -5,6 +5,8 @@ const ICONS = {
   sms: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
   whatsapp: '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.16-.17.2-.35.22-.64.08-1.73-.87-2.87-1.55-4.01-3.52-.3-.52.3-.48.86-1.6.1-.19.05-.36-.05-.5-.1-.15-.67-1.61-.92-2.21-.24-.58-.49-.5-.67-.51-.17-.01-.37-.01-.57-.01-.2 0-.52.08-.79.37-.27.3-1.04 1.02-1.04 2.48 0 1.46 1.07 2.88 1.21 3.07.15.2 2.04 3.12 4.95 4.25 2.46.97 2.46.64 3.41.56.94-.09 2.04-.85 2.33-1.67.3-.82.3-1.52.2-1.67-.1-.15-.3-.2-.6-.35z"/><path d="M12.04 2C6.52 2 2.04 6.48 2.04 12c0 1.83.49 3.53 1.36 5.01L2 22l5.18-1.36A9.95 9.95 0 0 0 12.04 22c5.52 0 10-4.48 10-10S17.56 2 12.04 2zm0 18.18a8.13 8.13 0 0 1-4.14-1.13l-.3-.18-3.07.81.82-3-.19-.31a8.12 8.12 0 0 1-1.25-4.35c0-4.49 3.66-8.15 8.15-8.15 4.49 0 8.15 3.66 8.15 8.15 0 4.5-3.66 8.16-8.17 8.16z"/></svg>',
   link: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.07 0l2.83-2.83a5 5 0 1 0-7.07-7.07L11.5 4.5"/><path d="M14 11a5 5 0 0 0-7.07 0L4.1 13.83a5 5 0 1 0 7.07 7.07l1.39-1.39"/></svg>',
+  copy: '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>',
+  check: '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
 };
 
 function digitsOnly(phone) {
@@ -76,15 +78,20 @@ export function createContactModal({ weddingId, getLang }) {
     }
     // Always available, regardless of phone/RSVP state — a direct way to
     // reach the guest's own confirmation page without going through a
-    // messaging app at all (share it however you like).
+    // messaging app at all (share it however you like). The copy button is
+    // a sibling, not nested in the <a>, so it can have its own click
+    // behaviour instead of also navigating.
     actions.push(`
-      <a class="contact-modal-action" href="${escapeHtml(rsvpUrl)}" target="_blank" rel="noopener">
-        <span class="contact-modal-action-icon" aria-hidden="true">${ICONS.link}</span>
-        <span class="contact-modal-action-text">
-          <span class="contact-modal-action-label">${escapeHtml(t(lang, 'contactModalRsvpLinkLabel'))}</span>
-          <span class="contact-modal-action-value">${escapeHtml(rsvpUrl.replace(/^https?:\/\//, ''))}</span>
-        </span>
-      </a>
+      <div class="contact-modal-action">
+        <a class="contact-modal-action-open" href="${escapeHtml(rsvpUrl)}" target="_blank" rel="noopener">
+          <span class="contact-modal-action-icon" aria-hidden="true">${ICONS.link}</span>
+          <span class="contact-modal-action-text">
+            <span class="contact-modal-action-label">${escapeHtml(t(lang, 'contactModalRsvpLinkLabel'))}</span>
+            <span class="contact-modal-action-value">${escapeHtml(rsvpUrl.replace(/^https?:\/\//, ''))}</span>
+          </span>
+        </a>
+        <button type="button" class="contact-modal-action-copy" data-copy-url="${escapeHtml(rsvpUrl)}" title="${escapeHtml(t(lang, 'contactModalCopyLinkLabel'))}" aria-label="${escapeHtml(t(lang, 'contactModalCopyLinkLabel'))}">${ICONS.copy}</button>
+      </div>
     `);
     return actions;
   }
@@ -104,7 +111,17 @@ export function createContactModal({ weddingId, getLang }) {
 
   closeBtn.addEventListener('click', close);
   modal.addEventListener('click', (e) => {
-    if (e.target === modal) close();
+    if (e.target === modal) {
+      close();
+      return;
+    }
+    const copyBtn = e.target.closest('.contact-modal-action-copy');
+    if (!copyBtn) return;
+    navigator.clipboard?.writeText(copyBtn.dataset.copyUrl).catch(() => {});
+    copyBtn.innerHTML = ICONS.check;
+    setTimeout(() => {
+      copyBtn.innerHTML = ICONS.copy;
+    }, 1200);
   });
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && !modal.hidden) close();

@@ -5281,6 +5281,35 @@ body.admin-theme .theme-decoration-position-arrow {
   background: color-mix(in srgb, var(--gold) 16%, var(--sage-light));
 }
 
+.contact-modal-action-open {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1 1 auto;
+  min-width: 0;
+  color: inherit;
+  text-decoration: none;
+}
+
+.contact-modal-action-copy {
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: var(--paper);
+  color: var(--sage-deep);
+  box-shadow: none;
+}
+
+.contact-modal-action-copy:hover {
+  filter: none;
+  transform: none;
+  box-shadow: none;
+  background: color-mix(in srgb, var(--gold) 18%, var(--paper));
+}
+
 .contact-modal-action-icon {
   display: flex;
   align-items: center;
