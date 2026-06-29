@@ -34,6 +34,20 @@
   box-sizing: border-box;
 }
 
+/* Mobile Chrome's address bar collapses/expands on scroll or even a tap,
+   which changes the visual viewport height after `100vh` was already
+   measured — if body's own painted area ends just short of the new, taller
+   viewport, the gap shows through to <html>'s default (white) background
+   instead of the page's own, looking like a hard line cutting across
+   whatever happens to sit near the bottom of the screen at that moment.
+   Giving <html> the same background is a static, always-correct safety net
+   regardless of why/when that gap opens up. --guest-bg defaults to --cream
+   and gets overridden per-wedding on guest-facing pages, so this tracks
+   whichever theme is actually in use. */
+html {
+  background: var(--guest-bg);
+}
+
 body {
   margin: 0;
   font-family: 'Inter', sans-serif;
@@ -42,6 +56,7 @@ body {
   background-image: radial-gradient(circle at 50% 0%, #ffffff 0%, var(--cream) 60%);
   color: var(--ink);
   min-height: 100vh;
+  min-height: 100dvh;
   -webkit-font-smoothing: antialiased;
 }
 
