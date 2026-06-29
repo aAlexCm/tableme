@@ -1308,7 +1308,7 @@ nav.admin-nav.admin-nav-stacked {
 .invitation-text-settings {
   flex: 0 0 auto;
   width: 240px;
-  display: flex;
+  display: none;
   flex-direction: column;
   gap: 16px;
   padding: 18px;
@@ -1316,6 +1316,14 @@ nav.admin-nav.admin-nav-stacked {
   background: var(--paper);
   border: 1px solid rgba(15, 23, 42, 0.08);
   box-shadow: 0 4px 16px rgba(15, 23, 42, 0.1);
+}
+
+/* `display: none` above is the default/closed state — [hidden] and this
+   class rule have equal specificity, so without this the class's own
+   `display` would silently win over the hidden attribute and the panel
+   would stay visible (with no widget selected) at all times. */
+.invitation-text-settings:not([hidden]) {
+  display: flex;
 }
 
 .invitation-text-settings-header {
