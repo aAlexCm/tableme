@@ -37,7 +37,32 @@ function wireTextSettingsPanel(phoneScreenEl) {
     phoneScreenEl.contentWindow?.updateSelectedWidgetProps?.(props);
   }
 
-  window.onInvitationWidgetSelected = (widget) => {
+  // Positions the panel like a popover next to the selected text instead of
+  // a permanent sidebar — it must never push the phone frame layout around,
+  // which is why the CSS makes it position:fixed (out of the flex flow).
+  // `rect` is the widget's bounding box in the IFRAME's own viewport; adding
+  // the iframe's own offset converts it to the parent page's coordinates.
+  function positionPanel(rect) {
+    if (!rect) return;
+    const iframeRect = phoneScreenEl.getBoundingClientRect();
+    const margin = 12;
+    const panelWidth = panel.offsetWidth || 240;
+    const panelHeight = panel.offsetHeight || 420;
+
+    let left = iframeRect.left + rect.right + margin;
+    if (left + panelWidth + margin > window.innerWidth) {
+      left = iframeRect.left + rect.left - panelWidth - margin;
+    }
+    left = Math.min(Math.max(margin, left), window.innerWidth - panelWidth - margin);
+
+    let top = iframeRect.top + rect.top;
+    top = Math.min(Math.max(margin, top), window.innerHeight - panelHeight - margin);
+
+    panel.style.left = `${left}px`;
+    panel.style.top = `${top}px`;
+  }
+
+  window.onInvitationWidgetSelected = (widget, rect) => {
     currentWidget = widget;
     panel.hidden = false;
     fontSelect.value = widget.fontFamily;
@@ -50,6 +75,7 @@ function wireTextSettingsPanel(phoneScreenEl) {
     alignLeftBtn.classList.toggle('active', widget.align === 'left');
     alignCenterBtn.classList.toggle('active', widget.align === 'center');
     alignRightBtn.classList.toggle('active', widget.align === 'right');
+    if (window.innerWidth > 760) positionPanel(rect);
   };
 
   window.onInvitationWidgetDeselected = () => {

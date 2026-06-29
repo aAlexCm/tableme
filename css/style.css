@@ -1305,8 +1305,13 @@ nav.admin-nav.admin-nav-stacked {
    iframe) since a real side panel needs more room than a 320px phone mockup
    has. invitation.js shows/hides it and syncs its fields via direct calls
    into invitation-page.js's exposed window functions (same-origin iframe). */
+/* position:fixed (not a flex sibling of .invitation-canvas-area) on purpose
+   — it's a popover that appears next to the selected text, positioned in JS
+   by invitation.js, and must never shift the phone-frame layout around when
+   it opens/closes. */
 .invitation-text-settings {
-  flex: 0 0 auto;
+  position: fixed;
+  z-index: 40;
   width: 240px;
   display: none;
   flex-direction: column;
@@ -1315,7 +1320,7 @@ nav.admin-nav.admin-nav-stacked {
   border-radius: var(--radius);
   background: var(--paper);
   border: 1px solid rgba(15, 23, 42, 0.08);
-  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.1);
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.2);
 }
 
 /* `display: none` above is the default/closed state — [hidden] and this
@@ -1459,8 +1464,20 @@ nav.admin-nav.admin-nav-stacked {
     width: 100%;
   }
 
+  /* Below this width invitation.js skips positioning the panel near the
+     widget (no room next to a 280px phone) — it becomes a bottom sheet
+     instead. `!important` is needed because JS still sets inline top/left
+     on the element from the last time it positioned a popup above this
+     breakpoint; the stylesheet must win over that leftover inline style. */
   .invitation-text-settings {
+    left: 0 !important;
+    top: auto !important;
+    right: 0;
+    bottom: 0;
     width: 100%;
+    max-height: 70vh;
+    overflow-y: auto;
+    border-radius: var(--radius) var(--radius) 0 0;
   }
 
   .invitation-phone-frame {

@@ -60,8 +60,20 @@ function applyTextStyle(node, w) {
 // this iframe — there's no room for a real Wix-style side panel inside a
 // 320px-wide phone mockup. Both pages are same-origin, so we just call
 // functions on window.parent directly instead of postMessage.
-function notifyParentSelected(w) {
-  window.parent.onInvitationWidgetSelected?.({ ...w });
+function notifyParentSelected(w, node) {
+  // The settings panel lives in the parent document, which has no idea
+  // where this widget sits inside our iframe — pass its rect (in *our*
+  // viewport's coordinates) so the parent can add its own iframe offset
+  // and place the panel right next to the text instead of at a fixed spot.
+  const rect = node ? node.getBoundingClientRect() : null;
+  window.parent.onInvitationWidgetSelected?.({ ...w }, rect && {
+    top: rect.top,
+    left: rect.left,
+    right: rect.right,
+    bottom: rect.bottom,
+    width: rect.width,
+    height: rect.height,
+  });
 }
 
 function notifyParentDeselected() {
@@ -96,7 +108,7 @@ function selectWidget(id) {
   canvasRoot.querySelectorAll('.widget').forEach((n) => {
     n.classList.toggle('selected', n.dataset.id === id);
   });
-  notifyParentSelected(w);
+  notifyParentSelected(w, canvasRoot.querySelector(`[data-id="${id}"]`));
 }
 
 function updateSelected(mutator) {
@@ -105,7 +117,7 @@ function updateSelected(mutator) {
   mutator(w);
   const node = canvasRoot.querySelector(`[data-id="${selectedId}"]`);
   if (node) applyTextStyle(node, w);
-  notifyParentSelected(w);
+  notifyParentSelected(w, node);
   scheduleSave();
 }
 
@@ -208,7 +220,7 @@ function wireFontSizeResize(handle, node, w) {
         const dy = ev.clientY - startY;
         w.fontSize = Math.min(120, Math.max(8, Math.round(startSize + dy / 2)));
         applyTextStyle(node, w);
-        if (selectedId === w.id) notifyParentSelected(w);
+        if (selectedId === w.id) notifyParentSelected(w, node);
       },
       onEnd() {
         scheduleSave();
