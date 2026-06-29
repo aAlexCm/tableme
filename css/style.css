@@ -5612,13 +5612,17 @@ body.admin-theme .theme-decoration-position-arrow {
 
   /* Text-only + a faint border was easy to miss as a tappable control on a
      small screen — a stronger tint plus the globe icon makes it read as a
-     "change language" button at a glance, not just a label. */
+     "change language" button at a glance, not just a label. The shadow
+     stays small on purpose: the button sits only 12px from the bottom of
+     the viewport, and a wider blur (e.g. 16px) doesn't have room to fade
+     out before hitting the screen edge — it gets hard-clipped there
+     instead, which reads as a stray line under the button. */
   .lang-switcher-trigger {
     padding: 7px 12px;
     font-size: 0.7rem;
     background: var(--gold-light);
     border-color: var(--gold);
-    box-shadow: 0 6px 16px rgba(138, 109, 60, 0.18);
+    box-shadow: 0 2px 6px rgba(138, 109, 60, 0.18);
   }
 
   .lang-switcher-icon svg {
