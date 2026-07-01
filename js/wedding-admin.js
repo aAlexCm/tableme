@@ -1108,7 +1108,15 @@ function parseSheetRows(rows) {
   const partnersTile = document.getElementById('partners-tile');
   if (partnersTile) partnersTile.href = `partenaires.html?id=${weddingId}`;
   const todoTile = document.getElementById('todo-tile');
-  if (todoTile) todoTile.href = `todo.html?id=${weddingId}`;
+  const todoTileBadge = document.getElementById('todo-tile-badge');
+  if (todoTile) {
+    const todoEnabled = isFeatureEnabled(wedding, 'todoList');
+    todoTile.classList.toggle('is-disabled', !todoEnabled);
+    todoTile.setAttribute('aria-disabled', String(!todoEnabled));
+    if (todoTileBadge) todoTileBadge.hidden = todoEnabled;
+    if (todoEnabled) todoTile.href = `todo.html?id=${weddingId}`;
+    else todoTile.removeAttribute('href');
+  }
   const menuTile = document.getElementById('menu-tile');
   if (menuTile) menuTile.href = `menu.html?id=${weddingId}`;
   const themeTile = document.getElementById('theme-settings-tile');
