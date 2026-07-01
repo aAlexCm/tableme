@@ -133,11 +133,11 @@ function normalizeElement(el) {
     text: typeof el.text === 'string' ? el.text : '',
     fontKey: FONT_OPTIONS.some((f) => f.key === el.fontKey) ? el.fontKey : FONT_OPTIONS[0].key,
     fontSize: typeof el.fontSize === 'number' ? el.fontSize : 28,
-    // No default on purpose: undefined means "shrink-wrap the text", same as
-    // before this field existed. Only set once the couple drags
-    // poster-text-width-handle, which is also what makes the align buttons
-    // visibly do anything.
-    width: typeof el.width === 'number' ? el.width : undefined,
+    // Omit width when not set — absence means "shrink-wrap the text", same as
+    // before this field existed. Only present once the couple drags
+    // poster-text-width-handle. Never store undefined: Firestore SDK v9
+    // rejects it and throws "Unsupported field value: undefined".
+    ...(typeof el.width === 'number' ? { width: el.width } : {}),
     bold: !!el.bold,
     italic: !!el.italic,
     align: ['left', 'center', 'right'].includes(el.align) ? el.align : 'left',
