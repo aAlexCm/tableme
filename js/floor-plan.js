@@ -179,6 +179,20 @@ function reconcileTables(tables, usedLabels) {
     applyZoom();
   }
 
+  // Returns the center of the visible canvas area as {x, y} percentages.
+  // New tables/landmarks land here instead of at the fixed (50, 50) midpoint
+  // of the full canvas, which is often off-screen when the user has panned.
+  function getVisibleCenterPct() {
+    const vw = floorCanvasViewportEl.clientWidth;
+    const vh = floorCanvasViewportEl.clientHeight;
+    const sl = floorCanvasViewportEl.scrollLeft;
+    const st = floorCanvasViewportEl.scrollTop;
+    return {
+      x: clamp(((sl + vw / 2) / zoom / CANVAS_WIDTH) * 100, 5, 95),
+      y: clamp(((st + vh / 2) / zoom / CANVAS_HEIGHT) * 100, 5, 95),
+    };
+  }
+
   function getSafeMargins(table) {
     const reach = getTableReach(table);
     const marginXPct = Math.min(45, (reach.x / CANVAS_WIDTH) * 100);
@@ -802,12 +816,13 @@ function reconcileTables(tables, usedLabels) {
     // each attempt, so two near-simultaneous "add table" clicks (two tabs,
     // two devices) can't both land on the same label.
     function mutate(tables) {
+      const { x: cx, y: cy } = getVisibleCenterPct();
       const newTable = {
         id: newTableId,
         label: nextTableLabel(tables || []),
         shape: 'round',
-        x: 50 + (Math.random() * 16 - 8),
-        y: 50 + (Math.random() * 16 - 8),
+        x: cx + (Math.random() * 8 - 4),
+        y: cy + (Math.random() * 8 - 4),
         seats: null,
       };
       clampTablePosition(newTable);
@@ -839,11 +854,12 @@ function reconcileTables(tables, usedLabels) {
     const btn = e.target.closest('.landmark-picker-option');
     if (!btn) return;
     landmarkPickerEl.hidden = true;
+    const { x: cx, y: cy } = getVisibleCenterPct();
     const newLandmark = {
       id: generateId(),
       type: btn.dataset.type,
-      x: 50 + (Math.random() * 16 - 8),
-      y: 50 + (Math.random() * 16 - 8),
+      x: cx + (Math.random() * 8 - 4),
+      y: cy + (Math.random() * 8 - 4),
     };
     clampLandmarkPosition(newLandmark);
     try {
