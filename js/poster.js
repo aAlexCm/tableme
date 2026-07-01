@@ -293,6 +293,11 @@ function fontFamilyFor(fontKey) {
     // also with !important, to actually beat that blanket rule.
     content.style.setProperty('font-family', fontFamilyFor(el.fontKey), 'important');
     content.style.fontSize = `${el.fontSize}px`;
+    // Keep whole-element bold/italic for backwards compat with old data that
+    // stored these as boolean flags rather than inline <strong>/<em> HTML.
+    // New elements always have el.bold=false (execCommand handles inline bold).
+    content.style.fontWeight = el.bold ? '700' : '';
+    content.style.fontStyle = el.italic ? 'italic' : '';
     content.style.textAlign = el.align;
     content.style.color = el.color;
   }
@@ -791,20 +796,12 @@ function fontFamilyFor(fontKey) {
     textContentEl.className = 'poster-text-content';
     textContentEl.contentEditable = 'true';
     textContentEl.spellcheck = false;
-    // Migration: old format stored plain text + el.bold/el.italic booleans.
-    // New format stores innerHTML with <strong>/<em>/<br> inline.
-    {
-      let html = el.text || '';
-      if (!/<[^>]/.test(html)) {
-        html = html
-          .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-          .replace(/\n/g, '<br>');
-        if (el.italic) html = `<em>${html}</em>`;
-        if (el.bold)   html = `<strong>${html}</strong>`;
-        el.text = html;
-      }
-      textContentEl.innerHTML = html;
-    }
+    // el.text stores innerHTML (may contain <strong>/<em>/<br>).
+    // Old data (plain text, no HTML tags) is tolerated by the browser's HTML
+    // parser — & and \n render correctly with white-space:pre-wrap — so no
+    // escaping/migration is needed here. Doing so caused double-encoding on
+    // every reload (&amp; → &amp;amp; → …).
+    textContentEl.innerHTML = el.text || '';
     node.appendChild(textContentEl);
 
     const handle = document.createElement('span');
