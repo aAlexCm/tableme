@@ -121,8 +121,7 @@ function parseSheetRows(rows) {
   const guestTableInput = document.getElementById('guest-table');
   const guestPhoneCodeSelect = document.getElementById('guest-phone-code');
   const guestPhoneInput = document.getElementById('guest-phone');
-  const defaultPhoneSettings = DEFAULT_COUNTRY_CODE_BY_LANG[currentLang] || DEFAULT_COUNTRY_CODE_BY_LANG.fr;
-  guestPhoneCodeSelect.innerHTML = buildCountryCodeOptionsHtml(defaultPhoneSettings.code, defaultPhoneSettings.iso2);
+  refreshPhoneCodeSelect(currentLang);
   const guestListEl = document.getElementById('guest-list');
   const guestEmptyEl = document.getElementById('guest-empty');
 
@@ -264,6 +263,11 @@ function parseSheetRows(rows) {
     }
   }
 
+  function refreshPhoneCodeSelect(lang) {
+    const settings = DEFAULT_COUNTRY_CODE_BY_LANG[lang] || DEFAULT_COUNTRY_CODE_BY_LANG.fr;
+    guestPhoneCodeSelect.innerHTML = buildCountryCodeOptionsHtml(settings.code, settings.iso2);
+  }
+
   function setLang(lang) {
     currentLang = lang;
     localStorage.setItem(LANG_KEY, lang);
@@ -272,6 +276,7 @@ function parseSheetRows(rows) {
     tableModalApi.updateLabels();
     applyContactMailto(document.getElementById('contact-link'), lang);
     updatePageTitle();
+    refreshPhoneCodeSelect(lang);
     renderGuests();
   }
 

@@ -91,7 +91,7 @@ function flagFromIso2(iso2) {
 
 export const COUNTRIES = COUNTRIES_RAW
   .map(([iso2, name, code]) => ({ iso2, name, code, flag: flagFromIso2(iso2) }))
-  .sort((a, b) => a.name.localeCompare(b.name));
+  .sort((a, b) => parseInt(a.code, 10) - parseInt(b.code, 10) || a.name.localeCompare(b.name));
 
 // code = dial code to pre-select; iso2 = preferred country when multiple share the same code
 export const DEFAULT_COUNTRY_CODE_BY_LANG = {
