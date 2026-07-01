@@ -4088,8 +4088,8 @@ h2 {
 
 .lang-switcher-mount {
   position: fixed;
-  top: 18px;
-  right: 18px;
+  top: calc(18px + env(safe-area-inset-top, 0px));
+  right: calc(18px + env(safe-area-inset-right, 0px));
   z-index: 10;
 }
 
@@ -4807,6 +4807,11 @@ body.admin-theme .theme-decoration-position-arrow {
   user-select: none;
 }
 
+.floor-plan-card.fullscreen-active .fullscreen-close-btn {
+  top: calc(10px + env(safe-area-inset-top, 0px));
+  right: calc(10px + env(safe-area-inset-right, 0px));
+}
+
 .fullscreen-close-btn {
   z-index: 5;
 }
@@ -4846,8 +4851,8 @@ body.admin-theme .theme-decoration-position-arrow {
 
 .floor-plan-card.fullscreen-active .card-header-row {
   position: absolute;
-  top: 12px;
-  left: 12px;
+  top: calc(12px + env(safe-area-inset-top, 0px));
+  left: calc(12px + env(safe-area-inset-left, 0px));
   z-index: 2;
   margin-bottom: 0;
   width: auto;
