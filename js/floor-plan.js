@@ -1010,12 +1010,25 @@ function reconcileTables(tables, usedLabels) {
     if (!qrEnabled) guestPageLink.removeAttribute('href');
   }
   const partnersTile = document.getElementById('partners-tile');
+  const partnersTileBadge = document.getElementById('partners-tile-badge');
   if (partnersTile) {
-    partnersTile.href = `partenaires.html?id=${weddingId}`;
-    partnersTile.hidden = !isFeatureEnabled(wedding, 'sponsorPartners');
+    const partnersEnabled = isFeatureEnabled(wedding, 'sponsorPartners');
+    partnersTile.classList.toggle('is-disabled', !partnersEnabled);
+    partnersTile.setAttribute('aria-disabled', String(!partnersEnabled));
+    if (partnersTileBadge) partnersTileBadge.hidden = partnersEnabled;
+    if (partnersEnabled) partnersTile.href = `partenaires.html?id=${weddingId}`;
+    else partnersTile.removeAttribute('href');
   }
   const posterTile = document.getElementById('poster-tile');
-  if (posterTile) posterTile.href = `poster.html?id=${weddingId}`;
+  const posterTileBadge = document.getElementById('poster-tile-badge');
+  if (posterTile) {
+    const posterEnabled = isFeatureEnabled(wedding, 'poster');
+    posterTile.classList.toggle('is-disabled', !posterEnabled);
+    posterTile.setAttribute('aria-disabled', String(!posterEnabled));
+    if (posterTileBadge) posterTileBadge.hidden = posterEnabled;
+    if (posterEnabled) posterTile.href = `poster.html?id=${weddingId}`;
+    else posterTile.removeAttribute('href');
+  }
   // Same grayed-out + contact-us pattern as the wedding-admin tools grid —
   // still under construction, so it stays off by default until enabled per couple.
   const invitationTile = document.getElementById('invitation-tile');
@@ -1039,9 +1052,14 @@ function reconcileTables(tables, usedLabels) {
     else todoTile.removeAttribute('href');
   }
   const menuTile = document.getElementById('menu-tile');
+  const menuTileBadge = document.getElementById('menu-tile-badge');
   if (menuTile) {
-    menuTile.href = `menu.html?id=${weddingId}`;
-    menuTile.hidden = !isFeatureEnabled(wedding, 'menuManagement');
+    const menuEnabled = isFeatureEnabled(wedding, 'menuManagement');
+    menuTile.classList.toggle('is-disabled', !menuEnabled);
+    menuTile.setAttribute('aria-disabled', String(!menuEnabled));
+    if (menuTileBadge) menuTileBadge.hidden = menuEnabled;
+    if (menuEnabled) menuTile.href = `menu.html?id=${weddingId}`;
+    else menuTile.removeAttribute('href');
   }
   tableModalApi.updateLabels();
   applyContactMailto(document.getElementById('contact-link'), currentLang);
