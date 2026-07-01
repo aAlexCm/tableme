@@ -736,8 +736,10 @@ nav.admin-nav.admin-nav-stacked {
 
 .icon-number-field {
   position: relative;
-  display: inline-flex;
   align-items: center;
+}
+.icon-number-field:not([hidden]) {
+  display: inline-flex;
 }
 
 .icon-number-field-icon {
