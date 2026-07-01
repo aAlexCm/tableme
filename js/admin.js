@@ -70,7 +70,7 @@ const ICONS = {
   }
 
   function weddingAdminUrl(id) {
-    return `${window.location.origin}${window.location.pathname.replace('admin.html', '')}wedding-admin.html?id=${id}`;
+    return `${window.location.origin}/wedding-admin?id=${id}`;
   }
 
   function formatLocation(location) {
