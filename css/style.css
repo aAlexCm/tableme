@@ -6555,6 +6555,12 @@ body.admin-theme .admin-nav-actions .admin-nav-chip:hover {
   box-shadow: none;
 }
 
+body.admin-theme .admin-nav-actions .admin-nav-chip.is-disabled {
+  opacity: 0.4;
+  cursor: default;
+  pointer-events: none;
+}
+
 body.admin-theme nav.admin-nav .wedding-countdown {
   margin-bottom: 0;
 }

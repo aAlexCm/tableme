@@ -24,7 +24,9 @@ export function createShareControls({ getLang, weddingNameEl }) {
   function refreshLinks() {
     if (!currentWeddingId) return;
     const lang = getLang();
-    guestPageLink.href = `guest/${lang}?id=${currentWeddingId}`;
+    if (!guestPageLink.classList.contains('is-disabled')) {
+      guestPageLink.href = `guest/${lang}?id=${currentWeddingId}`;
+    }
     guestLinkInput.value = `${window.location.origin}${window.location.pathname.replace(/[^/]+$/, '')}guest/${lang}?id=${currentWeddingId}`;
   }
 
@@ -76,7 +78,10 @@ export function createShareControls({ getLang, weddingNameEl }) {
     document.body.classList.remove('modal-open');
   }
 
-  qrCodeBtn.addEventListener('click', openQrModal);
+  qrCodeBtn.addEventListener('click', () => {
+    if (qrCodeBtn.classList.contains('is-disabled')) return;
+    openQrModal();
+  });
   qrModalClose.addEventListener('click', closeQrModal);
   qrModal.addEventListener('click', (e) => {
     if (e.target === qrModal) closeQrModal();

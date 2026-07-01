@@ -205,7 +205,19 @@ function parseSheetRows(rows) {
     }
 
     const qrBtn = document.getElementById('qr-code-btn');
-    if (qrBtn) qrBtn.hidden = !isFeatureEnabled(wedding, 'qrShare');
+    const qrBadge = document.getElementById('qr-code-badge');
+    const guestPageLink = document.getElementById('guest-page-link');
+    const qrEnabled = isFeatureEnabled(wedding, 'qrShare');
+    if (qrBtn) {
+      qrBtn.classList.toggle('is-disabled', !qrEnabled);
+      qrBtn.setAttribute('aria-disabled', String(!qrEnabled));
+      if (qrBadge) qrBadge.hidden = qrEnabled;
+    }
+    if (guestPageLink) {
+      guestPageLink.classList.toggle('is-disabled', !qrEnabled);
+      guestPageLink.setAttribute('aria-disabled', String(!qrEnabled));
+      if (!qrEnabled) guestPageLink.removeAttribute('href');
+    }
 
     const partnersTile = document.getElementById('partners-tile');
     if (partnersTile) partnersTile.hidden = !isFeatureEnabled(wedding, 'sponsorPartners');
