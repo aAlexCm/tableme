@@ -121,7 +121,8 @@ function parseSheetRows(rows) {
   const guestTableInput = document.getElementById('guest-table');
   const guestPhoneCodeSelect = document.getElementById('guest-phone-code');
   const guestPhoneInput = document.getElementById('guest-phone');
-  guestPhoneCodeSelect.innerHTML = buildCountryCodeOptionsHtml(DEFAULT_COUNTRY_CODE_BY_LANG[currentLang] || '33');
+  const defaultPhoneSettings = DEFAULT_COUNTRY_CODE_BY_LANG[currentLang] || DEFAULT_COUNTRY_CODE_BY_LANG.fr;
+  guestPhoneCodeSelect.innerHTML = buildCountryCodeOptionsHtml(defaultPhoneSettings.code, defaultPhoneSettings.iso2);
   const guestListEl = document.getElementById('guest-list');
   const guestEmptyEl = document.getElementById('guest-empty');
 

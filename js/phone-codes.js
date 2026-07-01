@@ -93,11 +93,21 @@ export const COUNTRIES = COUNTRIES_RAW
   .map(([iso2, name, code]) => ({ iso2, name, code, flag: flagFromIso2(iso2) }))
   .sort((a, b) => a.name.localeCompare(b.name));
 
-export const DEFAULT_COUNTRY_CODE_BY_LANG = { fr: '33', ro: '40', en: '44' };
+// code = dial code to pre-select; iso2 = preferred country when multiple share the same code
+export const DEFAULT_COUNTRY_CODE_BY_LANG = {
+  fr: { code: '33', iso2: 'FR' },
+  ro: { code: '40', iso2: 'RO' },
+  en: { code: '1',  iso2: 'US' },
+};
 
-export function buildCountryCodeOptionsHtml(selectedCode) {
+// Pins preferredIso2's country to the top of the list so the user sees it
+// first, then falls back to alphabetical order for everything else.
+export function buildCountryCodeOptionsHtml(selectedCode, preferredIso2 = null) {
+  const sorted = preferredIso2
+    ? [...COUNTRIES.filter((c) => c.iso2 === preferredIso2), ...COUNTRIES.filter((c) => c.iso2 !== preferredIso2)]
+    : COUNTRIES;
   let selected = false;
-  return COUNTRIES
+  return sorted
     .map(({ code, flag, name }) => {
       const isSelected = !selected && code === selectedCode;
       if (isSelected) selected = true;
