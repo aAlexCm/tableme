@@ -305,7 +305,11 @@ function reconcileTables(tables, usedLabels) {
 
   async function rotateTableInline(table) {
     try {
-      await Storage.mutateTables(weddingId, (tables) => tables.map((tb) => (tb.id === table.id ? { ...tb, rotated: !tb.rotated } : tb)));
+      await Storage.mutateTables(weddingId, (tables) => tables.map((tb) => {
+        if (tb.id !== table.id) return tb;
+        if (tb.shape === 'head') return { ...tb, headSide: ((tb.headSide || 0) + 1) % 4 };
+        return { ...tb, rotated: !tb.rotated };
+      }));
     } catch (err) {
       console.error('mutateTables failed', err);
       alert(t(currentLang, 'saveErrorRetry'));
@@ -631,7 +635,7 @@ function reconcileTables(tables, usedLabels) {
         shapeEl.style.width = `${width}px`;
         shapeEl.style.height = `${height}px`;
       } else if (shape === 'head') {
-        const { width, height } = getHeadShapeSize(seatCount, table.rotated);
+        const { width, height } = getHeadShapeSize(seatCount, table.headSide || 0);
         shapeEl.style.width = `${width}px`;
         shapeEl.style.height = `${height}px`;
       }
@@ -647,11 +651,15 @@ function reconcileTables(tables, usedLabels) {
       });
 
       if (shape === 'rectangle' || shape === 'head') {
-        const rotateLabel = table.rotated ? t(currentLang, 'rotateToHorizontalBtn') : t(currentLang, 'rotateToVerticalBtn');
+        const rotateLabel = shape === 'head'
+          ? t(currentLang, 'rotateHeadTableBtn')
+          : (table.rotated ? t(currentLang, 'rotateToHorizontalBtn') : t(currentLang, 'rotateToVerticalBtn'));
         const rotateBtn = document.createElement('button');
         rotateBtn.type = 'button';
         rotateBtn.className = 'icon-btn table-rotate-overlay-btn';
-        rotateBtn.innerHTML = table.rotated ? ICONS.rotateToHorizontal : ICONS.rotateToVertical;
+        rotateBtn.innerHTML = shape === 'head'
+          ? ICONS.rotateCw
+          : (table.rotated ? ICONS.rotateToHorizontal : ICONS.rotateToVertical);
         rotateBtn.title = rotateLabel;
         rotateBtn.setAttribute('aria-label', rotateLabel);
         rotateBtn.addEventListener('pointerdown', (e) => e.stopPropagation());
@@ -664,7 +672,7 @@ function reconcileTables(tables, usedLabels) {
 
       unitEl.appendChild(shapeEl);
 
-      buildChairs(unitEl, shape, seatCount, tableGuests, undefined, table.rotated);
+      buildChairs(unitEl, shape, seatCount, tableGuests, undefined, table.rotated, table.headSide || 0);
       unitEl.querySelectorAll('.chair.occupied').forEach((chairEl) => attachChairDrag(chairEl));
 
       attachTableDrag(unitEl, shapeEl, table);

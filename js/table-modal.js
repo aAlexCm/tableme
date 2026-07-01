@@ -8,6 +8,7 @@ export const ICONS = {
   plus: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>',
   rotateToVertical: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="9" width="15" height="6" rx="1.3"/><path d="M15 3a6.5 6.5 0 0 1 6 7"/><path d="M18 8.5 21 10l-1 3"/><path d="M8 21a6.5 6.5 0 0 1-6-7"/><path d="M5 15.5 2 14l1-3"/></svg>',
   rotateToHorizontal: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="4" width="6" height="15" rx="1.3"/><path d="M3 15a6.5 6.5 0 0 0 7 6"/><path d="M8.5 18 10 21l3-1"/><path d="M21 8a6.5 6.5 0 0 0-7-6"/><path d="M15.5 5 14 2l-3 1"/></svg>',
+  rotateCw: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2v6h-6"/><path d="M21 13a9 9 0 1 1-3-7.7L21 8"/></svg>',
 };
 
 function escapeHtml(value) {
@@ -59,10 +60,16 @@ export function createTableModal({ weddingId, getLang, onChange }) {
 
   function updateRotateButton(table) {
     const lang = getLang();
-    const rotateLabel = table.rotated ? t(lang, 'rotateToHorizontalBtn') : t(lang, 'rotateToVerticalBtn');
-    tableRotateBtn.innerHTML = table.rotated ? ICONS.rotateToHorizontal : ICONS.rotateToVertical;
-    tableRotateBtn.title = rotateLabel;
-    tableRotateBtn.setAttribute('aria-label', rotateLabel);
+    if (table.shape === 'head') {
+      tableRotateBtn.innerHTML = ICONS.rotateCw;
+      tableRotateBtn.title = t(lang, 'rotateHeadTableBtn');
+      tableRotateBtn.setAttribute('aria-label', t(lang, 'rotateHeadTableBtn'));
+    } else {
+      const rotateLabel = table.rotated ? t(lang, 'rotateToHorizontalBtn') : t(lang, 'rotateToVerticalBtn');
+      tableRotateBtn.innerHTML = table.rotated ? ICONS.rotateToHorizontal : ICONS.rotateToVertical;
+      tableRotateBtn.title = rotateLabel;
+      tableRotateBtn.setAttribute('aria-label', rotateLabel);
+    }
   }
 
   function buildMoveSelectHtml(tables, currentLabel) {
@@ -219,7 +226,14 @@ export function createTableModal({ weddingId, getLang, onChange }) {
     const table = wedding.tables.find((tb) => tb.id === activeTableId);
     if (!table) return;
     try {
-      await Storage.mutateTables(weddingId, (tables) => tables.map((tb) => (tb.id === activeTableId ? { ...tb, rotated: !tb.rotated } : tb)));
+      await Storage.mutateTables(weddingId, (tables) => tables.map((tb) => {
+        if (tb.id !== activeTableId) return tb;
+        if (tb.shape === 'head') {
+          // Cycle through 4 sides: 0=top → 1=right → 2=bottom → 3=left → 0
+          return { ...tb, headSide: ((tb.headSide || 0) + 1) % 4 };
+        }
+        return { ...tb, rotated: !tb.rotated };
+      }));
     } catch (err) {
       console.error('mutateTables failed', err);
       alert(t(getLang(), 'saveErrorRetry'));

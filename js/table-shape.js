@@ -37,11 +37,13 @@ export function getHeadDimensions(seatCount) {
   return { halfWidth, usableHalf };
 }
 
-export function getHeadShapeSize(seatCount, rotated) {
+// headSide: 0=top, 1=right, 2=bottom, 3=left
+export function getHeadShapeSize(seatCount, headSide) {
   const { halfWidth } = getHeadDimensions(seatCount);
   const long = halfWidth * 2;
   const short = RECT_HALF_H * 2;
-  return rotated ? { width: short, height: long } : { width: long, height: short };
+  const isVertical = headSide === 1 || headSide === 3;
+  return isVertical ? { width: short, height: long } : { width: long, height: short };
 }
 
 export function getTableReach(table) {
@@ -55,7 +57,8 @@ export function getTableReach(table) {
     const { halfWidth } = getHeadDimensions(seatCount);
     const reachLong = halfWidth;
     const reachShort = RECT_Y_OFFSET + CHAIR_RADIUS_PX;
-    return table.rotated ? { x: reachShort, y: reachLong } : { x: reachLong, y: reachShort };
+    const isVertical = (table.headSide || 0) === 1 || (table.headSide || 0) === 3;
+    return isVertical ? { x: reachShort, y: reachLong } : { x: reachLong, y: reachShort };
   }
   const { halfWidth } = getRectDimensions(seatCount);
   const reachLong = halfWidth;
@@ -83,20 +86,27 @@ export function assignSeats(guests, seatCount) {
   return slots;
 }
 
-export function buildChairs(unitEl, shape, seatCount, guests, highlightGuestId, rotated) {
+// headSide (for shape==='head'): 0=top, 1=right, 2=bottom, 3=left
+export function buildChairs(unitEl, shape, seatCount, guests, highlightGuestId, rotated, headSide) {
   const slots = assignSeats(guests, seatCount);
 
   if (shape === 'head') {
-    const { usableHalf } = getHeadDimensions(seatCount);
-    const sideOffset = -RECT_Y_OFFSET; // chairs always on the "front" side
+    const side = headSide || 0;
+    // Perpendicular offset (how far the chairs sit from the table edge)
+    const perp = RECT_Y_OFFSET;
+    // Map side to a {dx, dy} direction for the chair offset from table centre
+// Pack chairs tightly in the centre (CHAIR_SPACING between each one) rather
+    // than spreading them to the table edges — the couple sit side by side.
+    const totalSpan = Math.max(0, seatCount - 1) * CHAIR_SPACING;
+    const startAlong = -totalSpan / 2;
     const positions = [];
-    if (seatCount <= 1) {
-      positions.push(rotated ? { x: sideOffset, y: 0 } : { x: 0, y: sideOffset });
-    } else {
-      const span = usableHalf * 2;
-      for (let i = 0; i < seatCount; i += 1) {
-        const along = -usableHalf + (i * span) / (seatCount - 1);
-        positions.push(rotated ? { x: sideOffset, y: along } : { x: along, y: sideOffset });
+    for (let i = 0; i < seatCount; i += 1) {
+      const along = seatCount <= 1 ? 0 : startAlong + i * CHAIR_SPACING;
+      switch (side) {
+        case 0: positions.push({ x: along, y: -perp }); break; // top
+        case 1: positions.push({ x: perp,  y: along  }); break; // right
+        case 2: positions.push({ x: along, y: perp  }); break; // bottom
+        case 3: positions.push({ x: -perp, y: along  }); break; // left
       }
     }
     positions.forEach((pos, i) => {

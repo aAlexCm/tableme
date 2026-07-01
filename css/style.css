@@ -5520,6 +5520,7 @@ body.admin-theme .theme-decoration-position-arrow {
 
 .table-modal-row {
   display: flex;
+  flex-wrap: wrap;
   gap: 12px;
   margin-bottom: 10px;
 }
@@ -5793,12 +5794,14 @@ body.admin-theme .theme-decoration-position-arrow {
 }
 
 
+/* Shape picker always takes the full row width (3 options no longer fit
+   side-by-side with the seats stepper since "Table des mariés" is long). */
 .table-modal-row .field:first-child {
-  flex: 1.4;
+  flex: 1 1 100%;
 }
 
 .table-modal-row .field:last-child {
-  flex: 1;
+  flex: 0 0 auto;
 }
 
 .shape-picker-row {
