@@ -2787,6 +2787,10 @@ body.admin-theme .menu-card {
     grid-column: 1 / -1;
   }
 
+  .field-grid.field-grid-single > button {
+    width: 100%;
+  }
+
   .field-grid > button {
     grid-column: auto;
     margin-top: 0;
