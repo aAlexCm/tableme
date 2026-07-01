@@ -1,7 +1,7 @@
 import { Storage, normalize } from './storage.js';
 import { initErrorLogging } from './error-log.js';
 import { applyTranslations, buildLangSwitcher, t, LANGS } from './i18n.js';
-import { DEFAULT_SEATS, getRectShapeSize, getTableReach, buildChairs } from './table-shape.js';
+import { DEFAULT_SEATS, getRectShapeSize, getHeadShapeSize, getTableReach, buildChairs } from './table-shape.js';
 import { getLandmarkType } from './landmarks.js';
 import { applyGuestTheme, applyGuestFonts, getDefaultTheme } from './guest-themes.js';
 import { applyGuestDecoration } from './guest-decorations.js';
@@ -305,7 +305,7 @@ function getCardinalAnchor(center, direction, radius) {
 
   function buildTablePreview(guest, tableGuests) {
     const table = (currentWedding.tables || []).find((tb) => tb.label === guest.table);
-    const shape = table?.shape === 'rectangle' ? 'rectangle' : 'round';
+    const shape = (table?.shape === 'rectangle' || table?.shape === 'head') ? table.shape : 'round';
     const seatCount = table?.seats != null ? table.seats : Math.max(DEFAULT_SEATS, tableGuests.length);
 
     const wrap = document.createElement('div');
@@ -342,7 +342,8 @@ function getCardinalAnchor(center, direction, radius) {
     // shape + chairs would spill out past the canvas's rounded background.
     // Growing the canvas to fit the actual reach (never shrinking below the
     // existing default) keeps the common cases pixel-identical.
-    const reach = getTableReach({ shape, seats: seatCount, rotated: table?.rotated });
+    const headSide = table?.headSide || 0;
+    const reach = getTableReach({ shape, seats: seatCount, rotated: table?.rotated, headSide });
     canvas.style.height = `${Math.max(180, reach.y * 2 + 24)}px`;
 
     const unitEl = document.createElement('div');
@@ -356,11 +357,15 @@ function getCardinalAnchor(center, direction, radius) {
       const { width, height } = getRectShapeSize(seatCount, table?.rotated);
       shapeEl.style.width = `${width}px`;
       shapeEl.style.height = `${height}px`;
+    } else if (shape === 'head') {
+      const { width, height } = getHeadShapeSize(seatCount, headSide);
+      shapeEl.style.width = `${width}px`;
+      shapeEl.style.height = `${height}px`;
     }
     shapeEl.innerHTML = `<span class="table-shape-label">${escapeHtml(t(currentLang, 'tableLabel'))} ${escapeHtml(guest.table)}</span>`;
     unitEl.appendChild(shapeEl);
 
-    buildChairs(unitEl, shape, seatCount, tableGuests, guest.id, table?.rotated);
+    buildChairs(unitEl, shape, seatCount, tableGuests, guest.id, table?.rotated, headSide);
     canvas.appendChild(unitEl);
     wrap.appendChild(canvas);
 
@@ -449,8 +454,9 @@ function getCardinalAnchor(center, direction, radius) {
     const tablePoints = (currentWedding.tables || []).map((tb) => ({
       id: `table:${tb.id}`,
       kind: 'table',
-      shape: tb.shape === 'rectangle' ? 'rectangle' : 'round',
+      shape: (tb.shape === 'rectangle' || tb.shape === 'head') ? tb.shape : 'round',
       rotated: !!tb.rotated,
+      headSide: tb.headSide || 0,
       seats: tb.seats != null ? tb.seats : DEFAULT_SEATS,
       x: tb.x,
       y: tb.y,
@@ -553,6 +559,11 @@ function getCardinalAnchor(center, direction, radius) {
           : `<span class="wayfinding-marker-shape"></span><span class="wayfinding-marker-label">${escapeHtml(p.label)}</span>`;
         if (p.kind === 'table' && p.shape === 'rectangle') {
           const { width, height } = getRectShapeSize(p.seats, p.rotated);
+          const shapeEl = marker.querySelector('.wayfinding-marker-shape');
+          shapeEl.style.width = `${Math.round(width * WAYFINDING_RECT_MARKER_SCALE)}px`;
+          shapeEl.style.height = `${Math.round(height * WAYFINDING_RECT_MARKER_SCALE)}px`;
+        } else if (p.kind === 'table' && p.shape === 'head') {
+          const { width, height } = getHeadShapeSize(p.seats, p.headSide);
           const shapeEl = marker.querySelector('.wayfinding-marker-shape');
           shapeEl.style.width = `${Math.round(width * WAYFINDING_RECT_MARKER_SCALE)}px`;
           shapeEl.style.height = `${Math.round(height * WAYFINDING_RECT_MARKER_SCALE)}px`;
