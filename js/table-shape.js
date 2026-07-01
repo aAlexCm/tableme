@@ -27,12 +27,36 @@ export function getRectDimensions(seatCount) {
   return { halfWidth, usableHalf };
 }
 
+// Head table: all seats in a single row on one side only — table grows
+// horizontally with each added seat, chairs never on the opposite side.
+export function getHeadDimensions(seatCount) {
+  const count = Math.max(1, seatCount);
+  const neededUsableHalf = count > 1 ? ((count - 1) * CHAIR_SPACING) / 2 : 0;
+  const usableHalf = Math.max(RECT_USABLE_HALF_MIN, neededUsableHalf);
+  const halfWidth = usableHalf + RECT_INSET;
+  return { halfWidth, usableHalf };
+}
+
+export function getHeadShapeSize(seatCount, rotated) {
+  const { halfWidth } = getHeadDimensions(seatCount);
+  const long = halfWidth * 2;
+  const short = RECT_HALF_H * 2;
+  return rotated ? { width: short, height: long } : { width: long, height: short };
+}
+
 export function getTableReach(table) {
-  if ((table.shape || 'round') !== 'rectangle') {
+  const shape = table.shape || 'round';
+  if (shape !== 'rectangle' && shape !== 'head') {
     const r = ROUND_CHAIR_RADIUS + CHAIR_RADIUS_PX;
     return { x: r, y: r };
   }
   const seatCount = table.seats != null ? table.seats : DEFAULT_SEATS;
+  if (shape === 'head') {
+    const { halfWidth } = getHeadDimensions(seatCount);
+    const reachLong = halfWidth;
+    const reachShort = RECT_Y_OFFSET + CHAIR_RADIUS_PX;
+    return table.rotated ? { x: reachShort, y: reachLong } : { x: reachLong, y: reachShort };
+  }
   const { halfWidth } = getRectDimensions(seatCount);
   const reachLong = halfWidth;
   const reachShort = RECT_Y_OFFSET + CHAIR_RADIUS_PX;
@@ -61,6 +85,42 @@ export function assignSeats(guests, seatCount) {
 
 export function buildChairs(unitEl, shape, seatCount, guests, highlightGuestId, rotated) {
   const slots = assignSeats(guests, seatCount);
+
+  if (shape === 'head') {
+    const { usableHalf } = getHeadDimensions(seatCount);
+    const sideOffset = -RECT_Y_OFFSET; // chairs always on the "front" side
+    const positions = [];
+    if (seatCount <= 1) {
+      positions.push(rotated ? { x: sideOffset, y: 0 } : { x: 0, y: sideOffset });
+    } else {
+      const span = usableHalf * 2;
+      for (let i = 0; i < seatCount; i += 1) {
+        const along = -usableHalf + (i * span) / (seatCount - 1);
+        positions.push(rotated ? { x: sideOffset, y: along } : { x: along, y: sideOffset });
+      }
+    }
+    positions.forEach((pos, i) => {
+      const guest = slots[i];
+      const occupied = !!guest;
+      const isYou = occupied && highlightGuestId != null && guest.id === highlightGuestId;
+      const chairEl = document.createElement('div');
+      chairEl.className = `chair chair-fixed${occupied ? ' occupied' : ''}${isYou ? ' chair-you' : ''}`;
+      chairEl.dataset.slot = i;
+      if (occupied) {
+        chairEl.dataset.name = guest.name;
+        chairEl.dataset.guestId = guest.id;
+        const initialsEl = document.createElement('span');
+        initialsEl.className = 'chair-initials';
+        initialsEl.textContent = getInitials(guest.name);
+        chairEl.appendChild(initialsEl);
+      }
+      chairEl.style.left = `${pos.x}px`;
+      chairEl.style.top = `${pos.y}px`;
+      unitEl.appendChild(chairEl);
+    });
+    return;
+  }
+
   if (shape === 'round') {
     for (let i = 0; i < seatCount; i += 1) {
       const angle = (360 / seatCount) * i;

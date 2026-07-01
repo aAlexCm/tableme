@@ -94,8 +94,8 @@ export function createTableModal({ weddingId, getLang, onChange }) {
     shapeRadios.forEach((radio) => {
       radio.checked = radio.value === (table.shape || 'round');
     });
-    tableRotateBtn.hidden = table.shape !== 'rectangle';
-    if (table.shape === 'rectangle') updateRotateButton(table);
+    tableRotateBtn.hidden = table.shape !== 'rectangle' && table.shape !== 'head';
+    if (table.shape === 'rectangle' || table.shape === 'head') updateRotateButton(table);
     const seatCount = table.seats != null ? table.seats : DEFAULT_SEATS;
     tableSeatsInput.value = seatCount;
 

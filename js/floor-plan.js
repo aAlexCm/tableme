@@ -3,7 +3,7 @@ import { initErrorLogging } from './error-log.js';
 import { applyTranslations, buildLangSwitcher, t } from './i18n.js';
 import { createTableModal, ICONS } from './table-modal.js';
 import { createShareControls } from './share-controls.js';
-import { DEFAULT_SEATS, getRectShapeSize, getTableReach, buildChairs } from './table-shape.js';
+import { DEFAULT_SEATS, getRectShapeSize, getHeadShapeSize, getTableReach, buildChairs } from './table-shape.js';
 import { LANDMARK_TYPES, getLandmarkType } from './landmarks.js';
 import { isFeatureEnabled } from './features.js';
 import { applyContactMailto } from './contact-mailto.js';
@@ -614,7 +614,7 @@ function reconcileTables(tables, usedLabels) {
     (wedding.tables || []).forEach((table) => {
       const tableGuests = wedding.guests.filter((g) => g.table === table.label);
       const guestCount = tableGuests.filter((g) => !g.empty).length;
-      const shape = table.shape === 'rectangle' ? 'rectangle' : 'round';
+      const shape = table.shape === 'rectangle' ? 'rectangle' : table.shape === 'head' ? 'head' : 'round';
       const seatCount = table.seats != null ? table.seats : DEFAULT_SEATS;
 
       const unitEl = document.createElement('div');
@@ -630,6 +630,10 @@ function reconcileTables(tables, usedLabels) {
         const { width, height } = getRectShapeSize(seatCount, table.rotated);
         shapeEl.style.width = `${width}px`;
         shapeEl.style.height = `${height}px`;
+      } else if (shape === 'head') {
+        const { width, height } = getHeadShapeSize(seatCount, table.rotated);
+        shapeEl.style.width = `${width}px`;
+        shapeEl.style.height = `${height}px`;
       }
       shapeEl.innerHTML = `
         <span class="table-shape-label">${escapeHtml(t(currentLang, 'tableLabel'))} ${escapeHtml(table.label)}</span>
@@ -642,7 +646,7 @@ function reconcileTables(tables, usedLabels) {
         }
       });
 
-      if (shape === 'rectangle') {
+      if (shape === 'rectangle' || shape === 'head') {
         const rotateLabel = table.rotated ? t(currentLang, 'rotateToHorizontalBtn') : t(currentLang, 'rotateToVerticalBtn');
         const rotateBtn = document.createElement('button');
         rotateBtn.type = 'button';
