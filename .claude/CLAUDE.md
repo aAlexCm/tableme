@@ -135,6 +135,16 @@ Registre `FEATURE_FLAGS` (tableau d'objets `{key, labelKey, default, icon}`) —
 
 ## 7. Pièges connus
 
+### Les tuiles d'outils sont dupliquées sur wedding-admin ET floor-plan — toujours les deux
+
+`wedding-admin.html`/`js/wedding-admin.js` et `floor-plan.html`/`js/floor-plan.js` affichent les **mêmes tuiles d'outils** (thème, QR, partenaires, affiche, invitation, todo, menu). Chaque tuile est déclarée deux fois (une fois dans chaque fichier HTML) et gatée deux fois (une fois dans chaque fichier JS via `applyFeatureGating`). Toute modification de gating, badge, libellé ou comportement d'une tuile **doit être appliquée dans les deux paires de fichiers en même temps** — ne pas juste mettre à jour wedding-admin et oublier floor-plan (et vice-versa), sinon les comportements divergent silencieusement (c'est exactement ce qui a causé le bug de l'affiche visible non-grisée sur floor-plan le 2026-07-01).
+
+**Checklist tuile** (pour chaque tuile feature-gatée) :
+- `wedding-admin.html` : badge span `<span class="admin-tool-tile-badge" id="X-badge" data-i18n="XDisabledBadge" hidden>`
+- `floor-plan.html` : idem
+- `js/wedding-admin.js` (dans `applyFeatureGating`) : pattern `is-disabled` + badge + `removeAttribute('href')` quand off
+- `js/floor-plan.js` : idem
+
 ### html/body background vs décorations invité (z-index négatif)
 
 `html` porte le fond (background + dégradé radial) pour toutes les pages ; `body` et `body.guest-theme` ne déclarent volontairement **aucun** fond.

@@ -225,7 +225,15 @@ function parseSheetRows(rows) {
     floorPlanTabLink.hidden = !isFeatureEnabled(wedding, 'floorPlan');
 
     const menuTile = document.getElementById('menu-tile');
-    if (menuTile) menuTile.hidden = !isFeatureEnabled(wedding, 'menuManagement');
+    const menuTileBadge = document.getElementById('menu-tile-badge');
+    if (menuTile) {
+      const menuEnabled = isFeatureEnabled(wedding, 'menuManagement');
+      menuTile.classList.toggle('is-disabled', !menuEnabled);
+      menuTile.setAttribute('aria-disabled', String(!menuEnabled));
+      if (menuTileBadge) menuTileBadge.hidden = menuEnabled;
+      if (menuEnabled) menuTile.href = `menu.html?id=${weddingId}`;
+      else menuTile.removeAttribute('href');
+    }
 
     // Unlike the other gated tiles (which vanish when off), the poster tile
     // stays visible but grayed-out with a contact-us badge — it's a feature
@@ -1129,8 +1137,6 @@ function parseSheetRows(rows) {
     if (todoEnabled) todoTile.href = `todo.html?id=${weddingId}`;
     else todoTile.removeAttribute('href');
   }
-  const menuTile = document.getElementById('menu-tile');
-  if (menuTile) menuTile.href = `menu.html?id=${weddingId}`;
   const themeTile = document.getElementById('theme-settings-tile');
   if (themeTile) themeTile.href = `theme-settings.html?id=${weddingId}`;
   shareControls.init(weddingId);
