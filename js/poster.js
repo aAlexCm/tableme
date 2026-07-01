@@ -435,8 +435,8 @@ function fontFamilyFor(fontKey) {
     iconSymbolSelect.hidden = !isIcon;
     qrBodySelect.hidden = !isQr;
     qrCornerSelect.hidden = !isQr;
-    dividerThicknessInput.hidden = !isDivider;
-    dividerOrnamentSizeInput.hidden = !isDivider;
+    dividerThicknessInput.closest('.icon-number-field').hidden = !isDivider;
+    dividerOrnamentSizeInput.closest('.icon-number-field').hidden = !isDivider;
     // Images keep their own colors — no tint control for them.
     colorInput.hidden = isImage;
     hexInput.hidden = isImage;
