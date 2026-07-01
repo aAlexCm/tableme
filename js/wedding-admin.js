@@ -265,7 +265,7 @@ function parseSheetRows(rows) {
 
   function refreshPhoneCodeSelect(lang) {
     const settings = DEFAULT_COUNTRY_CODE_BY_LANG[lang] || DEFAULT_COUNTRY_CODE_BY_LANG.fr;
-    guestPhoneCodeSelect.innerHTML = buildCountryCodeOptionsHtml(settings.code, settings.iso2);
+    guestPhoneCodeSelect.innerHTML = buildCountryCodeOptionsHtml(settings.code, settings.iso2, lang);
   }
 
   function setLang(lang) {

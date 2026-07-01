@@ -100,20 +100,49 @@ export const DEFAULT_COUNTRY_CODE_BY_LANG = {
   en: { code: '1',  iso2: 'US' },
 };
 
-// Pins preferredIso2's country to the top of the list so the user sees it
-// first, then falls back to alphabetical order for everything else.
-export function buildCountryCodeOptionsHtml(selectedCode, preferredIso2 = null) {
-  const sorted = preferredIso2
-    ? [...COUNTRIES.filter((c) => c.iso2 === preferredIso2), ...COUNTRIES.filter((c) => c.iso2 !== preferredIso2)]
-    : COUNTRIES;
-  let selected = false;
-  return sorted
-    .map(({ code, flag, name }) => {
-      const isSelected = !selected && code === selectedCode;
-      if (isSelected) selected = true;
+const EU_ISO2 = new Set([
+  'AD','AL','AT','AX','BA','BE','BG','BY','CH','CY','CZ','DE','DK','EE','ES',
+  'FI','FO','FR','GB','GE','GG','GI','GR','HR','HU','IE','IM','IS','IT','JE',
+  'LI','LT','LU','LV','MC','MD','ME','MK','MT','NL','NO','PL','PT','RO','RS',
+  'RU','SE','SI','SK','SM','UA','VA','XK',
+]);
+
+const AM_ISO2 = new Set([
+  'AG','AI','AR','AS','AW','BB','BL','BM','BO','BQ','BR','BS','BZ','CA','CL',
+  'CO','CR','CU','CW','DM','DO','EC','FK','GD','GF','GL','GP','GT','GU','GY',
+  'HN','HT','JM','KN','KY','LC','MF','MQ','MS','MX','NI','PA','PE','PM','PR',
+  'PY','SR','SV','SX','TC','TT','US','UY','VC','VG','VI',
+]);
+
+const CONTINENT_LABELS = {
+  fr: { eu: 'Europe', am: 'Amérique', other: 'Autres' },
+  ro: { eu: 'Europa', am: 'America', other: 'Altele' },
+  en: { eu: 'Europe', am: 'America', other: 'Other' },
+};
+
+// Builds grouped <optgroup> options: Europe first, then America, then the rest.
+// Within each group countries are sorted numerically by dial code.
+// The preferredIso2 country is pinned first within its group.
+export function buildCountryCodeOptionsHtml(selectedCode, preferredIso2 = null, lang = 'fr') {
+  const labels = CONTINENT_LABELS[lang] || CONTINENT_LABELS.fr;
+  const eu    = COUNTRIES.filter((c) =>  EU_ISO2.has(c.iso2));
+  const am    = COUNTRIES.filter((c) =>  AM_ISO2.has(c.iso2));
+  const other = COUNTRIES.filter((c) => !EU_ISO2.has(c.iso2) && !AM_ISO2.has(c.iso2));
+
+  let globalSelected = false;
+  function renderGroup(countries, groupLabel) {
+    if (countries.length === 0) return '';
+    const pinned = preferredIso2 ? countries.filter((c) => c.iso2 === preferredIso2) : [];
+    const rest   = preferredIso2 ? countries.filter((c) => c.iso2 !== preferredIso2) : countries;
+    const options = [...pinned, ...rest].map(({ code, flag, name }) => {
+      const isSelected = !globalSelected && code === selectedCode;
+      if (isSelected) globalSelected = true;
       return `<option value="${code}" title="${name}" ${isSelected ? 'selected' : ''}>${flag} +${code}</option>`;
-    })
-    .join('');
+    }).join('');
+    return `<optgroup label="${groupLabel}">${options}</optgroup>`;
+  }
+
+  return renderGroup(eu, labels.eu) + renderGroup(am, labels.am) + renderGroup(other, labels.other);
 }
 
 // Combines a country code with a locally-formatted number into a single

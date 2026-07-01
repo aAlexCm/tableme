@@ -91,7 +91,11 @@ export function createGuestModal({ weddingId, getLang, onChange }) {
     avatarEl.textContent = initialsFor(guest.name);
     nameInput.value = guest.name;
     const { code, number } = splitPhone(guest.phone);
-    phoneCodeSelect.innerHTML = buildCountryCodeOptionsHtml(code || DEFAULT_COUNTRY_CODE_BY_LANG[getLang()] || '33');
+    const lang = getLang();
+    const defaults = DEFAULT_COUNTRY_CODE_BY_LANG[lang] || DEFAULT_COUNTRY_CODE_BY_LANG.fr;
+    const selectedCode = code || defaults.code;
+    const preferredIso2 = code ? null : defaults.iso2;
+    phoneCodeSelect.innerHTML = buildCountryCodeOptionsHtml(selectedCode, preferredIso2, lang);
     phoneInput.value = number;
     tableSelect.innerHTML = buildTableOptionsHtml(wedding.tables || [], guest.table || '');
     menuSelect.innerHTML = buildMenuOptionsHtml(wedding.menus || [], guest.menuId || '');
