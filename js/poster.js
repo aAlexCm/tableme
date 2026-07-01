@@ -293,8 +293,6 @@ function fontFamilyFor(fontKey) {
     // also with !important, to actually beat that blanket rule.
     content.style.setProperty('font-family', fontFamilyFor(el.fontKey), 'important');
     content.style.fontSize = `${el.fontSize}px`;
-    content.style.fontWeight = el.bold ? '700' : '400';
-    content.style.fontStyle = el.italic ? 'italic' : 'normal';
     content.style.textAlign = el.align;
     content.style.color = el.color;
   }
@@ -446,8 +444,8 @@ function fontFamilyFor(fontKey) {
     dividerOrnamentSizeInput.title = t(currentLang, 'posterOrnamentSizeTooltip');
 
     if (isText) {
-      boldBtn.classList.toggle('active', el.bold);
-      italicBtn.classList.toggle('active', el.italic);
+      boldBtn.classList.toggle('active', document.queryCommandState('bold'));
+      italicBtn.classList.toggle('active', document.queryCommandState('italic'));
       alignLeftBtn.classList.toggle('active', el.align === 'left');
       alignCenterBtn.classList.toggle('active', el.align === 'center');
       alignRightBtn.classList.toggle('active', el.align === 'right');
@@ -500,16 +498,14 @@ function fontFamilyFor(fontKey) {
     const node = sheetContentEl.querySelector(`[data-id="${selectedId}"]`);
     if (node) applyElementStyle(node, el);
     if (el.type === 'text') {
-      boldBtn.classList.toggle('active', el.bold);
-      italicBtn.classList.toggle('active', el.italic);
+      boldBtn.classList.toggle('active', document.queryCommandState('bold'));
+      italicBtn.classList.toggle('active', document.queryCommandState('italic'));
       alignLeftBtn.classList.toggle('active', el.align === 'left');
       alignCenterBtn.classList.toggle('active', el.align === 'center');
       alignRightBtn.classList.toggle('active', el.align === 'right');
       lastTextStyle = {
         fontKey: el.fontKey,
         fontSize: el.fontSize,
-        bold: el.bold,
-        italic: el.italic,
         align: el.align,
         color: el.color,
       };
@@ -795,7 +791,20 @@ function fontFamilyFor(fontKey) {
     textContentEl.className = 'poster-text-content';
     textContentEl.contentEditable = 'true';
     textContentEl.spellcheck = false;
-    textContentEl.textContent = el.text;
+    // Migration: old format stored plain text + el.bold/el.italic booleans.
+    // New format stores innerHTML with <strong>/<em>/<br> inline.
+    {
+      let html = el.text || '';
+      if (!/<[^>]/.test(html)) {
+        html = html
+          .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+          .replace(/\n/g, '<br>');
+        if (el.italic) html = `<em>${html}</em>`;
+        if (el.bold)   html = `<strong>${html}</strong>`;
+        el.text = html;
+      }
+      textContentEl.innerHTML = html;
+    }
     node.appendChild(textContentEl);
 
     const handle = document.createElement('span');
@@ -821,12 +830,19 @@ function fontFamilyFor(fontKey) {
     node.appendChild(rotateHandle);
 
     node.addEventListener('pointerdown', () => selectElement(el.id));
+    // Intercept Enter: insert <br> instead of letting the browser create a
+    // <div> child, which inherits styles differently and looks heavier/bolder.
+    textContentEl.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter') return;
+      e.preventDefault();
+      document.execCommand('insertLineBreak');
+    });
     textContentEl.addEventListener('input', () => {
-      el.text = textContentEl.textContent;
+      el.text = textContentEl.innerHTML;
       scheduleSave();
     });
     textContentEl.addEventListener('blur', () => {
-      el.text = textContentEl.textContent;
+      el.text = textContentEl.innerHTML;
       scheduleSave();
     });
 
@@ -1139,8 +1155,28 @@ function fontFamilyFor(fontKey) {
     }
   });
 
-  boldBtn.addEventListener('click', () => updateSelected((el) => { el.bold = !el.bold; }));
-  italicBtn.addEventListener('click', () => updateSelected((el) => { el.italic = !el.italic; }));
+  // Prevent mousedown on B/I from blurring the contenteditable (which would
+  // clear the selection before execCommand runs).
+  boldBtn.addEventListener('mousedown', (e) => e.preventDefault());
+  italicBtn.addEventListener('mousedown', (e) => e.preventDefault());
+  boldBtn.addEventListener('click', () => {
+    document.execCommand('bold');
+    boldBtn.classList.toggle('active', document.queryCommandState('bold'));
+    const el = poster.elements.find((e) => e.id === selectedId);
+    if (el?.type === 'text') {
+      const content = sheetContentEl.querySelector(`[data-id="${selectedId}"] .poster-text-content`);
+      if (content) { el.text = content.innerHTML; scheduleSave(); }
+    }
+  });
+  italicBtn.addEventListener('click', () => {
+    document.execCommand('italic');
+    italicBtn.classList.toggle('active', document.queryCommandState('italic'));
+    const el = poster.elements.find((e) => e.id === selectedId);
+    if (el?.type === 'text') {
+      const content = sheetContentEl.querySelector(`[data-id="${selectedId}"] .poster-text-content`);
+      if (content) { el.text = content.innerHTML; scheduleSave(); }
+    }
+  });
   alignLeftBtn.addEventListener('click', () => updateSelected((el) => { el.align = 'left'; }));
   alignCenterBtn.addEventListener('click', () => updateSelected((el) => { el.align = 'center'; }));
   alignRightBtn.addEventListener('click', () => updateSelected((el) => { el.align = 'right'; }));
@@ -1165,6 +1201,15 @@ function fontFamilyFor(fontKey) {
     else el.fontSize = value;
   }));
   colorInput.addEventListener('input', () => updateSelected((el) => { el.color = colorInput.value; }));
+
+  // When the cursor moves inside a text element, reflect the inline formatting
+  // state (bold/italic at the cursor position) in the toolbar buttons.
+  document.addEventListener('selectionchange', () => {
+    const el = poster.elements.find((e) => e.id === selectedId);
+    if (!el || el.type !== 'text') return;
+    boldBtn.classList.toggle('active', document.queryCommandState('bold'));
+    italicBtn.classList.toggle('active', document.queryCommandState('italic'));
+  });
 
   function deleteSelected() {
     if (!selectedId) return;
