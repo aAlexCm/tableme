@@ -194,7 +194,15 @@ function parseSheetRows(rows) {
       .forEach((btn) => { btn.hidden = !bulkImportEnabled; });
 
     const themeTile = document.getElementById('theme-settings-tile');
-    if (themeTile) themeTile.hidden = !isFeatureEnabled(wedding, 'themeCustomization');
+    const themeTileBadge = document.getElementById('theme-settings-tile-badge');
+    if (themeTile) {
+      const themeEnabled = isFeatureEnabled(wedding, 'themeCustomization');
+      themeTile.classList.toggle('is-disabled', !themeEnabled);
+      themeTile.setAttribute('aria-disabled', String(!themeEnabled));
+      if (themeTileBadge) themeTileBadge.hidden = themeEnabled;
+      if (themeEnabled) themeTile.href = `theme-settings.html?id=${weddingId}`;
+      else themeTile.removeAttribute('href');
+    }
 
     const qrBtn = document.getElementById('qr-code-btn');
     if (qrBtn) qrBtn.hidden = !isFeatureEnabled(wedding, 'qrShare');

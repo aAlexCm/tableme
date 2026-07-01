@@ -986,9 +986,14 @@ function reconcileTables(tables, usedLabels) {
   listTabLink.href = `wedding-admin.html?id=${weddingId}`;
   shareControls.init(weddingId);
   const themeTile = document.getElementById('theme-settings-tile');
+  const themeTileBadge = document.getElementById('theme-settings-tile-badge');
   if (themeTile) {
-    themeTile.href = `theme-settings.html?id=${weddingId}`;
-    themeTile.hidden = !isFeatureEnabled(wedding, 'themeCustomization');
+    const themeEnabled = isFeatureEnabled(wedding, 'themeCustomization');
+    themeTile.classList.toggle('is-disabled', !themeEnabled);
+    themeTile.setAttribute('aria-disabled', String(!themeEnabled));
+    if (themeTileBadge) themeTileBadge.hidden = themeEnabled;
+    if (themeEnabled) themeTile.href = `theme-settings.html?id=${weddingId}`;
+    else themeTile.removeAttribute('href');
   }
   const qrBtn = document.getElementById('qr-code-btn');
   if (qrBtn) qrBtn.hidden = !isFeatureEnabled(wedding, 'qrShare');
