@@ -132,6 +132,10 @@ export function applyGuestTheme(colors, target = document.documentElement) {
   GUEST_THEME_COLOR_KEYS.forEach((key) => {
     if (colors[key]) target.style.setProperty(GUEST_THEME_CSS_VARS[key], colors[key]);
   });
+  if (colors.bg) {
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', colors.bg);
+  }
 }
 
 export function applyGuestFonts(fonts, target = document.documentElement) {
